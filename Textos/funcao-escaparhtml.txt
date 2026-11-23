@@ -1,0 +1,57 @@
+/////////////////////////////////////////////////
+//// Função escaparHTML(str) {}
+/////////////////////////////////////////////////
+
+function escaparHTML(str) {
+  if (str == null) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+Essa função serve para proteger o seu código contra ataques de injeção de script (XSS) e evitar quebras de layout ao exibir textos digitados por usuários no navegador. [1] 
+Ela transforma caracteres especiais do HTML em "entidades HTML", que são códigos seguros que o navegador apenas desenha na tela, em vez de executar. [2, 3] 
+## O que cada linha faz:
+
+* if (str == null) return "";
+* Evita erros no código. Se o valor enviado for nulo (null) ou indefinido (undefined), a função retorna um texto vazio.
+
+* .replace(/&/g, "&amp;")
+* Substitui o símbolo & (e comercial) por &amp;. É a primeira substituição necessária para não quebrar as regras do próprio HTML.
+
+* .replace(/</g, "&lt;")
+* Substitui o sinal de menor < por &lt; (less than). Isso impede a abertura de tags como <blockquote> ou <script>.
+
+* .replace(/>/g, "&gt;")
+* Substitui o sinal de maior > por &gt; (greater than). Isso impede o fechamento de tags HTML.
+
+* .replace(/"/g, "&quot;")
+* Substitui as aspas duplas " por &quot;. Isso evita que um usuário feche prematuramente um atributo HTML (como value="..." ou href="...") e insira comandos maliciosos. [4] 
+
+## Exemplo prático de uso:
+Se um usuário mal-intencionado tentar enviar o seguinte texto em um formulário:
+
+<script>alert('hack')</script>
+
+Após passar pela função escaparHTML(), o resultado gerado será exatamente este:
+
+&lt;script&gt;alert('hack')&lt;/script&gt;
+
+Resultado no navegador: O usuário comum verá o texto <script>alert('hack')</script> escrito na tela de forma inofensiva, e o código do hacker não será executado.
+------------------------------
+Para te ajudar a deixar esse código ainda mais seguro ou funcional, me conte:
+
+* Você pretende usar essa função dentro de atributos HTML (como href ou src)?
+* Gostaria de ver como adicionar suporte para aspas simples e barras, que também são usadas em ataques?
+* Está usando essa função em um projeto Node.js puro ou com algum framework (como React ou Vue)? [5, 6] 
+
+
+[1] [https://www.testmuai.com](https://www.testmuai.com/free-online-tools/html-escape/)
+[2] [https://pimylifeup.com](https://pimylifeup.com/php-htmlspecialchars/)
+[3] [https://www.testmuai.com](https://www.testmuai.com/free-online-tools/html-escape/)
+[4] [https://examples.javacodegeeks.com](https://examples.javacodegeeks.com/java-escape-html-symbols/)
+[5] [https://www.naukri.com](https://www.naukri.com/code360/library/lodash-escape-method)
+[6] [https://flatcoding.com](https://flatcoding.com/tutorials/php/php-escape-characters-how-to-escape-special-characters/)
+

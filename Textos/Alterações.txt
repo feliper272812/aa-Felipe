@@ -1,0 +1,177 @@
+
+A Opção 1 é a mais adequada para o seu projeto atual. Na prática, você vai usar o navegador como banco de dados local.
+
+O que você deve fazer
+1. No cadclientesPF.html
+
+Ao clicar em Salvar Cadastro, os dados devem ser gravados em:
+
+localStorage.setItem(
+    'PDV_CLIENTES_PF',
+    JSON.stringify(listaClientes)
+);
+
+Pelo que vimos anteriormente, isso já está praticamente implementado.
+
+2. No tabClientePF.html
+
+Ao abrir a página:
+
+document.addEventListener(
+    'DOMContentLoaded',
+    carregarDadosPF
+);
+
+A função:
+
+carregarDadosPF()
+
+deve ler:
+
+PDV_CLIENTES_PF
+
+do Local Storage.
+
+Isto também já está implementado no tabCliente_integrado.js.
+
+3. Fluxo correto
+Cadastrar
+Abrir cadclientesPF.html
+↓
+Preencher formulário
+↓
+Salvar Cadastro
+↓
+Dados gravados em Local Storage
+Consultar
+Abrir tabClientePF.html
+↓
+carregarDadosPF()
+↓
+Ler Local Storage
+↓
+Mostrar tabela
+Editar
+Tabela
+↓
+Botão Editar
+↓
+CLIENTE_EDITAR
+↓
+cadclientesPF.html
+↓
+Salvar
+↓
+Atualiza registro
+Excluir
+Tabela
+↓
+Excluir
+↓
+Remove do Local Storage
+↓
+Atualiza tabela
+4. Backup
+
+Adicionar botão:
+
+⬇ Baixar JSON
+
+Já implementado.
+
+Ele gera:
+
+cadclientesPF.json
+5. Restaurar backup
+
+Adicionar botão:
+
+⬆ Importar JSON
+
+Já implementado.
+
+Ele:
+
+Seleciona arquivo
+↓
+Lê JSON
+↓
+Mescla com Local Storage
+↓
+Atualiza tabela
+O que testar agora
+Teste 1
+Apague o Local Storage do navegador.
+Abra cadclientesPF.html.
+Cadastre 3 clientes.
+Salve.
+Teste 2
+
+Abra:
+
+tabClientePF.html
+
+Verifique se os 3 clientes aparecem.
+
+Teste 3
+
+Clique:
+
+Editar
+
+Altere um cliente.
+
+Salve.
+
+Volte para a tabela.
+
+Teste 4
+
+Clique:
+
+Baixar JSON
+
+Verifique se foi criado:
+
+cadclientesPF.json
+Teste 5
+
+Apague os dados do navegador:
+
+localStorage.clear();
+
+Atualize a tabela.
+
+Ela deverá ficar vazia.
+
+Teste 6
+
+Clique:
+
+Importar JSON
+
+Selecione:
+
+cadclientesPF.json
+
+Todos os clientes devem reaparecer.
+
+Uma melhoria que recomendo
+
+No cadclientesPF.html, após salvar com sucesso, redirecione automaticamente para a tabela:
+
+alert('Cliente salvo com sucesso!');
+
+window.location.href =
+    'tabClientePF.html';
+
+Assim o fluxo fica:
+
+Cadastro
+↓
+Salvar
+↓
+Tabela
+
+que é o comportamento esperado em um sistema PDV.
+

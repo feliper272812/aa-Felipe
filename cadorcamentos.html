@@ -1,0 +1,741 @@
+<!-- =========================================================
+ARQUIVO: cadorcamentos.html
+
+FORMULÁRIO DE CADASTRO DE ORÇAMENTOS MULTI-ITENS UNIFICADO
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+  Autor: Felipe Rodrigues - FullTime Technology
+========================================================= -->
+
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="auto">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamentos</title>
+
+    <!-- =====================================================
+         SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3
+    ====================================================== -->
+    <script src="./js/color-modes.js"></script>
+  
+
+    <!-- CONTROLE DE TEMA IMEDIATO -->
+    <script>
+        (() => {
+            const getStoredTheme = () => localStorage.getItem('theme');
+            const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const resolveTheme = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+            document.documentElement.setAttribute('data-bs-theme', resolveTheme(getStoredTheme() || 'auto'));
+        })();
+    </script>
+
+    <!-- BOOTSTRAP 5.3.3 CSS (CDN oficial) -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous"> -->
+
+    <!-- BOOTSTRAP 5.3.3 CSS LOCAL -->
+    <link id="bootstrap-css-local" href="./css/bootstrap.min.css" rel="stylesheet">
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let cssCarregado = false;
+            for (let i = 0; i < document.styleSheets.length; i++) {
+                try {
+                    let sheet = document.styleSheets[i];
+                    if (sheet.href && sheet.href.indexOf("bootstrap.min.css") !== -1) {
+                        if (sheet.cssRules && sheet.cssRules.length > 0) {
+                            cssCarregado = true;
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    // Captura restrições de segurança de CORS se houverem
+                }
+            }
+
+            if (!cssCarregado) {
+                alert('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                console.warn('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                
+                let cdn = document.createElement("link");
+                cdn.rel = "stylesheet";
+                cdn.href = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css";
+                cdn.integrity = "sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH";
+                cdn.crossOrigin = "anonymous";
+                document.head.appendChild(cdn);
+            }
+        });
+    </script>
+
+    <style>
+        html, body {
+            min-height: 100%;
+            overflow-y: auto;
+        }
+        body {
+            background-color: #f5f7fb;
+            transition: background-color 0.3s ease;
+            padding-top: 25px;
+            padding-bottom: 40px;
+        }
+        [data-bs-theme="dark"] body {
+            background-color: #121414;
+        }
+        .card-custom {
+            border-radius: 16px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.08);
+        }
+        .titulo-secao {
+            color: var(--bs-success);
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .form-label {
+            font-weight: 600;
+        }
+        
+        /* BLOCO OCULTO VISUALMENTE QUE SÓ APARECE NA IMPRESSÃO */
+        #cabecalho-impressao-timbrado {
+            display: none;
+        }
+
+        /* =====================================================
+             REGRAS AVANÇADAS PARA IMPRESSÃO EM PDF / A4
+        ====================================================== */
+        @media print {
+            body {
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+                background-color: #fff !important;
+                color: #000 !important;
+            }
+            .navbar, .sticky-top, .footer, #bloco-formulario-adicionar, .btn-acao-tabela, #btnSair {
+                display: none !important; /* Esconde botões e barras no papel */
+            }
+            .card-custom {
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+            }
+            .card-header {
+                display: none !important; /* Remove o cabeçalho verde do card */
+            }
+            #cabecalho-impressao-timbrado {
+                display: block !important; /* Ativa o papel timbrado profissional */
+                border-bottom: 2px solid #198754;
+                margin-bottom: 25px;
+                padding-bottom: 10px;
+            }
+            .table th {
+                background-color: #f8f9fa !important;
+                color: #000 !important;
+                border-bottom: 2px solid #000 !important;
+            }
+            .text-success {
+                color: #000 !important; /* Força cores escuras para leitura legível no papel */
+            }
+        }
+    </style>
+</head>
+<body>
+    
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///////      BARRA DE NAVEGAÇÃO FIXA (NAVBAR) /////////////////////////////////// -->
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+<header>
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-success shadow-sm">
+  <div class="container-fluid">
+    <!-- Dropdown Perfil/Menu -->
+    <div class="dropdown me-2">
+      <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+        <img src="./imagens/usuarios/Felipe.jpg" alt="Felipe" width="33" height="33" class="rounded-circle" />
+      </a>
+      <ul class="dropdown-menu text-small shadow">
+        <li><a class="dropdown-item" href="#">Novo projeto...</a></li>
+        <li><a class="dropdown-item" href="#">Configurações</a></li>
+        <li><a class="dropdown-item" href="#">Perfil</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="cadclientesPF.html">Cadastro de Clientes PF</a></li>
+        <li><a class="dropdown-item" href="cadclientesPJ.html">Cadastro de Clientes PJ</a></li>
+        <li><a class="dropdown-item" href="cadFornecedores.html">Cadastro de Fornecedores</a></li>
+        <li><a class="dropdown-item" href="cadusuarios.html">Cadastro de Usuários</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="cadProdutos.html">Cadastro de Produtos</a></li>
+        <li><a class="dropdown-item" href="tabProdutos.html">Tabela de Produtos</a></li>
+        <li><a class="dropdown-item" href="Ordemdeservico.html">Cadastro de Ordens de Serviço</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="cadusuarios.html">Usuários</a></li>
+        <li><a class="dropdown-item" href="tabusuarios.html">Tab. Usuários</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="felipe.html">Felipe Rodrigues</a></li>
+        <li><a class="dropdown-item" href="about.html">Sobre a FullTime</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="index-constantino.html">Constantino</a></li>
+        <li><a class="dropdown-item" href="index-brasil.html">Brasil</a></li>
+        <li><a class="dropdown-item" href="index-rs.html">Rio Grande do Sul</a></li>
+        <li><a class="dropdown-item" href="index-canoas.html">Canoas</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <!-- ALTERAÇÃO REALIZADA: id="btnSair" adicionado abaixo -->
+        <li><a id="btnSair" class="dropdown-item text-danger" href="#">Sair</a></li>
+      </ul>
+    </div>
+
+    <!-- Botão Hamburguer para Mobile -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <ul class="navbar-nav me-auto mb-2 mb-md-0">
+        <li class="nav-item"><a class="nav-link active text-light" href="index.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabClientesPF.html">Cliente PF</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabClientesPJ.html">Cliente PJ</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabFornecedores.html">Fornecedor</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabProdutos.html">Produto</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="frentedecaixa.html">PDV</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="taborcamentos.html">Orçamentos</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="Ordemdeservico.html">O.S.</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabusuarios.html">Usuários</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="index-sistema.html">Sistema</a></li>
+      </ul>
+
+      <!-- Seletor de Tema -->
+      <ul class="navbar-nav ms-md-auto mb-2 mb-md-0">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-light" href="#" id="themeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            🎨 Tema
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="themeDropdown">
+            <li>
+              <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', 'light'); localStorage.setItem('theme', 'light')">
+                ☀️ Modo Claro
+              </button>
+            </li>
+            <li>
+              <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', 'dark'); localStorage.setItem('theme', 'dark')">
+                🌙 Modo Escuro
+              </button>
+            </li>
+            <li>
+              <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); localStorage.setItem('theme', 'auto')">
+                💻 Automático
+              </button>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+</header>
+<hr>
+<!-- =====================================================
+     CONTAINER PRINCIPAL (OCUPANDO ESPAÇO MÁXIMO - 100%)
+====================================================== -->
+<!-- <div class="container-fluid px-md-4 mt-3"> -->
+    <!-- <div class="row justify-content-center"> -->
+        <!-- <div class="col-12"> -->
+            
+            <div class="card card-custom border-0 mt-3">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0 text-center">Formulário de Orçamentos</h3>
+                </div>
+
+                <!-- =============================
+                             BARRA DE BOTÕES GERENCIAIS PADRONIZADA
+                ============================== -->
+                <div class="sticky-top bg-body pt-2 pb-2 mb-3 border-bottom" style="z-index: 1020;">
+                    <div class="d-flex flex-wrap align-items-center gap-1">&nbsp;
+                        <button class="btn btn-sm btn-primary text-light" onclick="novoOrcamento()">➕ Novo</button>
+                        <button class="btn btn-sm btn-secondary text-light" onclick="salvarOrcamento(event)">💾 Salvar</button>
+                        <button class="btn btn-sm btn-secondary text-light" onclick="limparFormulario()">🧹 Limpar</button>
+                        <button class="btn btn-sm btn-warning fw-bold text-dark" onclick="baixarJSON()">⬇ JSON</button>
+                        <label for="arquivoJSONcad" class="btn btn-sm btn-info mb-0 text-dark" style="cursor: pointer;">📂 Importar</label>
+                        <input type="file" id="arquivoJSONcad" accept=".json" class="d-none" onchange="importarOrcamentoCompleto(event)">
+                        <button class="btn btn-sm btn-success" onclick="exportarParaCSV()">📄 CSV</button>
+                        <button class="btn btn-sm btn-dark" onclick="window.print()">🖨️ Imprimir</button>
+                        <button class="btn btn-sm btn-outline-success" onclick="voltarTabela()">📋 Tabela</button>
+                        <span id="badgeTotalRegistrosForm" class="badge bg-dark text-white p-2" style="font-size: 0.82rem; border-radius: 4px;">Total de orçamentos: 0</span>
+                        <div class="vr mx-2"></div>
+                        <div class="input-group input-group-sm ms-auto" style="max-width:380px">
+                            <input id="inputOrcamentoNav" class="form-control" placeholder="Pesquisar Orçamento">
+                            <button class="btn btn-outline-success" onclick="pesquisarOrcamento(event)">🔍</button>&nbsp;&nbsp;
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- PAPEL TIMBRADO EXCLUSIVO PARA IMPRESSÃO -->
+                    <div id="cabecalho-impressao-timbrado" class="text-center">
+                        <h2 class="fw-bold text-success mb-1">FULLTIME TECHNOLOGY</h2>
+                        <p class="text-muted small mb-2">Soluções Corporativas em Tecnologia & Sistema PDV</p>
+                        <h4 class="fw-semibold border-top border-bottom py-1 text-uppercase text-secondary" style="letter-spacing: 1px; font-size: 1.1rem;">Relatório Comercial de Orçamento</h4>
+                    </div>
+
+                    <form id="formOrcamento" autocomplete="off" novalidate>
+                        <div class="row g-3">
+
+                            <!-- DADOS DO CLIENTE / CABEÇALHO -->
+                            <div class="col-12">
+                                <h5 class="titulo-secao mb-3">Dados Gerais do Cliente</h5>
+                                <div class="row">
+                                    <!-- ID DO ORÇAMENTO -->
+                                    <div class="col-md-2 mb-3">
+                                        <label class="form-label">ID Orçamento</label>
+                                        <input type="text" id="orcamentoIdDisplay" class="form-control bg-body-secondary text-muted" value="(auto)" disabled>
+                                    </div>
+                                    
+                                    <!-- CLIENTE -->
+                                    <div class="col-md-10 mb-3">
+                                        <label class="form-label">Cliente</label>
+                                        <input type="text" id="cliente" class="form-control" placeholder="Nome completo do cliente solicitante">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- LANÇAMENTO INLINE DE ITENS / SERVIÇOS -->
+                            <div class="col-12 mt-2">
+                                <h5 class="titulo-secao mb-3">Itens / Serviços do Orçamento</h5>
+                                
+                                <div id="bloco-formulario-adicionar" class="row g-2 align-items-end p-3 rounded mb-3" style="background-color: var(--bs-tertiary-bg); border: 1px solid var(--bs-border-color);">
+                                    <div class="col-md-2 col-12">
+                                        <button type="button" class="btn btn-sm btn-success w-100 fw-bold" onclick="adicionarItemNaGrade()">➕ Adicionar Íten</button>
+                                    </div>
+
+                                    <div class="col-md-6 col-12">
+                                        <label class="form-label small mb-1">Descrição do Serviço / Item</label>
+                                        <input type="text" id="itemDescricao" class="form-control form-control-sm" placeholder="Ex: Formatação de PC, Instalação de Câmeras, Troca de Conector...">
+                                    </div>
+                                    <div class="col-md-2 col-6">
+                                        <label class="form-label small mb-1">Quantidade</label>
+                                        <input type="number" id="itemQuantidade" class="form-control form-control-sm" value="1" min="1">
+                                    </div>
+                                    <div class="col-md-2 col-6">
+                                        <label class="form-label small mb-1">Preço Unitário (R$)</label>
+                                        <input type="number" id="itemValorUnitario" class="form-control form-control-sm" placeholder="0.00" step="0.01">
+                                    </div>
+                                </div>
+
+                                <!-- TABELA DE ITENS LANÇADOS (LARGURA TOTAL) -->
+                                <div class="table-responsive rounded border mb-3">
+                                    <table class="table table-hover table-striped align-middle mb-0" style="font-size: 0.9rem;">
+                                        <thead class="table-success text-uppercase" style="font-size: 0.78rem; letter-spacing: 0.5px;">
+                                            <tr>
+                                                <th scope="col" style="width: 5%;">#</th>
+                                                <th scope="col" style="width: 55%;">Descrição do Item / Serviço</th>
+                                                <th scope="col" class="text-center" style="width: 10%;">Quantidade</th>
+                                                <th scope="col" class="text-end" style="width: 12%;">Preço Unitário</th>
+                                                <th scope="col" class="text-end" style="width: 13%;">Subtotal</th>
+                                                <th scope="col" class="text-center btn-acao-tabela" style="width: 5%;">Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="corpoTabelaItens">
+                                            <!-- Inserido dinamicamente via Javascript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- BOX DE TOTAL GERAL DO ORÇAMENTO -->
+                                <div class="d-flex justify-content-end align-items-center gap-3 p-3 rounded border bg-body-secondary">
+                                    <span class="fw-bold text-body" style="font-size: 1.1rem;">VALOR TOTAL GERAL:</span>
+                                    <div class="input-group" style="max-width: 220px;">
+                                        <span class="input-group-text bg-success text-white fw-bold">R$</span>
+                                        <input type="text" id="valorTotalGeralDisplay" class="form-control text-end bg-body text-success fw-bold" style="font-size: 1.2rem;" value="0,00" disabled>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                </div> <!-- Fim .card-body -->
+            </div> <!-- Fim .card-custom -->
+        <!-- </div> --> <!-- Fim .col-12 -->
+    <!-- </div> --> <!-- Fim .row -->
+<!-- </div> --> <!-- Fim .container-fluid -->
+
+    <!-- =====================================================
+         ENGINE JAVASCRIPT DE SINCRONIZAÇÃO E MANUTENÇÃO (Parte 4a)
+    ====================================================== -->
+    <script>
+    const STORAGE_KEY = 'PDV_ORCAMENTOS';
+    const EDIT_KEY = 'ORCAMENTO_EDITAR';
+
+    ////////////////////////////////////////////////////////////////
+    // STATE - MATRIZ DE PRODUTOS/SERVIÇOS EM MEMÓRIA
+    ////////////////////////////////////////////////////////////////
+    let formularioAlterado = false;
+    let itensOrcamento = []; 
+
+    ////////////////////////////////////////////////////////////////
+    // ATUALIZAÇÃO DO BADGE TOTALIZADOR DO FORMULÁRIO
+    ////////////////////////////////////////////////////////////////
+    function atualizarBadgeTotalGeral() {
+        const badgeTotal = document.getElementById('badgeTotalRegistrosForm');
+        if (badgeTotal) {
+            const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            badgeTotal.textContent = `Total de orçamentos: ${lista.length}`;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////
+    // MANIPULAÇÃO DA GRADE DINÂMICA DE ITENS
+    ////////////////////////////////////////////////////////////////
+    function adicionarItemNaGrade() {
+        const descEl = document.getElementById('itemDescricao');
+        const qtdEl = document.getElementById('itemQuantidade');
+        const valorEl = document.getElementById('itemValorUnitario');
+
+        const descricao = descEl.value.trim();
+        const quantidade = parseInt(qtdEl.value, 10) || 0;
+        const valorUnitario = parseFloat(valorEl.value) || 0;
+
+        if (!descricao) { alert('Informe a descrição do item ou serviço!'); descEl.focus(); return; }
+        if (quantidade < 1) { alert('A quantidade deve ser de no mínimo 1!'); qtdEl.focus(); return; }
+        if (valorUnitario <= 0) { alert('Informe um preço unitário válido!'); valorEl.focus(); return; }
+
+        itensOrcamento.push({
+            descricao,
+            quantidade,
+            valorUnitario
+        });
+
+        descEl.value = '';
+        qtdEl.value = '1';
+        valorEl.value = '';
+        
+        formularioAlterado = true;
+        atualizarGradeInterface();
+        descEl.focus();
+    }
+
+    function removerItemDaGrade(index) {
+        itensOrcamento.splice(index, 1);
+        formularioAlterado = true;
+        atualizarGradeInterface();
+    }
+
+    function atualizarGradeInterface() {
+        const tbody = document.getElementById('corpoTabelaItens');
+        const totalDisplay = document.getElementById('valorTotalGeralDisplay');
+        
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        let totalGeral = 0;
+
+        if (itensOrcamento.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Nenhum item adicionado a este orçamento.</td></tr>';
+            if (totalDisplay) totalDisplay.value = '0,00';
+            return;
+        }
+
+        itensOrcamento.forEach((item, index) => {
+            const subtotal = item.quantidade * item.valorUnitario;
+            totalGeral += subtotal;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td class="text-start fw-medium">${item.descricao}</td>
+                    <td class="text-center">${item.quantidade}</td>
+                    <td class="text-end">R$ ${item.valorUnitario.toFixed(2).replace('.', ',')}</td>
+                    <td class="text-end fw-bold text-success">R$ ${subtotal.toFixed(2).replace('.', ',')}</td>
+                    <td class="text-center btn-acao-tabela">
+                        <button type="button" class="btn btn-sm text-danger border-0 p-0 fw-bold" style="font-size: 1.1rem;" onclick="removerItemDaGrade(${index})" title="Remover Item">✕</button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        if (totalDisplay) {
+            totalDisplay.value = totalGeral.toFixed(2).replace('.', ',');
+        }
+    }
+    ////////////////////////////////////////////////////////////////
+    // CICLO DE VIDA E PERSISTÊNCIA (LOCALSTORAGE)
+    ////////////////////////////////////////////////////////////////
+    function carregarEdicao() {
+        const editData = localStorage.getItem(EDIT_KEY);
+        if (!editData) return;
+
+        const orcamentoData = JSON.parse(editData);
+        const form = document.getElementById('formOrcamento');
+        if (form) form.dataset.editId = String(orcamentoData.id).trim();
+
+        document.getElementById('orcamentoIdDisplay').value = orcamentoData.id;
+        document.getElementById('cliente').value = orcamentoData.cliente || '';
+
+        itensOrcamento = orcamentoData.itens || [];
+        atualizarGradeInterface();
+    }
+
+    function limparFormulario() {
+        document.getElementById('cliente').value = '';
+        document.getElementById('itemDescricao').value = '';
+        document.getElementById('itemQuantidade').value = '1';
+        document.getElementById('itemValorUnitario').value = '';
+
+        const form = document.getElementById('formOrcamento');
+        if (form) delete form.dataset.editId;
+
+        document.getElementById('orcamentoIdDisplay').value = '(auto)';
+        localStorage.removeItem(EDIT_KEY);
+
+        itensOrcamento = [];
+        atualizarGradeInterface();
+
+        formularioAlterado = false;
+        atualizarBadgeTotalGeral();
+        
+        const first = document.getElementById('cliente');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        setTimeout(() => { if (first) first.focus(); }, 300);
+    }
+
+    function voltarTabela() {
+        if (formularioAlterado) {
+            if (!confirm('Há alterações não salvas. Deseja sair mesmo assim?')) return;
+        }
+        formularioAlterado = false;
+        localStorage.removeItem(EDIT_KEY);
+        window.location.href = 'taborcamentos.html';
+    }
+
+    function novoOrcamento() {
+        if (formularioAlterado) {
+            if (!confirm('Descartar alterações?')) return;
+        }
+        localStorage.removeItem(EDIT_KEY);
+        formularioAlterado = false;
+        limparFormulario();
+    }
+
+    function gerarId() {
+        const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const maxId = lista.length ? Math.max(...lista.map(o => Number(o.id) || 0)) + 1 : 1;
+        return String(maxId);
+    }
+
+    function salvarOrcamento(e) {
+        if (e) e.preventDefault();
+        
+        if (!confirm('Deseja salvar este orçamento?')) return;
+
+        const cliente = document.getElementById('cliente').value.trim();
+
+        if (!cliente) { alert('O campo Cliente é obrigatório!'); return; }
+        if (itensOrcamento.length === 0) { alert('Adicione ao menos um item ao orçamento antes de salvar!'); return; }
+
+        const form = document.getElementById('formOrcamento');
+        const editId = form?.dataset.editId ? String(form.dataset.editId).trim() : null;
+
+        const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const agora = new Date().toISOString();
+
+        const valorTotalCalculado = itensOrcamento.reduce((acc, curr) => acc + (curr.quantidade * curr.valorUnitario), 0);
+
+        const orcamentoData = {
+            id: editId || gerarId(),
+            cliente,
+            itens: itensOrcamento, 
+            valorTotal: valorTotalCalculado,
+            dataAlteracao: agora
+        };
+
+        if (editId) {
+            const idx = lista.findIndex(o => String(o.id).trim() === editId);
+            if (idx !== -1) {
+                orcamentoData.dataCadastro = lista[idx].dataCadastro;
+                lista[idx] = orcamentoData;
+            }
+        } else {
+            orcamentoData.dataCadastro = agora;
+            lista.push(orcamentoData);
+        }
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+        formularioAlterado = false;
+        localStorage.removeItem(EDIT_KEY);
+
+        alert(editId ? 'Orçamento atualizado com sucesso!' : 'Orçamento salvo com sucesso!');
+        window.location.href = 'taborcamentos.html';
+    }
+    ////////////////////////////////////////////////////////////////
+    // EXPORTAÇÃO E IMPORTAÇÃO COMPLETA
+    ////////////////////////////////////////////////////////////////
+    function baixarJSON() {
+        let orcamentos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const json = JSON.stringify(orcamentos, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'cadorcamentos.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function importarOrcamentoCompleto(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function () {
+            try {
+                let dados = JSON.parse(reader.result);
+                if (!Array.isArray(dados)) dados = [dados];
+                if (!dados.length) { alert('O arquivo JSON está vazio.'); return; }
+                if (formularioAlterado) {
+                    if (!confirm('Descartar alterações atuais e carregar o JSON?')) return;
+                }
+
+                const o = dados[0];
+                const form = document.getElementById('formOrcamento');
+                if (form) form.dataset.editId = o.id ? String(o.id).trim() : '';
+
+                document.getElementById('orcamentoIdDisplay').value = o.id || '(auto)';
+                document.getElementById('cliente').value = o.cliente || '';
+
+                itensOrcamento = o.itens || [];
+                atualizarGradeInterface();
+                formularioAlterado = true;
+                atualizarBadgeTotalGeral();
+            } catch (error) {
+                alert('Erro ao processar o arquivo JSON de orçamentos.');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // EXPORTAÇÃO COMPATÍVEL CSV
+    function exportarParaCSV() {
+        const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        if (lista.length === 0) { alert('Não há dados para exportar!'); return; }
+        let csv = 'ID;Cliente;Qtd Itens;Valor Total\(\r\\)n';
+        lista.forEach(o => {
+            const qtd = Array.isArray(o.itens) ? o.itens.length : 0;
+            csv += `${o.id};${o.cliente};${qtd};${Number(o.valorTotal).toFixed(2).replace('.', ',')}\r\n`;
+        });
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'orcamentos_exportados.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function pesquisarOrcamento(e) {
+        if (e) e.preventDefault();
+        const termo = document.getElementById('inputOrcamentoNav').value.trim().toLowerCase();
+        if (!termo) { alert('Digite o nome do cliente para pesquisar.'); return; }
+
+        const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const achado = lista.find(o => String(o.cliente).toLowerCase().includes(termo));
+
+        if (achado) {
+            localStorage.setItem(EDIT_KEY, JSON.stringify(achado));
+            carregarEdicao();
+        } else {
+            alert('Nenhum orçamento encontrado para o cliente informado.');
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////
+    // DOM CONTENT LOADED
+    ////////////////////////////////////////////////////////////////
+    document.addEventListener('DOMContentLoaded', () => {
+        const btnSair = document.getElementById('btnSair');
+        if (btnSair) {
+            btnSair.addEventListener('click', function (event) {
+                event.preventDefault();
+                localStorage.setItem("PDV_HABILITADO", "0");
+                window.location.reload();
+            });
+        }
+
+        if (localStorage.getItem("PDV_HABILITADO") !== "1") {
+            alert("Acesso negado! Por favor, realize o login.");
+            window.location.href = "index.html";
+            return;
+        }
+
+        carregarEdicao();
+        atualizarBadgeTotalGeral();
+
+        const form = document.getElementById('formOrcamento');
+        const campos = form?.querySelectorAll('input,select,textarea') || [];
+        campos.forEach(c => {
+            if(c.id !== 'itemDescricao' && c.id !== 'itemQuantidade' && c.id !== 'itemValorUnitario') {
+                c.addEventListener('input', () => formularioAlterado = true);
+                c.addEventListener('change', () => formularioAlterado = true);
+            }
+        });
+
+        const first = document.getElementById('cliente');
+        if (first) first.focus();
+    });
+
+    window.addEventListener('beforeunload', (e) => {
+        if (formularioAlterado) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    </script>
+
+    <!-- //////////////////////////////////////////////////////// -->
+    <!-- RODAPÉ FIXO (FOOTER) -->
+    <!-- //////////////////////////////////////////////////////// -->
+
+    <div id="footer-placeholder"></div>
+
+    <!-- /////////////////////////////////////////// -->
+    <!-- DEPENDÊNCIAS DE SCRIPTS DO ECOSSISTEMA CORE -->
+    <!-- /////////////////////////////////////////// -->
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // CORREÇÃO: Fallback estável apontando para o arquivo completo do Bootstrap JS na jDelivr oficial
+        if (typeof bootstrap === 'undefined') {
+            alert('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            console.warn('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            document.write('src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');
+        }
+    </script>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- iNCLUDE PARA USART HTML EXTERNO -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/include.js"></script>
+    
+<!-- //////////////////////////////////////////////////////// -->
+<!-- Script de proteção global -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/autenticacao.js"></script>
+
+
+</body>
+</html>

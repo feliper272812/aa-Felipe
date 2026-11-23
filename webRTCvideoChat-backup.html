@@ -1,0 +1,507 @@
+<!-- =========================================================
+  ARQUIVO: webRTCvideoChat.html
+  CHAMADA DE VÍDEO PONTO A PONTO (P2P) VIA WEBRTC
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+  - JavaScript ES6 (WebRTC API)
+
+  Autor: Felipe Rodrigues - FullTime Technology
+========================================================= -->
+
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="auto">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VideoChat P2P - FullTime Technology</title>
+
+  <script id="color-modes-local" src="./js/color-modes.js"></script>
+
+  <script>
+    const carregarFallbackTema = () => {
+      alert('color-modes.js local não carregou. Usando CDN oficial do Bootstrap 5.3 como reserva.');
+      console.warn('color-modes.js local não carregou. Usando CDN oficial do Bootstrap 5.3 como reserva.');
+
+      const cdnScript = document.createElement('script');
+      cdnScript.src = 'https://getbootstrap.com';
+      document.head.appendChild(cdnScript);
+    };
+  </script>
+
+  <script src="./js/color-modes.js" onerror="carregarFallbackTema()"></script>
+
+  <link id="bootstrap-css-local" href="./css/bootstrap.min.css" rel="stylesheet">
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      let cssCarregado = false;
+      for (let i = 0; i < document.styleSheets.length; i++) {
+        try {
+          let sheet = document.styleSheets[i];
+          if (sheet.href && sheet.href.indexOf("bootstrap.min.css") !== -1 && sheet.cssRules && sheet.cssRules.length > 0) {
+            cssCarregado = true;
+            break;
+          }
+        } catch (e) {}
+      }
+      if (!cssCarregado) {
+        let cdn = document.createElement("link");
+        cdn.rel = "stylesheet";
+        cdn.href = "https://jsdelivr.net";
+        cdn.integrity = "sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH";
+        cdn.crossOrigin = "anonymous";
+        document.head.appendChild(cdn);
+      }
+    });
+  </script>
+
+  <style>
+    html, body {
+      height: 100vh !important;
+      margin: 0;
+      overflow: hidden !important;
+    }
+    body {
+      background-color: #f5f7fb;
+      display: flex;
+      flex-direction: column;
+      padding-top: 50px;      
+    }
+
+    [data-bs-theme="dark"] body {
+      background-color: #121212;
+    }
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 92px) !important;
+      overflow: hidden !important;
+    }
+    .chat-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding-bottom: 4px !important;
+    }
+    .videos-row {
+      flex: 1;
+      min-height: 0;
+    }
+    .video-wrapper {
+      position: relative;
+      background-color: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid #198754;
+      width: 100%;
+      height: 100%;
+    }
+    .video-wrapper video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .video-label {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    #localVideo {
+      transform: scaleX(-1);
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///////      BARRA DE NAVEGAÇÃO FIXA (NAVBAR) /////////////////////////////////// -->
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+  
+  <header>
+    <div id="nav-sistema-placeholder"></div>
+  </header>
+
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+  <main class="container-fluid px-0 pt-2 chat-container">
+    <div class="card border-0 shadow-sm h-100 d-flex flex-column">
+      <div class="card-header bg-success text-white position-relative d-flex justify-content-center align-items-center">
+        <h4 class="mb-0 text-center">📹 VideoChat Ponto a Ponto (WebRTC P2P)</h4>
+        <span id="statusConexao" class="badge bg-light text-dark position-absolute end-0 me-3">Aguardando Câmera...</span>
+      </div>
+
+      <!-- Barra de Controles de Mídia -->
+      <div class="bg-body-tertiary p-2 border-bottom d-flex flex-wrap gap-2 align-items-center">
+        <button id="btnIniciarCamera" class="btn btn-sm btn-primary fw-bold" onclick="iniciarCamera()">🎥 1. Ligar Câmera e Microfone</button>
+        <button id="btnMutarAudio" class="btn btn-sm btn-outline-secondary" onclick="alternarAudio()" disabled>🎤 Áudio: Ativo</button>
+        <button id="btnPausarVideo" class="btn btn-sm btn-outline-secondary" onclick="alternarVideo()" disabled>📷 Vídeo: Ativo</button>
+        <button id="btnDesligar" class="btn btn-sm btn-danger ms-auto fw-bold" onclick="encerrarChamada()" disabled>❌ Encerrar Chamada</button>
+      </div>
+
+      <!-- Área Principal Rolável -->
+      <div class="card-body chat-body">
+        <!-- Grade de Vídeos -->
+        <div class="row g-3 mb-0 videos-row">
+          <div class="col-md-6 h-100">
+            <div class="video-wrapper shadow-sm">
+              <video id="localVideo" autoplay playsinline muted></video>
+              <span class="video-label">👤 Você (Local)</span>
+            </div>
+          </div>
+          <div class="col-md-6 h-100">
+            <div class="video-wrapper shadow-sm">
+              <video id="remoteVideo" autoplay playsinline></video>
+              <span class="video-label">🌐 Contato Remoto</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel de Sinalização P2P (Troca de Chaves SDP sem Servidor) -->
+        <div class="card border-success" style="margin-top: 20px;">
+          <div class="card-header bg-success-subtle text-success-emphasis fw-bold d-flex justify-content-between align-items-center">
+            <span>🔗 Conexão Direta (Troca de Sinalização P2P)</span>
+            <span id="badgeIpLocal" class="badge bg-secondary">IP LAN: Aguardando câmera...</span>
+          </div>
+
+          <div class="card-body">
+            <div class="row g-3">
+              <!-- Lado A: Criar Conexão Local -->
+              <div class="col-md-6 border-end">
+                <h6 class="fw-bold text-primary">Passo A: Iniciar Chamada (Quem Liga)</h6>
+                <p class="small text-muted mb-2">Gere convite e envie para a outra pessoa colar no Passo B.</p>
+                <div class="d-flex gap-2 mb-2">
+                  <button id="btnCriarOferta" class="btn btn-success text-nowrap" onclick="criarOferta()" disabled>📤 Gerar Convite</button>
+                  <input type="text" id="txtOferta" class="form-control font-monospace" placeholder="O código do convite aparecerá aqui..." readonly>
+                  <button class="btn btn-outline-success text-nowrap" onclick="copiarTexto('txtOferta')">📋 Copiar</button>
+                </div>
+              </div>
+
+              <!-- Lado B: Responder ou Conectar -->
+              <div class="col-md-6">
+                <h6 class="fw-bold text-success">Passo B: Conectar / Responder</h6>
+                <p class="small text-muted mb-2">Cole aqui o código recebido da outra pessoa e clique em Conectar.</p>
+                <div class="d-flex gap-2 mb-2">
+                  <button id="btnProcessarSinal" class="btn btn-primary text-nowrap" onclick="processarSinalRemoto()" disabled>⚡ Conectar / Responder</button>
+                  <input type="text" id="txtResposta" class="form-control font-monospace" placeholder="Cole o código recebido aqui...">
+                  <button class="btn btn-outline-primary text-nowrap" onclick="copiarTexto('txtResposta')">📋 Copiar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script>
+    let localStream = null;
+    let remoteStream = null;
+    let peerConnection = null;
+
+    const rtcConfig = {
+      iceServers: [
+        { urls: 'stun:://google.com' },
+        { urls: 'stun:://google.com' }
+      ]
+    };
+
+    // 1. Liga a webcam (com fallback automático caso não exista microfone)
+    async function iniciarCamera() {
+      let temAudio = true;
+
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      } catch (err) {
+        try {
+          localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          temAudio = false;
+        } catch (errVideo) {
+          alert('Erro ao acessar a webcam: ' + errVideo.message);
+          return;
+        }
+      }
+
+      document.getElementById('localVideo').srcObject = localStream;
+
+      const btnAudio = document.getElementById('btnMutarAudio');
+      if (temAudio && localStream.getAudioTracks().length > 0) {
+        btnAudio.disabled = false;
+        btnAudio.textContent = '🎤 Áudio: Ativo';
+        atualizarStatus('Câmera e Áudio Ativos - Pronto para Conectar', 'bg-warning text-dark');
+      } else {
+        btnAudio.disabled = true;
+        btnAudio.textContent = '🔇 Sem Microfone';
+        atualizarStatus('Webcam Ativa (Apenas Vídeo) - Pronto para Conectar', 'bg-warning text-dark');
+      }
+
+      document.getElementById('btnIniciarCamera').disabled = true;
+      document.getElementById('btnPausarVideo').disabled = false;
+      document.getElementById('btnCriarOferta').disabled = false;
+      document.getElementById('btnProcessarSinal').disabled = false;
+
+      prepararConexaoP2P();
+      exibirIPLocalLAN();
+    }
+
+    function exibirIPLocalLAN() {
+      const badgeIp = document.getElementById('badgeIpLocal');
+      if (!badgeIp) return;
+
+      badgeIp.textContent = '🌐 Verificando Rede LAN...';
+      badgeIp.className = 'badge bg-info text-dark';
+
+      const pcTemp = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:://google.com' }]
+      });
+      pcTemp.createDataChannel('');
+      pcTemp.createOffer().then(offer => pcTemp.setLocalDescription(offer));
+
+      let redeDetectada = false;
+
+      pcTemp.onicecandidate = event => {
+        if (!event || !event.candidate || redeDetectada) return;
+        const candidato = event.candidate.candidate;
+
+        // 1. Tenta capturar IPv4 numérico caso esteja liberado na rede
+        const regexIP = /([0-9]{1,3}(\.[0-9]{1,3}){3})/;
+        const matchIP = regexIP.exec(candidato);
+
+        if (matchIP && matchIP.at(0)) {
+          const ip = matchIP.at(0);
+          const isPrivado = ip.startsWith('10.') || 
+                            ip.startsWith('192.168.') || 
+                            /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(ip);
+
+          if (isPrivado) {
+            redeDetectada = true;
+            badgeIp.textContent = `🌐 IP LAN: ${ip}`;
+            badgeIp.className = 'badge bg-success text-white';
+            pcTemp.close();
+            return;
+          }
+        }
+
+        // 2. Captura o endereço mDNS (.local) padrão do Chrome moderno
+        const regexMDNS = /([a-zA-Z0-9-]+\.local)/;
+        const matchMDNS = regexMDNS.exec(candidato);
+
+        if (matchMDNS && matchMDNS.at(0)) {
+          redeDetectada = true;
+          badgeIp.textContent = `🌐 Rede LAN Ativa (${matchMDNS.at(0)})`;
+          badgeIp.className = 'badge bg-success text-white';
+          pcTemp.close();
+        }
+      };
+
+      setTimeout(() => {
+        if (!redeDetectada) {
+          badgeIp.textContent = '🌐 Rede P2P Pronta';
+          badgeIp.className = 'badge bg-success text-white';
+          pcTemp.close();
+        }
+      }, 2500);
+    }
+
+    // 2. Prepara a instância RTCPeerConnection e escuta os fluxos
+    function prepararConexaoP2P() {
+      peerConnection = new RTCPeerConnection(rtcConfig);
+      remoteStream = new MediaStream();
+      document.getElementById('remoteVideo').srcObject = remoteStream;
+
+      localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, localStream);
+      });
+
+      peerConnection.ontrack = event => {
+        if (event.streams && event.streams[0]) {
+          event.streams[0].getTracks().forEach(track => {
+            remoteStream.addTrack(track);
+          });
+        } else {
+          remoteStream.addTrack(event.track);
+        }
+      };
+
+      peerConnection.onconnectionstatechange = () => {
+        const estado = peerConnection.connectionState;
+        if (estado === 'connected') {
+          atualizarStatus('🟢 Conectado em Tempo Real (P2P)', 'bg-success text-white');
+          document.getElementById('btnDesligar').disabled = false;
+        } else if (estado === 'disconnected' || estado === 'failed' || estado === 'closed') {
+          atualizarStatus('🔴 Chamada Encerrada / Desconectado', 'bg-danger text-white');
+        }
+      };
+    }
+
+    // 3. Passo A: Gera a Oferta
+    async function criarOferta() {
+      if (!peerConnection) prepararConexaoP2P();
+      atualizarStatus('Gerando código de oferta...', 'bg-info text-dark');
+
+      const offer = await peerConnection.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true
+      });
+      await peerConnection.setLocalDescription(offer);
+
+      await aguardarColetaICE(peerConnection);
+
+      document.getElementById('txtOferta').value = JSON.stringify(peerConnection.localDescription);
+      atualizarStatus('Oferta Gerada! Copie e envie para o contato.', 'bg-primary text-white');
+    }
+
+    // 4. Passo B: Processa a Oferta ou Resposta
+    async function processarSinalRemoto() {
+      const texto = document.getElementById('txtResposta').value.trim();
+      if (!texto) {
+        alert('Cole o código recebido no campo de texto antes de clicar em Conectar.');
+        return;
+      }
+
+      try {
+        const sinal = JSON.parse(texto);
+        if (!peerConnection) prepararConexaoP2P();
+
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(sinal));
+
+        if (sinal.type === 'offer') {
+          atualizarStatus('Gerando código de resposta...', 'bg-info text-dark');
+          const answer = await peerConnection.createAnswer();
+          await peerConnection.setLocalDescription(answer);
+
+          await aguardarColetaICE(peerConnection);
+
+          document.getElementById('txtResposta').value = JSON.stringify(peerConnection.localDescription);
+          atualizarStatus('Resposta Gerada! Copie e envie de volta para quem ligou.', 'bg-primary text-white');
+          alert('Resposta gerada com sucesso! Copie o novo código da caixa e envie de volta para a outra pessoa colar no Passo B dela.');
+        } else if (sinal.type === 'answer') {
+          atualizarStatus('Conectando vídeo...', 'bg-warning text-dark');
+        }
+      } catch (err) {
+        alert('Código inválido ou erro ao processar sinal: ' + err.message);
+      }
+    }
+
+    function aguardarColetaICE(pc) {
+      return new Promise(resolve => {
+        if (pc.iceGatheringState === 'complete') {
+          resolve();
+        } else {
+          const checkState = () => {
+            if (pc.iceGatheringState === 'complete') {
+              pc.removeEventListener('icegatheringstatechange', checkState);
+              resolve();
+            }
+          };
+          pc.addEventListener('icegatheringstatechange', checkState);
+          setTimeout(resolve, 3000);
+        }
+      });
+    }
+    function alternarAudio() {
+      if (!localStream) return;
+      const audioTrack = localStream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        const btn = document.getElementById('btnMutarAudio');
+        btn.textContent = audioTrack.enabled ? '🎤 Áudio: Ativo' : '🔇 Áudio: Mudo';
+        btn.className = audioTrack.enabled ? 'btn btn-sm btn-outline-secondary' : 'btn btn-sm btn-danger';
+      }
+    }
+
+    function alternarVideo() {
+      if (!localStream) return;
+      const videoTrack = localStream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled;
+        const btn = document.getElementById('btnPausarVideo');
+        btn.textContent = videoTrack.enabled ? '📷 Vídeo: Ativo' : '🚫 Vídeo: Pausado';
+        btn.className = videoTrack.enabled ? 'btn btn-sm btn-outline-secondary' : 'btn btn-sm btn-warning';
+      }
+    }
+
+    function encerrarChamada() {
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+      }
+      document.getElementById('localVideo').srcObject = null;
+      document.getElementById('remoteVideo').srcObject = null;
+      document.getElementById('txtOferta').value = '';
+      document.getElementById('txtResposta').value = '';
+
+      const badgeIp = document.getElementById('badgeIpLocal');
+      if (badgeIp) {
+        badgeIp.textContent = 'IP LAN: Aguardando câmera...';
+        badgeIp.className = 'badge bg-secondary';
+      }
+
+      const btnAudio = document.getElementById('btnMutarAudio');
+      btnAudio.disabled = true;
+      btnAudio.textContent = '🎤 Áudio: Ativo';
+      btnAudio.className = 'btn btn-sm btn-outline-secondary';
+
+      document.getElementById('btnIniciarCamera').disabled = false;
+      document.getElementById('btnPausarVideo').disabled = true;
+      document.getElementById('btnCriarOferta').disabled = true;
+      document.getElementById('btnProcessarSinal').disabled = true;
+      document.getElementById('btnDesligar').disabled = true;
+
+      atualizarStatus('Chamada Encerrada', 'bg-secondary text-white');
+    }
+
+    function atualizarStatus(texto, classeBadge) {
+      const badge = document.getElementById('statusConexao');
+      badge.textContent = texto;
+      badge.className = `badge position-absolute end-0 me-3 ${classeBadge}`;
+    }
+
+    function copiarTexto(idElemento) {
+      const el = document.getElementById(idElemento);
+      if (!el || !el.value) {
+        alert('Nada para copiar ainda.');
+        return;
+      }
+      navigator.clipboard.writeText(el.value);
+      alert('Código copiado para a área de transferência!');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem("PDV_HABILITADO") !== "1") {
+        alert("Acesso negado! Por favor, realize o login.");
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+
+  <!-- DEPENDÊNCIAS DE SCRIPTS DO ECOSSISTEMA CORE -->
+  <script src="./js/bootstrap.bundle.min.js"></script>
+  <script>
+    if (typeof bootstrap === 'undefined') {
+      alert('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+      console.warn('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+      document.write('<script src="https://jsdelivr.net" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');
+    }
+  </script>
+
+  <script src="./js/include.js"></script>
+  <script src="./js/autenticacao.js"></script>
+
+</body>
+</html>

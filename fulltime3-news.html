@@ -1,0 +1,698 @@
+
+<!-- =========================================================
+  ARQUIVO: constantino-news.html
+
+  JORNAL DO VEREADOR GABRIEL CONSTANTINO
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+  Autor: Felipe Rodrigues - FullTime Technology
+========================================================= -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Constantino News</title>
+
+  <link rel="preconnect" href="https://googleapis.com" />
+  <link rel="preconnect" href="https://gstatic.com" crossorigin />
+  <link href="https://googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+
+      <!-- ///////////////////////////////////////////////////////// -->
+    <!--         SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3             -->
+    <!-- ///////////////////////////////////////////////////////// -->
+
+    <script src="./js/color-modes.js"></script>
+    
+    <!-- ///////////////////////////////////////////////////////// -->
+    <!-- Controle de tema nativo imediato para evitar flash visual -->
+    <!-- ///////////////////////////////////////////////////////// -->
+
+    <script>
+        (() => {
+            const getStoredTheme = () => localStorage.getItem('theme');
+            const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const resolveTheme = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+            document.documentElement.setAttribute('data-bs-theme', resolveTheme(getStoredTheme() || 'auto'));
+        })();
+    </script>
+
+    <!-- BOOTSTRAP 5.3.3 CSS LOCAL -->
+    <link id="bootstrap-css-local" href="./css/bootstrap.min.css" rel="stylesheet">
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let cssCarregado = false;
+            for (let i = 0; i < document.styleSheets.length; i++) {
+                try {
+                    let sheet = document.styleSheets[i];
+                    if (sheet.href && sheet.href.indexOf("bootstrap.min.css") !== -1) {
+                        if (sheet.cssRules && sheet.cssRules.length > 0) {
+                            cssCarregado = true;
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    // Captura restrições de segurança de CORS se houverem
+                }
+            }
+
+            if (!cssCarregado) {
+                alert('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                console.warn('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                
+                let cdn = document.createElement("link");
+                cdn.rel = "stylesheet";
+                cdn.href = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css";
+                cdn.integrity = "sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH";
+                cdn.crossOrigin = "anonymous";
+                document.head.appendChild(cdn);
+            }
+        });
+    </script>
+
+  <style>
+    :root {
+      --ink: #111009;
+      --cream: #F7F3EC;
+      --rule: #C8B89A;
+      --accent: #B5001F;
+      --muted: #6B6455;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16px;
+      line-height: 1.75;
+      padding-top: 5px;
+    }
+
+    /* ── MASTHEAD ──────────────────────────────────── */
+    .masthead {
+      border-bottom: 3px double var(--ink);
+      padding: 1.5rem 0 1rem;
+    }
+
+    .masthead-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .masthead-meta {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* Tag H1 com Logotipo Customizado em Altura de Texto */
+    .masthead-logo-h1 {
+      text-align: center;
+      flex: 1;
+      margin: 0;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .masthead-logo-h1 img {
+      height: 100px; /* Altura equivalente a um h1 padrão */
+      width: auto;  /* Mantém a proporção sem achatar */
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .masthead-tagline {
+      text-align: center;
+      font-family: 'Source Serif 4', serif;
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--muted);
+      border-top: 1px solid var(--rule);
+      padding-top: 0.5rem;
+      margin-top: 0.4rem;
+    }
+
+    /* ── TICKER ────────────────────────────────────── */
+    .ticker-bar {
+      background: var(--ink);
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 0.35rem 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    /* Cabeçalho inteiro (ticker + masthead) fixo no topo ao rolar a página */
+    .cabecalho-fixo {
+      position: sticky;
+      top: 0;
+      z-index: 990; /* abaixo dos dropdowns (1000) e da navbar fixa (1030) do Bootstrap */
+      background: var(--cream);
+    }
+
+    .ticker-label {
+      background: var(--accent);
+      color: #fff;
+      padding: 0 0.75rem;
+      margin-right: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .ticker-scroll {
+      display: inline-block;
+      animation: ticker 28s linear infinite;
+    }
+
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ── NAV ───────────────────────────────────────── */
+    .section-nav {
+      border-bottom: 1px solid var(--rule);
+      padding: 0.5rem 0;
+    }
+
+    .section-nav a {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      padding: 0.25rem 0.75rem;
+      transition: color 0.15s;
+    }
+
+    .section-nav a:hover { color: var(--accent); }
+    .section-nav a.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+    /* ── EDITION LABEL ─────────────────────────────── */
+    .edition-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      font-weight: 500;
+      margin: 1.5rem 0 0.4rem;
+    }
+
+    /* ── COLUMN RULE ───────────────────────────────── */
+    .col-rule {
+      border-right: 1px solid var(--rule);
+    }
+
+    @media (max-width: 767.98px) {
+      .col-rule { border-right: none; border-bottom: 1px solid var(--rule); padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+    }
+
+    /* ── ARTICLE CARDS ─────────────────────────────── */
+    .article-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
+
+    .article-headline {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.35rem;
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+      color: var(--ink);
+    }
+
+    .article-headline a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .article-headline a:hover { color: var(--accent); }
+
+    .article-deck {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 0.6rem;
+    }
+
+    .article-byline {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .article-byline strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    /* ── ARTICLE COM FOTO À ESQUERDA ───────────────── */
+    .article-photo-left {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .article-photo-left .photo-thumb {
+      flex: 0 0 130px;
+      width: 130px;
+    }
+
+    .article-photo-left .photo-thumb img {
+      width: 100%;
+      height: auto;
+      display: block;
+      filter: sepia(15%) contrast(1.05);
+    }
+
+    .article-photo-left .photo-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .article-photo-left .article-headline {
+      font-size: 1.05rem;
+    }
+
+    /* ── IMAGENS GERAIS ────────────────────────────── */
+    .img-story {
+      width: 100%;
+      height: auto;
+      display: block;
+      filter: sepia(10%) contrast(1.05);
+      margin-bottom: 0.6rem;
+    }
+
+    .img-caption {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.68rem;
+      color: var(--muted);
+      border-top: 1px solid var(--rule);
+      padding-top: 0.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── DESTAQUE (col central) ─────────────────────── */
+    .featured-headline {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+      line-height: 1.2;
+      margin-bottom: 0.6rem;
+    }
+
+    .featured-headline a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .featured-headline a:hover { color: var(--accent); }
+
+    .featured-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      filter: sepia(8%) contrast(1.08);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── RODAPÉ ─────────────────────────────────────── */
+    footer {
+      border-top: 3px double var(--ink);
+      margin-top: 3rem;
+      padding: 1.5rem 0;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    footer .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    footer .footer-logo span { color: var(--accent); }
+  </style>
+</head>
+
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///////      BARRA DE NAVEGAÇÃO FIXA (NAVBAR) /////////////////////////////////// -->
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+
+    <div id="nav-sistema-placeholder"></div>
+
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+    <br>
+
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+<body>
+
+  <div style="margin-top: 25px;"></div>
+
+  <!-- ── CABEÇALHO FIXO (TICKER + MASTHEAD) ─────────────────────── -->
+  <div class="cabecalho-fixo">
+
+  <!-- ── TICKER ─────────────────────────────────────────────────── -->
+  <div class="ticker-bar">
+    <span class="ticker-label">Ao vivo</span>
+    <span class="ticker-scroll">
+      Bolsas europeias fecham em alta &nbsp;·&nbsp;
+      Governo anuncia pacote de infraestrutura de R$ 40 bi &nbsp;·&nbsp;
+      Seleção brasileira convocada para amistosos de junho &nbsp;·&nbsp;
+      Petróleo sobe 2% após decisão da OPEP+ &nbsp;·&nbsp;
+      Novo estudo aponta redução da pobreza extrema no país &nbsp;·&nbsp;
+      Bolsas europeias fecham em alta &nbsp;·&nbsp;
+      Governo anuncia pacote de infraestrutura de R$ 40 bi &nbsp;·&nbsp;
+      Seleção brasileira convocada para amistosos de junho &nbsp;·&nbsp;
+      Petróleo sobe 2% após decisão da OPEP+ &nbsp;·&nbsp;
+      Novo estudo aponta redução da pobreza extrema no país &nbsp;·&nbsp;
+    </span>
+  </div>
+
+  <!-- ── MASTHEAD ───────────────────────────────────────────────── -->
+  <div class="container-fluid px-4">
+    <div class="masthead">
+      <div class="masthead-top">
+        <div class="masthead-meta">Quarta-feira, 20 de maio de 2026</div>
+        
+        <div class="masthead-logo">Full<span>Time</span> News</div>
+
+        <div class="masthead-meta" style="text-align:right;">Edição Nº 4.217</div>
+      </div>
+      <div class="masthead-tagline">"Tudo que importa, no tempo certo."</div>
+    </div>
+  </div>
+
+  </div><!-- /cabecalho-fixo -->
+
+  <!-- ── NAV EDITORIAS ──────────────────────────────────────────── -->
+  <div class="container-fluid px-4">
+    <nav class="section-nav d-flex flex-wrap gap-1">
+      <a href="#" class="active">Brasil</a>
+      <a href="#">Mundo</a>
+      <a href="#">Economia</a>
+      <a href="#">Esporte</a>
+      <a href="#">Tecnologia</a>
+      <a href="#">Cultura</a>
+      <a href="#">Opinião</a>
+    </nav>
+  </div>
+
+  <!-- ── GRADE DE CONTEÚDO PRINCIPAL ───────────────────────────── -->
+  <div class="container-fluid px-4">
+    <p class="edition-label">Edição de hoje · Brasil & Mundo</p>
+    <div class="row g-4">
+      <!-- ── COLUNA 1 ─────────────────────────────── -->
+      <div class="col-12 col-md-4 col-rule">
+
+        <!-- Matéria 1: foto à esquerda, texto à direita -->
+        <div class="article-photo-left mb-4">
+          <div class="photo-thumb">
+            <img
+              src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=260&q=80"
+              alt="Congresso Nacional ao entardecer"
+            />
+          </div>
+          <div class="photo-text">
+            <p class="article-label">Política</p>
+            <h2 class="article-headline">
+              <a href="#">Congresso aprova reforma tributária em votação histórica</a>
+            </h2>
+            <p class="article-byline">
+              Por <strong>Ana Ferreira</strong> · 3h atrás
+            </p>
+          </div>
+        </div>
+
+        <!-- Matéria 2 -->
+        <div class="mb-4">
+          <p class="article-label">Economia</p>
+          <img
+            class="img-story"
+            src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80"
+            alt="Painel da bolsa de valores"
+          />
+          <p class="img-caption">Índice Bovespa registrou alta de 1,8% nesta quarta — REUTERS</p>
+          <h2 class="article-headline">
+            <a href="#">Ibovespa atinge recorde histórico com entrada de capital estrangeiro</a>
+          </h2>
+          <p class="article-deck">
+            Analistas atribuem o movimento à percepção de estabilidade fiscal e à queda dos juros nos Estados Unidos.
+          </p>
+          <p class="article-byline">Por <strong>Carlos Souza</strong> · 1h atrás</p>
+        </div>
+
+        <!-- Matéria 3 (só texto) -->
+        <div style="border-top: 1px solid var(--rule); padding-top: 1rem;">
+          <p class="article-label">Saúde</p>
+          <h2 class="article-headline" style="font-size:1.05rem;">
+            <a href="#">SUS inicia campanha nacional de vacinação contra dengue</a>
+          </h2>
+          <p class="article-deck" style="font-size:0.85rem;">
+            Ministério da Saúde prevê imunizar 8 milhões de brasileiros até o fim do inverno.
+          </p>
+          <p class="article-byline">Por <strong>Beatriz Lima</strong> · 5h atrás</p>
+        </div>
+
+      </div>
+
+      <!-- ── COLUNA 2 (DESTAQUE) ─────────────────── -->
+      <div class="col-12 col-md-4 col-rule">
+
+        <p class="article-label" style="border-bottom: 2px solid var(--accent); padding-bottom: 0.3rem; display:inline-block;">
+          Manchete Principal
+        </p>
+
+        <img
+          class="featured-img mt-2"
+          src="https://images.unsplash.com/photo-1467533003447-e295ff1b0435?w=800&q=80"
+          alt="Diplomatas reunidos em cúpula internacional"
+        />
+        <p class="img-caption">Líderes de 40 países se reúnem em Genebra para cúpula climática — AP Photo</p>
+
+        <h2 class="featured-headline">
+          <a href="#">Cúpula do Clima define meta de emissão zero para 2045 em acordo inédito</a>
+        </h2>
+        <p style="font-size:1rem; line-height:1.7; color: var(--ink); margin-bottom:0.75rem;">
+          Representantes de 40 nações assinaram nesta quarta o Pacto de Genebra, considerado o compromisso ambiental mais ambicioso da história moderna. O texto prevê eliminação gradual dos combustíveis fósseis e fundo de US$ 500 bilhões para países em desenvolvimento.
+        </p>
+        <p class="article-deck">
+          "É um momento de virada. O mundo decidiu que não há mais tempo para hesitar", declarou a secretária-geral da ONU durante a cerimônia de assinatura.
+        </p>
+        <p class="article-byline">Por <strong>Mariana Costa</strong> e <strong>Thomas Becker</strong> · Genebra · Há 45 min</p>
+
+        <hr style="border-color: var(--rule); margin: 1.5rem 0;" />
+
+        <!-- Secundária na col central -->
+        <div class="article-photo-left">
+          <div class="photo-thumb">
+            <img
+              src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=260&q=80"
+              alt="Tela com código de programação"
+            />
+          </div>
+          <div class="photo-text">
+            <p class="article-label">Tecnologia</p>
+            <h2 class="article-headline" style="font-size:1.05rem;">
+              <a href="#">União Europeia regula uso de IA generativa em sistemas públicos</a>
+            </h2>
+            <p class="article-byline">Por <strong>Pedro Alves</strong> · 2h atrás</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── COLUNA 3 ─────────────────────────────── -->
+      <div class="col-12 col-md-4">
+
+        <!-- Matéria esporte -->
+        <div class="mb-4">
+          <p class="article-label">Esporte</p>
+          <img
+            class="img-story"
+            src="./imagens/News/estadio-lotado.jpg"
+            alt="Estádio de futebol lotado"
+          />
+          <p class="img-caption">Copa América começa em julho com 16 seleções — Getty Images</p>
+          <h2 class="article-headline">
+            <a href="#">Brasil define lista de 26 para a Copa América com quatro estreantes</a>
+          </h2>
+          <p class="article-deck">
+            Técnico surpreende ao convocar jovens talentos do Palmeiras e do Flamengo. Convocação foi anunciada nesta manhã em coletiva no Rio.
+          </p>
+          <p class="article-byline">Por <strong>Roberto Nunes</strong> · 2h atrás</p>
+        </div>
+
+        <!-- Matéria com foto à esquerda -->
+        <div class="article-photo-left mb-4">
+          <div class="photo-thumb">
+            <img
+              src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=260&q=80"
+              alt="Empresário em reunião"
+            />
+          </div>
+          <div class="photo-text">
+            <p class="article-label">Negócios</p>
+            <h2 class="article-headline" style="font-size:1.05rem;">
+              <a href="#">Petrobras anuncia investimento de R$ 12 bi em energias renováveis</a>
+            </h2>
+            <p class="article-byline">Por <strong>Fernanda Rocha</strong> · 4h atrás</p>
+          </div>
+        </div>
+
+        <!-- Matéria cultura -->
+        <div style="border-top: 1px solid var(--rule); padding-top: 1rem;" class="mb-4">
+          <p class="article-label">Cultura</p>
+          <h2 class="article-headline" style="font-size:1.05rem;">
+            <a href="#">Mostra de cinema brasileiro em Cannes exibe 12 longas inéditos</a>
+          </h2>
+          <p class="article-deck" style="font-size:0.85rem;">
+            Festival acontece de 14 a 25 de maio; três produções nacionais concorrem à Palma de Ouro.
+          </p>
+          <p class="article-byline">Por <strong>Juliana Melo</strong> · 6h atrás</p>
+        </div>
+
+        <!-- Opinião -->
+        <div style="background:#fff; border: 0.5px solid var(--rule); border-left: 4px solid var(--accent); padding: 1rem 1rem 1rem 1.25rem; border-radius: 0 4px 4px 0;">
+          <p class="article-label" style="margin-bottom:0.25rem;">Opinião</p>
+          <h2 class="article-headline" style="font-size:1rem; margin-bottom:0.4rem;">
+            <a href="#">O acordo climático é real — agora vem a parte difícil</a>
+          </h2>
+          <p style="font-size:0.82rem; font-style:italic; color:var(--muted); margin:0;">
+            Por <strong style="color:var(--ink); font-style:normal;">Dra. Lúcia Tavares</strong>, colunista
+          </p>
+        </div>
+
+      </div>
+    </div><!-- /row -->
+
+  </div><!-- /container-fluid -->
+
+    <!-- /////////////////////////////////////////// -->
+    <!-- DEPENDÊNCIAS DE SCRIPTS DO ECOSSISTEMA CORE -->
+    <!-- /////////////////////////////////////////// -->
+
+    <!-- //////////////////////////////////////////////////////// -->
+    <!-- RODAPÉ FIXO (FOOTER) -->
+    <!-- //////////////////////////////////////////////////////// -->
+
+    <div id="footer-placeholder"></div>
+
+    <!-- /////////////////////////////////////////// -->
+    <!-- DEPENDÊNCIAS DE SCRIPTS DO ECOSSISTEMA CORE -->
+    <!-- /////////////////////////////////////////// -->
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // CORREÇÃO: Fallback estável apontando para o arquivo completo do Bootstrap JS na jDelivr oficial
+        if (typeof bootstrap === 'undefined') {
+            alert('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            console.warn('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            document.write('src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');
+        }
+    </script>
+
+    <!-- Ajusta o topo do cabeçalho fixo caso a navbar (carregada via include.js) seja fixa -->
+    <script>
+        (() => {
+            const ticker = document.querySelector('.cabecalho-fixo');
+            const placeholder = document.getElementById('nav-placeholder');
+            if (!ticker || !placeholder) return;
+
+            const ajustar = () => {
+                const nav = placeholder.querySelector('.fixed-top, .sticky-top, nav, header');
+                let topo = 0;
+                if (nav) {
+                    const pos = getComputedStyle(nav).position;
+                    if (pos === 'fixed' || pos === 'sticky') {
+                        topo = Math.max(0, nav.getBoundingClientRect().bottom);
+                    }
+                }
+                ticker.style.top = topo + 'px';
+            };
+
+            // Se o rodapé (carregado via include.js) for fixo na base da tela,
+            // reserva espaço no fim da página para o conteúdo terminar acima dele.
+            const rodapePlaceholder = document.getElementById('footer-placeholder');
+            const ajustarRodape = () => {
+                if (!rodapePlaceholder) return;
+                const rodape = rodapePlaceholder.querySelector('footer') || rodapePlaceholder.firstElementChild;
+                let folga = '';
+                if (rodape && getComputedStyle(rodape).position === 'fixed') {
+                    folga = rodape.offsetHeight + 'px';
+                }
+                document.body.style.paddingBottom = folga;
+            };
+
+            const ajustarTudo = () => { ajustar(); ajustarRodape(); };
+
+            new MutationObserver(ajustarTudo).observe(placeholder, { childList: true, subtree: true });
+            if (rodapePlaceholder) {
+                new MutationObserver(ajustarRodape).observe(rodapePlaceholder, { childList: true, subtree: true });
+            }
+            window.addEventListener('load', ajustarTudo);
+            window.addEventListener('resize', ajustarTudo);
+            ajustarTudo();
+        })();
+    </script>
+    
+<!-- //////////////////////////////////////////////////////// -->
+<!-- iNCLUDE PARA USART HTML EXTERNO -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/include.js"></script>
+    
+<!-- //////////////////////////////////////////////////////// -->
+<!-- Script de proteção global -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <!-- <script src="./js/autenticacao.js"></script> -->
+
+</body>
+</html>
+
+</body>
+</html>

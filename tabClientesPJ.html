@@ -1,0 +1,479 @@
+<!-- =========================================================
+  ARQUIVO: tabclientePJ.html
+  TABELA DE CLIENTES PESSOA JURÍDICA
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+  Autor: Felipe Rodrigues - FullTime Technology
+========================================================= -->
+
+<!doctype html>
+<html lang="pt-br" data-bs-theme="auto">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clientes PJ</title>
+  
+  <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+  <!-- SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3 -->
+  <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+  <script src="./js/color-modes.js"></script>
+
+  <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+  <!-- Bootstrap CSS v5.3.8 -->
+  <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+    <!-- BOOTSTRAP 5.3.3 CSS (CDN oficial) -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous"> -->
+
+    <!-- BOOTSTRAP 5.3.3 CSS LOCAL -->
+    <link id="bootstrap-css-local" href="./css/bootstrap.min.css" rel="stylesheet">
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let cssCarregado = false;
+            for (let i = 0; i < document.styleSheets.length; i++) {
+                try {
+                    let sheet = document.styleSheets[i];
+                    if (sheet.href && sheet.href.indexOf("bootstrap.min.css") !== -1) {
+                        if (sheet.cssRules && sheet.cssRules.length > 0) {
+                            cssCarregado = true;
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    // Captura restrições de segurança de CORS se houverem
+                }
+            }
+
+            if (!cssCarregado) {
+                alert('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                console.warn('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                
+                let cdn = document.createElement("link");
+                cdn.rel = "stylesheet";
+                cdn.href = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css";
+                cdn.integrity = "sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH";
+                cdn.crossOrigin = "anonymous";
+                document.head.appendChild(cdn);
+            }
+        });
+    </script>
+
+  <style>
+    body { padding-top: 65px !important; }
+    .tabela-scroll{ height:calc(100vh - 300px); overflow-x:auto; overflow-y:auto; }
+    .tabela-scroll table{ min-width:2800px; }
+    html, body { overflow-x: hidden !important; max-width: 100%; }
+  </style>
+
+</head>
+<body class="d-flex flex-column h-100">
+
+  <header>
+
+    <!-- //////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ///////      BARRA DE NAVEGAÇÃO FIXA (NAVBAR) /////////////////////////////////// -->
+    <!-- //////////////////////////////////////////////////////////////////////////////////-->
+
+    <div id="nav-placeholder"></div>
+
+    <!-- ///////////////////////////////////////////////////////////////////////////////// -->
+
+  </header>
+
+  <!-- ///////////////////////////////////////////////////////////////////////////////// -->
+  <!-- Área Principal - Colada na Navbar e sem espaços excessivos -->
+  <!-- ///////////////////////////////////////////////////////////////////////////////// -->
+
+  <main class="container-fluid px-2">
+    <div class="table-container w-100">
+      <div id="barraTituloPJ">
+        <h3 class="bg-success text-white p-2 text-center" style="border-radius: 8px 8px 0 0;">Tabela de Clientes Pessoa Jurídica</h3>
+      </div>
+      
+      <!-- Barra de Controle e Ações Superior Completa -->
+      <div class="sticky-top bg-body pt-2 pb-2 mb-3 border-bottom">
+        <div class="d-flex flex-wrap align-items-center gap-1">
+          &nbsp;&nbsp;
+          <button class="btn btn-sm btn-primary" onclick="novoClientePJ()">🆕 Novo</button>
+          <button class="btn btn-sm btn-secondary" onclick="carregarDadosPJ()">↺ Atualizar</button>
+          <button class="btn btn-sm btn-warning" onclick="baixarJSONPJ()">⬇ JSON</button>
+          <label for="arquivoJSON" class="btn btn-sm btn-info mb-0 text-dark" style="cursor:pointer;">📂 Importar</label>
+          <input id="arquivoJSON" type="file" accept=".json" class="d-none" onchange="importarJSONPJ(event)">
+          <button class="btn btn-sm btn-success" onclick="exportarCSVPJ()">📊 CSV</button>
+          <a href="cadclientesPJ.html" class="btn btn-sm btn-outline-success">📝 Cadastro</a>
+          <span class="badge text-bg-secondary">Total: <strong id="totalRegistros">0</strong></span>
+          <div class="vr mx-2"></div>
+          <div class="input-group input-group-sm ms-auto" style="max-width:380px">
+            <!-- Input Alfanumérico Unificado p/ Pesquisa Avançada -->
+            <input id="inputCNPJ" class="form-control" placeholder="Pesquisar Razão, CNPJ, Rua, Fantasia...">
+            <button class="btn btn-outline-success" onclick="pesquisarCNPJNav(event)">🔍</button>
+            &nbsp;&nbsp;
+          </div>
+        </div>
+      </div>
+
+      <!-- Estrutura Exata da Tabela de Dados (19 Colunas Restauradas) -->
+      <div class="table-container shadow rounded border bg-body">
+        <div class="tabela-scroll">
+          <table id="tabelaClientes" class="table table-striped table-hover table-sm align-middle mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th><th>Ações</th><th>Razão Social</th><th>CNPJ</th><th>Nome Fantasia</th><th>IE</th><th>Responsável</th><th>Telefone</th><th>Celular</th><th>Email</th><th>CEP</th><th>Rua</th><th>Número</th><th>Bairro</th><th>Cidade</th><th>Estado</th><th>Observações</th><th>Cadastro</th><th>Alteração</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyClientes">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const getStoredTheme = () => localStorage.getItem('theme');
+      const setStoredTheme = (tema) => localStorage.setItem('theme', tema);
+      const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const resolveTheme = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+      const aplicarTema = (tema) => {
+        document.documentElement.setAttribute('data-bs-theme', resolveTheme(tema));
+      };
+      const atualizarUI = (tema) => {
+        const botaoPrincipal = document.getElementById('bd-theme');
+        const itemAtivo = document.querySelector(`[data-bs-theme-value="${tema}"]`);
+        if (!botaoPrincipal || !itemAtivo) return;
+        document.querySelectorAll('[data-bs-theme-value]').forEach(el => {
+          el.classList.remove('active');
+          el.setAttribute('aria-pressed', 'false');
+          el.querySelector('.bi.ms-auto')?.classList.add('d-none');
+        });
+        itemAtivo.classList.add('active');
+        itemAtivo.setAttribute('aria-pressed', 'true');
+        itemAtivo.querySelector('.bi.ms-auto')?.classList.remove('d-none');
+        const hrefIcone = itemAtivo.querySelector('svg use')?.getAttribute('href');
+        const iconePrincipal = botaoPrincipal.querySelector('.theme-icon-active use');
+        if (hrefIcone && iconePrincipal) iconePrincipal.setAttribute('href', hrefIcone);
+        botaoPrincipal.setAttribute('aria-label', `Toggle theme (${tema})`);
+      };
+      document.addEventListener('DOMContentLoaded', () => {
+        const temaAtual = getStoredTheme() || 'auto';
+        aplicarTema(temaAtual);
+        atualizarUI(temaAtual);
+        document.querySelectorAll('[data-bs-theme-value]').forEach(botao => {
+          botao.addEventListener('click', () => {
+            const tema = botao.getAttribute('data-bs-theme-value');
+            setStoredTheme(tema);
+            aplicarTema(tema);
+            atualizarUI(tema);
+          });
+        });
+      });
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if ((getStoredTheme() || 'auto') === 'auto') aplicarTema('auto');
+      });
+    })();
+  </script>
+
+  <script>
+    const STORAGE_KEY = "PDV_CLIENTES_PJ";
+    const EDIT_KEY = "CLIENTE_PJ_EDITAR";
+
+    console.log("[tabCliente] chave:", STORAGE_KEY);
+    console.log("[tabCliente] raw :", localStorage.getItem(STORAGE_KEY));
+
+    function getClientes() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
+    }
+
+    function saveClientes(lista) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+    }
+
+    function formatarData(iso) {
+      if (!iso) return "—";
+      const d = new Date(iso.includes("T") ? iso : iso + "T00:00:00");
+      if (isNaN(d)) return iso;
+      return d.toLocaleDateString("pt-BR");
+    }
+
+    function escaparHTML(str) {
+      if (str == null) return "";
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function renderizarTabela(lista) {
+      const tbody = document.getElementById("tbodyClientes");
+      const totalEl = document.getElementById("totalRegistros");
+      totalEl.textContent = lista.length;
+      if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="19" class="text-center text-muted py-4">Nenhum cliente cadastrado. <a href="cadclientesPJ.html" class="ms-2">Cadastrar agora →</a></td></tr>`;
+        return;
+      }
+      tbody.innerHTML = lista.map((c) => `
+        <tr>
+          <td>${escaparHTML(c.id)}</td>
+          <td class="text-nowrap">
+            <button class="btn btn-sm btn-success py-0 px-1 me-1" title="Editar" onclick="editarCliente(${Number(c.id)})">✏️ Editar</button>
+            <button class="btn btn-sm btn-danger py-0 px-1 me-1" title="Excluir" onclick="excluirCliente(${Number(c.id)})">🗑️ Deletar</button>
+          </td>
+          <td style="min-width:250px">${escaparHTML(c.razaoSocial)}</td>
+          <td style="min-width:180px">${escaparHTML(c.cnpj)}</td>
+          <td>${escaparHTML(c.nomeFantasia)}</td>
+          <td>${escaparHTML(c.ie)}</td>
+          <td>${escaparHTML(c.nomeResponsavel)}</td>
+          <td style="min-width:120px">${escaparHTML(c.telefone)}</td>
+          <td style="min-width:140px">${escaparHTML(c.celular)}</td>
+          <td>${escaparHTML(c.email)}</td>
+          <td style="min-width:110px">${escaparHTML(c.cep)}</td>
+          <td style="min-width:200px">${escaparHTML(c.rua)}</td>
+          <td>${escaparHTML(c.numero)}</td>
+          <td>${escaparHTML(c.bairro)}</td>
+          <td>${escaparHTML(c.cidade)}</td>
+          <td>${escaparHTML(c.estado)}</td>
+          <td class="text-truncate" style="max-width:150px" title="${escaparHTML(c.observacoes)}">${escaparHTML(c.observacoes)}</td>
+          <td class="text-nowrap">${formatarData(c.dataCadastro)}</td>
+          <td class="text-nowrap">${formatarData(c.dataAlteracao)}</td>
+        </tr>`).join("");
+    }
+  function carregarDadosPJ() {
+    const termo = (document.getElementById("inputCNPJ")?.value || "").toLowerCase().trim();
+    let lista = getClientes();
+    if (termo) {
+      lista = lista.filter((c) => {
+        // Texto livre (Conceito SQL LIKE)
+        const razaoMatch = c.razaoSocial && c.razaoSocial.toLowerCase().includes(termo);
+        const fantasiaMatch = c.nomeFantasia && c.nomeFantasia.toLowerCase().includes(termo);
+        const ruaMatch = c.rua && c.rua.toLowerCase().includes(termo);
+        const emailMatch = c.email && c.email.toLowerCase().includes(termo);
+        
+        // Chaves Numéricas (Identidade Exata)
+        const termoLimpo = termo.replace(/\D/g, "");
+        const cnpjLimpo = c.cnpj ? c.cnpj.replace(/\D/g, "") : "";
+        const cnpjMatch = termoLimpo && cnpjLimpo === termoLimpo;
+        
+        const dataFormatada = c.dataAbertura ? formatarData(c.dataAbertura) : "";
+        const dataMatch = dataFormatada && (dataFormatada === termo || c.dataAbertura === termo);
+        
+        return razaoMatch || fantasiaMatch || ruaMatch || emailMatch || cnpjMatch || dataMatch;
+      });
+    }
+    renderizarTabela(lista);
+  }
+
+  function editarCliente(id) {
+    const lista = getClientes();
+    const cliente = lista.find((c) => Number(c.id) === Number(id));
+    if (!cliente) {
+      alert("Cliente não encontrado.");
+      return;
+    }
+    localStorage.setItem(EDIT_KEY, JSON.stringify(cliente));
+    window.location.href = "cadclientesPJ.html";
+  }
+
+  function excluirCliente(id) {
+    const lista = getClientes();
+    const cliente = lista.find((c) => Number(c.id) === Number(id));
+    const razao = cliente?.razaoSocial || "—";
+    const cnpj = cliente?.cnpj || "—";
+    if (!confirm(`Excluir o cliente?\n\nRazão Social: ${razao}\nCNPJ: ${cnpj}\n\nEsta ação não pode ser desfeita.`)) return;
+    saveClientes(lista.filter((c) => Number(c.id) !== Number(id)));
+    carregarDadosPJ();
+  }
+
+  function novoClientePJ() {
+    localStorage.removeItem(EDIT_KEY);
+    window.location.href = "cadclientesPJ.html";
+  }
+
+  function exportarCSVPJ() {
+    const lista = getClientes();
+    if (lista.length === 0) {
+      alert("Nenhum cliente para exportar.");
+      return;
+    }
+    const cab = ["ID","Razão Social","CNPJ","Data Abertura","IE","Nome Responsável","Telefone","Celular","Email","CEP","Rua","Número","Bairro","Cidade","Estado","Observações","Cadastro","Alteração"];
+    const rows = lista.map((c) => [c.id, c.razaoSocial, c.cnpj, c.dataAbertura, c.ie, c.nomeResponsavel, c.telefone, c.celular, c.email, c.cep, c.rua, c.numero, c.bairro, c.cidade, c.estado, c.observacoes, c.dataCadastro, c.dataAlteracao]
+      .map((v) => `"${String(v??'').replace(/"/g,'""')}"`)
+      .join(";")
+    );
+    const csv = [cab.map(h=>`"${h}"`).join(";"), ...rows].join("\r\n");
+    const blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement("a"), {href:url, download:`clientesPJ_${new Date().toISOString().slice(0,10)}.csv`});
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function baixarJSONPJ() {
+    const lista = getClientes();
+    if (lista.length === 0) {
+      alert("Nenhum cliente para baixar.");
+      return;
+    }
+    const blob = new Blob([JSON.stringify(lista,null,2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement("a"), {href:url, download:`clientesPJ_${new Date().toISOString().slice(0,10)}.json` });
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /* function importarJSONPF(event) {
+    importarJSONPJ(event);
+  } */
+
+  function importarJSONPJ(event) {
+    const file = event.target.files;
+    if (!file || file.length === 0) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const dados = JSON.parse(e.target.result);
+        if (!Array.isArray(dados)) throw new Error("O JSON não é uma lista de clientes.");
+        const existentes = getClientes();
+        let maiorId = existentes.reduce((max, c) => Math.max(max, Number(c.id) || 0), 0);
+        const idsMap = new Map(existentes.map((c, idx) => [Number(c.id), idx]));
+        let add = 0, upd = 0;
+        dados.forEach(novo => {
+          const clienteNormalizado = {
+            id: novo.id ? Number(novo.id) : null,
+            razaoSocial: novo.razaoSocial || novo.razao || novo.nomeCompleto || novo.nome || "",
+            cnpj: novo.cnpj || "",
+            nomeFantasia: novo.nomeFantasia || novo.fantasia || "",
+            ie: novo.ie || novo.inscricaoEstadual || "",
+            nomeResponsavel: novo.nomeResponsavel || novo.responsavel || "",
+            cargo: novo.cargo || "",
+            porte: novo.porte || "",
+            regimeTributario: novo.regimeTributario || "",
+            telefone: novo.telefone || "",
+            celular: novo.celular || "",
+            email: novo.email || "",
+            cep: novo.cep || "",
+            rua: novo.rua || novo.endereco || "",
+            numero: novo.numero || "",
+            bairro: novo.bairro || "",
+            cidade: novo.cidade || "",
+            estado: novo.estado || "",
+            observacoes: novo.observacoes || novo.obs || "",
+            dataAbertura: novo.dataAbertura || "",
+            dataCadastro: novo.dataCadastro || new Date().toISOString(),
+            dataAlteracao: novo.dataAlteracao || new Date().toISOString()
+          };
+          if (!clienteNormalizado.id) {
+            maiorId++;
+            clienteNormalizado.id = maiorId;
+          }
+          if (idsMap.has(clienteNormalizado.id)) {
+            const idx = idsMap.get(clienteNormalizado.id);
+            existentes[idx] = { ...existentes[idx], ...clienteNormalizado };
+            upd++;
+          } else {
+            existentes.push(clienteNormalizado);
+            idsMap.set(clienteNormalizado.id, existentes.length - 1);
+            add++;
+          }
+        });
+        saveClientes(existentes);
+        carregarDadosPJ();
+        alert(`Importação concluída!\n\n✅ Adicionados: ${add}\n🔄 Atualizados: ${upd}`);
+      } catch(err) {
+        alert("Erro ao importar JSON:\n" + err.message);
+      } finally {
+        event.target.value = "";
+      }
+    };
+    reader.readAsText(file[0], "UTF-8");
+  }
+
+  ////////////////////////////////////////////////////////////////
+  // PESQUISA AVANÇADA MULTICAMPOS (Razão, CNPJ, Rua, Fantasia)
+  ////////////////////////////////////////////////////////////////
+
+    function pesquisarCNPJNav(event) {
+      if (event) event.preventDefault();
+      carregarDadosPJ();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("PDV_HABILITADO") !== "1") {
+        alert("Acesso negado! Por favor, realize o login.");
+        window.location.href = "index.html";
+        return;
+      }
+
+      carregarDadosPJ();
+      document.getElementById("inputCNPJ")?.addEventListener("input", carregarDadosPJ);
+    });
+
+    window.addEventListener("pageshow", (event) => {
+      if (event.persisted) {
+        carregarDadosPJ();
+      }
+    });
+  </script>
+
+  <div class="modal fade" id="modalCPFNav" tabindex="-1" aria-labelledby="modalCPFNavLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title" id="modalCPFNavLabel">Resultado da Pesquisa de Clientes</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="modalCPFNavBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- //////////////////////////////////////////////////////// -->
+    <!-- RODAPÉ FIXO (FOOTER) -->
+    <!-- //////////////////////////////////////////////////////// -->
+
+    <div id="footer-placeholder"></div>
+
+    <!-- /////////////////////////////////////////// -->
+    <!-- DEPENDÊNCIAS DE SCRIPTS DO ECOSSISTEMA CORE -->
+    <!-- /////////////////////////////////////////// -->
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // CORREÇÃO: Fallback estável apontando para o arquivo completo do Bootstrap JS na jDelivr oficial
+        if (typeof bootstrap === 'undefined') {
+            alert('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            console.warn('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            document.write('src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');
+        }
+    </script>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- iNCLUDE PARA USART HTML EXTERNO -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/include.js"></script>
+    
+<!-- //////////////////////////////////////////////////////// -->
+<!-- Script de proteção global -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/autenticacao.js"></script>
+
+
+</body>
+</html>

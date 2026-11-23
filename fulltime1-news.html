@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jornal - Grid Completo</title>
+
+    <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+    <!-- SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3 -->
+    <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+    <script src="./js/color-modes.js"></script>
+
+    <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+    <!-- Bootstrap CSS v5.3.8 -->
+    <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+            
+    <!-- <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+        crossorigin="anonymous"
+    /> -->
+    <meta name="theme-color" content="#712cf9" />
+
+    <style>
+        /* Importação corrigida das fontes do Google */
+        @import url('https://googleapis.com');
+        
+        body {
+            background-color: #fdfbf7;
+            font-family: 'Texturina', serif;
+            color: #111;
+        }
+        /* Cabeçalho Horizontal do Jornal Tradicional */
+        .cabecalho-jornal {
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            border-top: 4px double #000;
+            border-bottom: 4px double #000;
+            letter-spacing: 6px;
+        }
+        /* Estilização dos títulos das matérias */
+        .titulo-materia {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        /* Alinhamento justificado clássico de jornais */
+        .texto-jornal {
+            text-align: justify;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        /* Divisória vertical entre as matérias */
+        .coluna-materia {
+            border-right: 1px solid #ddd;
+        }
+        @media (max-width: 991.98px) {
+            .coluna-materia {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 1.5rem;
+            }
+        }
+        .coluna-materia:last-child {
+            border-right: none;
+            border-bottom: none;
+        }
+    </style>
+</head>
+
+    <!-- //////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ///////      BARRA DE NAVEGAÇÃO FIXA (NAVBAR) /////////////////////////////////// -->
+    <!-- //////////////////////////////////////////////////////////////////////////////////-->
+
+    <div id="nav-placeholder"></div>
+
+    <!-- ///////////////////////////////////////////////////////////////////////////////// -->
+
+<body>
+
+    <div class="container my-4 px-4">
+        <!-- 1. Cabeçalho Horizontal (Ocupa a largura total no topo) -->
+        <header class="row mb-5">
+            <div class="col-12">
+                <div class="cabecalho-jornal py-4">
+                    <br>
+                    <h1 class="display-3 m-0 fw-bold text-uppercase">O Diário Nacional</h1>
+                    <div class="d-flex justify-content-between px-2 mt-2 border-top pt-2 small text-gray">
+                        <span>Edição Nº 1.234</span>
+                        <span class="text-uppercase fw-bold">Capa Principal</span>
+                        <span>Quarta-feira, 20 de Maio de 2026</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. Área das Matérias (Dividida em 3 colunas horizontais) -->
+        <main class="row g-4">
+            
+            <!-- MATÉRIA 1 -->
+            <article class="col-lg-4 coluna-materia">
+                <h2 class="h3 titulo-materia">Crise climática exige novas metas globais imediatas</h2>
+                
+                <!-- Grid interno: Foto na esquerda (col-6), Texto na direita (col-6) -->
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <img src="./imagens/Materias/materia1.jpg" class="img-fluid border" alt="Imagem da matéria 1">
+                    </div>
+                    <div class="col-6">
+                        <p class="texto-jornal fw-bold">Líderes mundiais se reúnem em conferência de emergência para discutir o avanço do aquecimento global.</p>
+                    </div>
+                </div>
+                
+                <!-- Continuação do texto ocupando a largura total da matéria abaixo -->
+                <div class="row">
+                    <div class="col-12">
+                        <p class="texto-jornal">Os novos relatórios apontam que as temperaturas médias subiram mais rápido do que o previsto na última década. Especialistas alertam que medidas drásticas precisam ser tomadas na indústria automobilística e no setor de geração de energia fóssil para evitar o colapso estrutural nas próximas gerações.</p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- MATÉRIA 2 -->
+            <article class="col-lg-4 coluna-materia">
+                <h2 class="h3 titulo-materia">Avanço da Inteligência Artificial transforma o mercado</h2>
+                
+                <!-- Grid interno: Foto na esquerda, Texto na direita -->
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <img src="./imagens/Materias/materia2.jpg" class="img-fluid border" alt="Imagem da matéria 2">
+                    </div>
+                    <div class="col-6">
+                        <p class="texto-jornal fw-bold">Automação de processos atinge novos setores e cria demanda por novas profissões tecnológicas.</p>
+                    </div>
+                </div>
+                
+                <!-- Continuação do texto -->
+                <div class="row">
+                    <div class="col-12">
+                        <p class="texto-jornal">Empresas que adotaram sistemas inteligentes registraram um aumento significativo de produtividade. No entanto, sindicatos debatem o impacto social da substituição de mão de obra e cobram programas governamentais de requalificação técnica para trabalhadores afetados pelo avanço rápido das tecnologias de código.</p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- MATÉRIA 3 -->
+            <article class="col-lg-4 coluna-materia">
+                <h2 class="h3 titulo-materia">Turismo espacial ganha força com novos voos comerciais</h2>
+                
+                <!-- Grid interno: Foto na esquerda, Texto na direita -->
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <img src="./imagens/Materias/materia3.jpg" class="img-fluid border" alt="Imagem da matéria 3">
+                    </div>
+                    <div class="col-6">
+                        <p class="texto-jornal fw-bold">Três empresas privadas disputam a liderança nas viagens de órbita curta para civis.</p>
+                    </div>
+                </div>
+                
+                <!-- Continuação do texto -->
+                <div class="row">
+                    <div class="col-12">
+                        <p class="texto-jornal">O custo para sair da atmosfera terrestre caiu cerca de 40% em relação aos primeiros testes realizados. Apesar dos preços ainda proibitivos para a maior parte da população, bilionários preenchem listas de espera que já se estendem pelos próximos cinco anos, consolidando um mercado antes considerado ficção científica.</p>
+                    </div>
+                </div>
+            </article>
+
+        </main>
+    </div>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- RODAPÉ FIXO (FOOTER) -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <div id="footer-placeholder"></div>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- Bootstrap JS Bundle -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- iNCLUDE PARA USART HTML EXTERNO -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/include.js"></script>
+
+</body>
+
+</html>

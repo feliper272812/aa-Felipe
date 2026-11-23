@@ -1,0 +1,45 @@
+[
+  {
+    "id": "1",
+    "cliente": "Sara Cougo",
+    "itens": [
+      {
+        "descricao": "Formatação de PC",
+        "quantidade": 1,
+        "valorUnitario": 150
+      },
+      {
+        "descricao": "Instalação de HD",
+        "quantidade": 1,
+        "valorUnitario": 200
+      },
+      {
+        "descricao": "Troca de conector de fonte",
+        "quantidade": 1,
+        "valorUnitario": 120
+      }
+    ],
+    "valorTotal": 470,
+    "dataAlteracao": "2026-10-06T12:47:58.624Z",
+    "dataCadastro": "2026-10-06T12:47:25.656Z"
+  },
+  {
+    "id": "2",
+    "cliente": "André Piffer",
+    "itens": [
+      {
+        "descricao": "Instalação de câmera IP",
+        "quantidade": 3,
+        "valorUnitario": 50
+      },
+      {
+        "descricao": "Configuração de PC",
+        "quantidade": 1,
+        "valorUnitario": 50
+      }
+    ],
+    "valorTotal": 200,
+    "dataAlteracao": "2026-10-07T19:03:02.437Z",
+    "dataCadastro": "2026-10-07T19:03:02.437Z"
+  }
+]

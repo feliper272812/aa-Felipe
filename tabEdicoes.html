@@ -1,0 +1,795 @@
+<!-- =========================================================
+  ARQUIVO: tabEdicoes.html
+
+  LISTAGEM DE EDIÇÕES DO JORNAL CONSTANTINO NEWS
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+  Dados: NewsDados (./js/news-dados.js)
+  - NEWS_EDICOES       : lista de edições (cada edição guarda as próprias matérias)
+  - NEWS_EDICAO_ATIVA  : id da edição que o tabMaterias.html / cadMaterias.html deve abrir
+
+  Autor: Felipe Rodrigues - FullTime Technology
+========================================================= -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edições - Constantino News</title>
+
+<!-- ////////////////////////////////////////////////////////////////////////////////// -->
+<!-- SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3 -->
+<!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <script src="./js/color-modes.js"></script>
+
+        <script>
+            if (!document.documentElement.hasAttribute('data-bs-theme')) {
+                alert('./js/color-modes.js local não carregou. Usando CDN como reserva.');
+                console.warn('color-modes.js local não carregou. Usando CDN como reserva.');
+
+                const scriptTheme = document.createElement('script');
+                scriptTheme.src = 'https://jsdelivr.net';
+                document.head.appendChild(scriptTheme);
+            }
+        </script>
+
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- BOOTSTRAP 5.3.3 CSS LOCAL -->
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <link id="bootstrap-css-local" href="./css/bootstrap.min.css" rel="stylesheet">
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                let cssCarregado = false;
+                for (let i = 0; i < document.styleSheets.length; i++) {
+                    try {
+                        let sheet = document.styleSheets[i];
+                        if (sheet.href && sheet.href.indexOf("bootstrap.min.css") !== -1) {
+                            if (sheet.cssRules && sheet.cssRules.length > 0) {
+                                cssCarregado = true;
+                                break;
+                            }
+                        }
+                    } catch (e) {
+                        // Captura restrições de segurança de CORS se houverem
+                    }
+                }
+
+                if (!cssCarregado) {
+                    alert('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                    console.warn('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+
+                    let cdn = document.createElement("link");
+                    cdn.rel = "stylesheet";
+                    cdn.href = "https://jsdelivr.net";
+                    cdn.integrity = "sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH";
+                    cdn.crossOrigin = "anonymous";
+                    document.head.appendChild(cdn);
+                }
+            });
+        </script>
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- CONTROLE DE TEMA IMEDIATO (Renderização ultrarrápida antes do carregamento do DOM) -->
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <script>
+            (() => {
+                const getStoredTheme = () => localStorage.getItem('theme');
+                const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                const resolveTheme = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+                document.documentElement.setAttribute('data-bs-theme', resolveTheme(getStoredTheme() || 'auto'));
+            })();
+        </script>
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+  <style>
+
+    /* Espaço para a NAV fixa do sistema (56px) */
+    body { padding-top: 56px; }
+
+    #nav-sistema-placeholder {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 56px;
+      z-index: 1050;
+    }
+
+    /* Toolbar fica colada logo abaixo da NAV */
+    .toolbar-cad { top: 56px; z-index: 1020; }
+
+    .tabela-edicoes thead th { white-space: nowrap; }
+    .tabela-edicoes td { vertical-align: middle; }
+
+    .titulo-edicao { min-width: 220px; max-width: 420px; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV DO SISTEMA (injetada pelo include.js) -->
+  <div id="nav-sistema-placeholder"></div>
+
+  <!-- ── TOOLBAR ─────────────────────────────────────────────── -->
+  <div class="bg-body-tertiary border-bottom sticky-top toolbar-cad">
+    <div class="container-fluid px-4 py-2 d-flex flex-wrap align-items-center gap-2">
+      <button type="button" id="btnNova" class="btn btn-sm btn-outline-success">🆕 Nova edição</button>
+
+      <span class="vr"></span>
+
+      <button type="button" id="btnExportar" class="btn btn-sm btn-outline-secondary">⬇ JSON</button>
+      <button type="button" id="btnImportar" class="btn btn-sm btn-outline-secondary">📂 Importar</button>
+      <input type="file" id="inputImportar" accept=".json,application/json" hidden />
+
+      <div class="input-group input-group-sm ms-auto" style="max-width: 320px;">
+        <input type="search" id="campoBusca" class="form-control" placeholder="Buscar por título, nº, data ou responsável" aria-label="Buscar edição" />
+        <button type="button" id="btnBuscar" class="btn btn-outline-success" title="Buscar">🔍</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTEÚDO ────────────────────────────────────────────── -->
+  <main class="container-fluid px-4 py-3">
+
+    <h1 class="h3 text-success mb-1">Edições</h1>
+    <p class="text-body-secondary small mb-3">
+      Cada edição reúne as matérias das três colunas do Constantino News. Só pode haver uma edição <strong>Editando</strong> por vez;
+      ao <strong>Fechar</strong>, ela fica pronta para publicação. Os dados ficam salvos neste navegador.
+    </p>
+
+    <div id="alerta" class="alert d-none" role="alert"></div>
+
+    <!-- Filtros -->
+    <div class="row g-2 align-items-end mb-3">
+      <div class="col-6 col-md-2">
+        <label for="filtroStatus" class="form-label small mb-1">Status</label>
+        <select id="filtroStatus" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          <option value="Editando">Editando</option>
+          <option value="Fechada">Fechada</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-auto ms-md-auto">
+        <span id="contador" class="small text-body-secondary"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle mb-0 tabela-edicoes">
+          <thead class="table-light">
+            <tr>
+              <th scope="col" class="text-center">Nº</th>
+              <th scope="col">Data</th>
+              <th scope="col">Título</th>
+              <th scope="col" class="text-center">Status</th>
+              <th scope="col">Matérias</th>
+              <th scope="col">Responsável</th>
+              <th scope="col">Atualizada em</th>
+              <th scope="col">Fechada em</th>
+              <th scope="col">Arquivo</th>
+              <th scope="col" class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="corpoTabela"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── MODAL: NOVA EDIÇÃO / DADOS DA EDIÇÃO ────────────────── -->
+  <div class="modal fade" id="modalEdicao" tabindex="-1" aria-labelledby="tituloModalEdicao" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-5 text-success" id="tituloModalEdicao">Nova edição</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div id="edErro" class="alert alert-danger py-2 d-none" role="alert"></div>
+          <form id="formEdicao" novalidate>
+            <input type="hidden" id="edId" />
+            <div class="row g-3">
+              <div class="col-5 col-md-4">
+                <label for="edNumero" class="form-label">Nº *</label>
+                <input type="number" id="edNumero" class="form-control" min="1" step="1" />
+              </div>
+              <div class="col-7 col-md-8">
+                <label for="edData" class="form-label">Data da edição *</label>
+                <input type="date" id="edData" class="form-control" />
+              </div>
+              <div class="col-12">
+                <label for="edTitulo" class="form-label">Título</label>
+                <input type="text" id="edTitulo" class="form-control" maxlength="120" />
+                <div class="form-text">Se ficar em branco, usa "Edição de dd/mm/aaaa".</div>
+              </div>
+              <div class="col-12">
+                <label for="edResponsavel" class="form-label">Responsável</label>
+                <input type="text" id="edResponsavel" class="form-control" maxlength="120" placeholder="Ex.: Felipe Rodrigues" />
+              </div>
+              <div class="col-12">
+                <label for="edObservacao" class="form-label">Observação</label>
+                <textarea id="edObservacao" class="form-control" rows="2" maxlength="400"></textarea>
+              </div>
+              <div class="col-12">
+                <div class="form-text">Arquivo da edição: <code id="edArquivo"></code></div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" form="formEdicao" id="btnSalvarEdicao" class="btn btn-success">💾 Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL DE CONFIRMAÇÃO (fechar / reabrir / excluir) ───── -->
+  <div class="modal fade" id="modalConfirmar" tabindex="-1" aria-labelledby="confTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-5" id="confTitulo"></h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body" id="confCorpo"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="btnConfirmar" class="btn btn-primary">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- //////////////////////////////////////////////////////// -->
+<!-- Camada de dados do Constantino News -->
+<!-- //////////////////////////////////////////////////////// -->
+<script src="./js/news-dados.js"></script>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- Script de global -->
+<!-- //////////////////////////////////////////////////////// -->
+  <script>
+  (() => {
+    'use strict';
+
+    const EDITANDO = 'Editando';
+    const FECHADA  = 'Fechada';
+
+    const $ = (id) => document.getElementById(id);
+    let timerAlerta = null;
+    let acaoConfirmada = null;
+
+    // ── Armazenamento unificado via NewsDados ───────────────
+    const lerEdicoes = () => NewsDados.lerEdicoes();
+
+    function gravarEdicoes(lista) {
+      if (!NewsDados.gravarEdicoes(lista)) {
+        mostrarAlerta('danger', 'Não foi possível gravar os dados. O armazenamento do navegador pode estar cheio.');
+        return false;
+      }
+      return true;
+    }
+
+    // ── Datas e utilidades ──────────────────────────────────
+    function nomeArquivo(iso) { return 'edicao-' + NewsDados.ddmmaaaa(iso) + '.html'; }
+    function tituloPadrao(iso) { return 'Edição de ' + NewsDados.dataBR(iso); }
+
+    function mostrarAlerta(tipo, texto) {
+      const el = $('alerta');
+      el.className = 'alert alert-' + tipo;
+      el.textContent = texto;
+      clearTimeout(timerAlerta);
+      if (tipo === 'success' || tipo === 'info') {
+        timerAlerta = setTimeout(() => el.classList.add('d-none'), 7000);
+      }
+    }
+
+    function esc(texto) {
+      return String(texto == null ? '' : texto)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function normalizar(texto) {
+      return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    const statusDe = (e) => (e && e.status === FECHADA ? FECHADA : EDITANDO);
+    const tituloDe = (e) => String((e && (e.titulo || e.nome)) || '').trim() || tituloPadrao(e && e.data);
+
+    // ── Regras de edição ────────────────────────────────────
+    function proximoNumero(edicoes) {
+      return (edicoes.length ? Math.max(...edicoes.map(e => Number(e.numero) || 0)) : 0) + 1;
+    }
+
+    function edicaoAberta(edicoes, ignorarId) {
+      return edicoes.find(e => statusDe(e) === EDITANDO && String(e.id) !== String(ignorarId || ''));
+    }
+
+    function novaEdicao(edicoes, data) {
+      const agora = new Date().toISOString();
+      return {
+        id: NewsDados.gerarId('edi'),
+        numero: proximoNumero(edicoes),
+        data: data,
+        nome: tituloPadrao(data),
+        titulo: tituloPadrao(data),
+        status: EDITANDO,
+        responsavel: '',
+        observacao: '',
+        arquivo: nomeArquivo(data),
+        criadoEm: agora,
+        atualizadoEm: agora,
+        fechadaEm: '',
+        materias: []
+      };
+    }
+
+    function resumoMaterias(edicao) {
+      const doc = Array.isArray(edicao.materias) ? edicao.materias : [];
+      const ativas = doc.filter(m => m.status !== 'Inativo');
+      const porColuna = { 1: 0, 2: 0, 3: 0 };
+      ativas.forEach(m => { if (porColuna[m.coluna] != null) porColuna[m.coluna]++; });
+      return {
+        total: doc.length,
+        ativas: ativas.length,
+        inativas: doc.length - ativas.length,
+        porColuna: porColuna,
+        manchete: ativas.some(m => m.tipo === 'manchete')
+      };
+    }
+
+    // ── Tabela ──────────────────────────────────────────────
+    function filtrarEdicoes() {
+      const termo = normalizar($('campoBusca').value.trim());
+      const status = $('filtroStatus').value;
+
+      return lerEdicoes()
+        .filter(e => !status || statusDe(e) === status)
+        .filter(e => !termo || normalizar([e.numero, tituloDe(e), NewsDados.dataBR(e.data), e.responsavel, e.observacao].join(' ')).includes(termo))
+        .sort((a, b) => String(b.data).localeCompare(String(a.data)) || (Number(b.numero) - Number(a.numero)));
+    }
+
+    function botao(acao, id, classe, texto, titulo) {
+      return '<button type="button" class="btn btn-sm ' + classe + ' me-1" data-acao="' + acao + '" data-id="' + esc(id) + '" title="' + esc(titulo) + '">' + texto + '</button>';
+    }
+
+    function linhaEdicao(e) {
+      const fechada = statusDe(e) === FECHADA;
+      const r = resumoMaterias(e);
+      const tit = tituloDe(e);
+
+      let textoMaterias = '<span class="text-body-secondary">Sem matérias</span>';
+      if (r.total) {
+        textoMaterias = '<div><strong>' + r.ativas + '</strong> ativa(s)' +
+          (r.inativas ? ' <span class="text-body-secondary">· ' + r.inativas + ' inativa(s)</span>' : '') + '</div>' +
+          '<div class="small text-body-secondary">C1: ' + r.porColuna[1] + ' · C2: ' + r.porColuna[2] + ' · C3: ' + r.porColuna[3] + '</div>';
+      }
+
+      const acoes = fechada
+        ? botao('materias', e.id, 'btn-outline-primary', '👁️ Ver matérias', 'Ver as matérias desta edição') +
+          botao('exportar-uma', e.id, 'btn-outline-secondary', '⬇ JSON', 'Exportar esta edição') +
+          botao('reabrir', e.id, 'btn-outline-warning', '🔓 Reabrir', 'Voltar a edição para "Editando"') +
+          '<button type="button" class="btn btn-sm btn-outline-danger" disabled title="Reabra a edição para poder excluir">🗑️ Excluir</button>'
+        : botao('materias', e.id, 'btn-outline-primary', '📝 Matérias', 'Cadastrar/editar as matérias desta edição') +
+          botao('dados', e.id, 'btn-outline-secondary', '✏️ Dados', 'Editar os dados da edição') +
+          botao('fechar', e.id, 'btn-outline-warning', '🔒 Fechar', 'Fechar a edição') +
+          botao('excluir', e.id, 'btn-outline-danger', '🗑️ Excluir', 'Excluir a edição e suas matérias');
+
+      return '<tr>' +
+        '<td class="text-center fw-semibold">' + esc(e.numero || '—') + '</td>' +
+        '<td class="text-nowrap">' + esc(NewsDados.dataBR(e.data)) + '</td>' +
+        '<td class="titulo-edicao"><div class="fw-semibold">' + esc(tit) + '</div>' +
+          (e.observacao ? '<div class="small text-body-secondary">' + esc(e.observacao) + '</div>' : '') + '</td>' +
+        '<td class="text-center"><span class="badge ' + (fechada ? 'text-bg-success' : 'text-bg-warning') + '">' + (fechada ? FECHADA : EDITANDO) + '</span></td>' +
+        '<td>' + textoMaterias + '</td>' +
+        '<td>' + esc(e.responsavel || '') + '</td>' +
+        '<td class="text-nowrap small">' + esc(NewsDados.dataHoraBR(e.atualizadoEm)) + '</td>' +
+        '<td class="text-nowrap small">' + esc(fechada ? NewsDados.dataHoraBR(e.fechadaEm) : '') + '</td>' +
+        '<td><code class="small">' + esc(e.arquivo || nomeArquivo(e.data)) + '</code></td>' +
+        '<td class="text-end text-nowrap">' + acoes + '</td>' +
+      '</tr>';
+    }
+
+    function renderTabela() {
+      const total = lerEdicoes().length;
+      const lista = filtrarEdicoes();
+      const corpo = $('corpoTabela');
+
+      if (!total) {
+        corpo.innerHTML = '<tr><td colspan="10" class="text-center text-body-secondary py-4">' +
+          'Nenhuma edição criada ainda. Clique em <strong>🆕 Nova edição</strong> para começar ou em <strong>📂 Importar</strong> para carregar um JSON.</td></tr>';
+      } else if (!lista.length) {
+        corpo.innerHTML = '<tr><td colspan="10" class="text-center text-body-secondary py-4">Nenhuma edição encontrada com esses filtros.</td></tr>';
+      } else {
+        corpo.innerHTML = lista.map(e => linhaEdicao(e)).join('');
+      }
+
+      $('contador').textContent = total
+        ? (lista.length === total ? total + ' edição(ões)' : lista.length + ' de ' + total + ' edição(ões)')
+        : '';
+    }
+    // ── Modal de confirmação genérico ───────────────────────
+    function abrirConfirmacao(opcoes) {
+      $('confTitulo').textContent = opcoes.titulo;
+      $('confTitulo').className = 'modal-title fs-5 ' + (opcoes.classeTitulo || '');
+      $('confCorpo').innerHTML = opcoes.html;
+      $('btnConfirmar').textContent = opcoes.textoBotao;
+      $('btnConfirmar').className = 'btn ' + (opcoes.classeBotao || 'btn-primary');
+      acaoConfirmada = opcoes.aoConfirmar;
+      bootstrap.Modal.getOrCreateInstance($('modalConfirmar')).show();
+    }
+
+    function aoConfirmar() {
+      const acao = acaoConfirmada;
+      acaoConfirmada = null;
+      bootstrap.Modal.getOrCreateInstance($('modalConfirmar')).hide();
+      if (acao) acao();
+    }
+
+    // ── Nova edição / dados da edição ───────────────────────
+    function atualizarPrevisaoArquivo() {
+      const data = $('edData').value;
+      $('edArquivo').textContent = NewsDados.dataValida(data) ? nomeArquivo(data) : '—';
+      $('edTitulo').placeholder = NewsDados.dataValida(data) ? tituloPadrao(data) : '';
+    }
+
+    function erroModal(texto) {
+      $('edErro').textContent = texto;
+      $('edErro').classList.remove('d-none');
+    }
+
+    function abrirModalEdicao(id) {
+      const edicoes = lerEdicoes();
+      const e = id ? edicoes.find(x => String(x.id) === String(id)) : null;
+
+      if (!e) {
+        const aberta = edicaoAberta(edicoes);
+        if (aberta) {
+          mostrarAlerta('warning', 'Já existe uma edição em andamento: "' + tituloDe(aberta) + '" (nº ' + (aberta.numero || '?') + '). Feche-a antes de criar outra.');
+          return;
+        }
+      }
+
+      $('edErro').classList.add('d-none');
+      $('edId').value = e ? e.id : '';
+      $('edNumero').value = e ? (e.numero || proximoNumero(edicoes)) : proximoNumero(edicoes);
+      $('edData').value = e ? e.data : NewsDados.hojeISO();
+      $('edTitulo').value = e ? (e.titulo || e.nome || '') : '';
+      $('edResponsavel').value = e ? (e.responsavel || '') : '';
+      $('edObservacao').value = e ? (e.observacao || '') : '';
+      $('tituloModalEdicao').textContent = e ? 'Dados da edição' : 'Nova edição';
+      atualizarPrevisaoArquivo();
+      bootstrap.Modal.getOrCreateInstance($('modalEdicao')).show();
+    }
+
+    function salvarEdicao(event) {
+      event.preventDefault();
+      const edicoes = lerEdicoes();
+      const id = $('edId').value;
+      const numero = parseInt($('edNumero').value, 10);
+      const data = $('edData').value;
+
+      if (!(numero >= 1)) return erroModal('Informe o número da edição (1 ou mais).');
+      if (!NewsDados.dataValida(data)) return erroModal('Informe a data da edição.');
+      if (edicoes.some(e => String(e.id) !== String(id) && e.data === data)) {
+        return erroModal('Já existe uma edição em ' + NewsDados.dataBR(data) + ' (o arquivo ' + nomeArquivo(data) + ' seria o mesmo).');
+      }
+      if (edicoes.some(e => String(e.id) !== String(id) && Number(e.numero) === numero)) {
+        return erroModal('Já existe a edição nº ' + numero + '.');
+      }
+
+      const agora = new Date().toISOString();
+      const tituloFinal = $('edTitulo').value.trim() || tituloPadrao(data);
+      const campos = {
+        numero: numero,
+        data: data,
+        nome: tituloFinal,
+        titulo: tituloFinal,
+        responsavel: $('edResponsavel').value.trim(),
+        observacao: $('edObservacao').value.trim(),
+        arquivo: nomeArquivo(data),
+        atualizadoEm: agora
+      };
+
+      let mensagem;
+      if (id) {
+        const idx = edicoes.findIndex(e => String(e.id) === String(id));
+        if (idx < 0) return erroModal('A edição não foi encontrada.');
+        if (statusDe(edicoes[idx]) === FECHADA) return erroModal('Edição fechada não pode ser alterada. Reabra-a primeiro.');
+        edicoes[idx] = { ...edicoes[idx], ...campos };
+        mensagem = 'Edição "' + campos.titulo + '" atualizada.';
+      } else {
+        if (edicaoAberta(edicoes)) return erroModal('Já existe uma edição em andamento. Feche-a antes de criar outra.');
+        const nova = { ...novaEdicao(edicoes, data), ...campos };
+        edicoes.push(nova);
+        NewsDados.definirAtiva(nova.id);
+        mensagem = 'Edição "' + campos.titulo + '" criada. Use 📝 Matérias para cadastrar o conteúdo.';
+      }
+
+      if (!gravarEdicoes(edicoes)) return;
+      bootstrap.Modal.getOrCreateInstance($('modalEdicao')).hide();
+      renderTabela();
+      mostrarAlerta('success', mensagem);
+    }
+
+    // ── Ações da linha ──────────────────────────────────────
+    function abrirMaterias(id) {
+      NewsDados.definirAtiva(id);
+      window.location.href = 'tabMaterias.html';
+    }
+
+    function pedirFechar(id) {
+      const e = NewsDados.obterEdicao(id);
+      if (!e) return;
+      const r = resumoMaterias(e);
+
+      if (!r.ativas) {
+        mostrarAlerta('warning', 'Não é possível fechar "' + tituloDe(e) + '": a edição não tem nenhuma matéria ativa.');
+        return;
+      }
+
+      const avisos = [];
+      if (!r.manchete) avisos.push('Nenhuma matéria ativa no formato "Manchete principal".');
+      ['1', '2', '3'].forEach(c => { if (!r.porColuna[c]) avisos.push('A coluna ' + c + ' está sem matérias ativas.'); });
+
+      abrirConfirmacao({
+        titulo: 'Fechar edição',
+        classeTitulo: 'text-warning-emphasis',
+        html: '<p class="mb-1">Fechar a edição abaixo?</p>' +
+              '<p class="fw-semibold mb-2">Nº ' + esc(e.numero || '?') + ' — ' + esc(tituloDe(e)) + ' (' + esc(NewsDados.dataBR(e.data)) + ')</p>' +
+              '<p class="small mb-2">' + r.ativas + ' matéria(s) ativa(s) serão consideradas na publicação.</p>' +
+              (avisos.length ? '<div class="alert alert-warning py-2 small mb-2"><strong>Atenção:</strong><ul class="mb-0 ps-3">' +
+                avisos.map(a => '<li>' + esc(a) + '</li>').join('') + '</ul></div>' : '') +
+              '<p class="small text-body-secondary mb-0">Você pode reabrir a edição depois, se precisar.</p>',
+        textoBotao: '🔒 Fechar edição',
+        classeBotao: 'btn-warning',
+        aoConfirmar: () => alterarStatus(id, FECHADA)
+      });
+    }
+
+    function pedirReabrir(id) {
+      const edicoes = lerEdicoes();
+      const e = edicoes.find(x => String(x.id) === String(id));
+      if (!e) return;
+      const aberta = edicaoAberta(edicoes, id);
+      if (aberta) {
+        mostrarAlerta('warning', 'A edição "' + tituloDe(aberta) + '" (nº ' + (aberta.numero || '?') + ') está em andamento. Feche-a antes de reabrir esta.');
+        return;
+      }
+      abrirConfirmacao({
+        titulo: 'Reabrir edição',
+        classeTitulo: 'text-warning-emphasis',
+        html: '<p class="mb-1">Reabrir a edição abaixo para alterações?</p>' +
+              '<p class="fw-semibold mb-0">Nº ' + esc(e.numero || '?') + ' — ' + esc(tituloDe(e)) + ' (' + esc(NewsDados.dataBR(e.data)) + ')</p>',
+        textoBotao: '🔓 Reabrir',
+        classeBotao: 'btn-warning',
+        aoConfirmar: () => alterarStatus(id, EDITANDO)
+      });
+    }
+    function alterarStatus(id, novoStatus) {
+      const edicoes = lerEdicoes();
+      const idx = edicoes.findIndex(x => String(x.id) === String(id));
+      if (idx < 0) return;
+      const agora = new Date().toISOString();
+      edicoes[idx] = {
+        ...edicoes[idx],
+        status: novoStatus,
+        fechadaEm: novoStatus === FECHADA ? agora : '',
+        atualizadoEm: agora
+      };
+      if (!gravarEdicoes(edicoes)) return;
+      renderTabela();
+      mostrarAlerta('success', 'Edição "' + tituloDe(edicoes[idx]) + '" ' + (novoStatus === FECHADA ? 'fechada.' : 'reaberta para edição.'));
+    }
+
+    function pedirExclusao(id) {
+      const e = NewsDados.obterEdicao(id);
+      if (!e) return;
+      if (statusDe(e) === FECHADA) {
+        mostrarAlerta('warning', 'Reabra a edição antes de excluir.');
+        return;
+      }
+      const r = resumoMaterias(e);
+      abrirConfirmacao({
+        titulo: 'Excluir edição',
+        classeTitulo: 'text-danger',
+        html: '<p class="mb-1">Deseja excluir a edição abaixo?</p>' +
+              '<p class="fw-semibold mb-2">Nº ' + esc(e.numero || '?') + ' — ' + esc(tituloDe(e)) + ' (' + esc(NewsDados.dataBR(e.data)) + ')</p>' +
+              '<p class="mb-1">' + (r.total ? '<strong>' + r.total + ' matéria(s)</strong> desta edição também serão excluídas.' : 'Esta edição não tem matérias.') + '</p>' +
+              '<p class="small text-body-secondary mb-0">As imagens da pasta <code>imagens/materias/</code> não são apagadas. Esta ação não pode ser desfeita; se precisar, exporte o JSON antes.</p>',
+        textoBotao: 'Excluir',
+        classeBotao: 'btn-danger',
+        aoConfirmar: () => excluirEdicao(id)
+      });
+    }
+
+    function excluirEdicao(id) {
+      const removida = NewsDados.obterEdicao(id);
+      if (!NewsDados.excluirEdicao(id)) {
+        mostrarAlerta('danger', 'Não foi possível excluir a edição.');
+        return;
+      }
+      renderTabela();
+      mostrarAlerta('success', 'Edição "' + (removida ? tituloDe(removida) : '') + '" excluída.');
+    }
+
+    function aoClicarTabela(event) {
+      const b = event.target.closest('[data-acao]');
+      if (!b || b.disabled) return;
+      const id = b.dataset.id;
+      switch (b.dataset.acao) {
+        case 'materias': abrirMaterias(id); break;
+        case 'dados': abrirModalEdicao(id); break;
+        case 'fechar': pedirFechar(id); break;
+        case 'reabrir': pedirReabrir(id); break;
+        case 'excluir': pedirExclusao(id); break;
+        case 'exportar-uma': exportarUma(id); break;
+      }
+    }
+
+    // ── Exportar / importar JSON (via NewsDados) ────────────
+    function exportarJSON() {
+      const edicoes = lerEdicoes();
+      if (!edicoes.length) {
+        mostrarAlerta('warning', 'Não há edições cadastradas para exportar.');
+        return;
+      }
+      NewsDados.exportarTodas();
+    }
+
+    function exportarUma(id) {
+      const e = NewsDados.obterEdicao(id);
+      if (e) NewsDados.exportarEdicao(e);
+    }
+
+    function importarJSON(event) {
+      const arquivo = event.target.files[0];
+      if (!arquivo) return;
+
+      const leitor = new FileReader();
+      leitor.onerror = () => mostrarAlerta('danger', 'Não foi possível ler o arquivo.');
+      leitor.onload = () => {
+        try {
+          const dados = JSON.parse(leitor.result);
+          const itens = Array.isArray(dados) ? dados : [dados];
+          const edicoes = lerEdicoes();
+          const agora = new Date().toISOString();
+          const c = { edNovas: 0, edAtual: 0, matNovas: 0, matAtual: 0, ignoradas: 0, forcadas: 0 };
+
+          itens.forEach(item => {
+            if (!item || typeof item !== 'object' || !NewsDados.dataValida(item.data)) { c.ignoradas++; return; }
+
+            const id = item.id || NewsDados.gerarId('edi');
+            const idx = edicoes.findIndex(x => String(x.id) === String(id));
+
+            if (edicoes.some(x => String(x.id) !== String(id) && x.data === item.data)) { c.ignoradas++; return; }
+
+            let status = statusDe(item);
+            if (status === EDITANDO && edicaoAberta(edicoes, id)) { status = FECHADA; c.forcadas++; }
+
+            let numero = Number(item.numero) || 0;
+            if (numero < 1 || edicoes.some(x => String(x.id) !== String(id) && Number(x.numero) === numero)) {
+              numero = proximoNumero(edicoes);
+            }
+
+            const tit = String(item.titulo || item.nome || '').trim() || tituloPadrao(item.data);
+            const edicao = {
+              ...(idx >= 0 ? edicoes[idx] : {}),
+              ...item,
+              id: id,
+              numero: numero,
+              nome: tit,
+              titulo: tit,
+              status: status,
+              arquivo: nomeArquivo(item.data),
+              criadoEm: item.criadoEm || (idx >= 0 ? edicoes[idx].criadoEm : '') || agora,
+              atualizadoEm: agora,
+              fechadaEm: status === FECHADA ? (item.fechadaEm || agora) : '',
+              materias: idx >= 0 ? [...edicoes[idx].materias] : []
+            };
+
+            const rMat = NewsDados.mesclarMaterias(edicao, item.materias || []);
+            c.matNovas += rMat.novas;
+            c.matAtual += rMat.atualizadas;
+            c.ignoradas += rMat.ignoradas;
+
+            if (idx >= 0) { edicoes[idx] = edicao; c.edAtual++; }
+            else { edicoes.push(edicao); c.edNovas++; }
+          });
+
+          if (!gravarEdicoes(edicoes)) return;
+          renderTabela();
+
+          let msg = 'Importação concluída: ' + c.edNovas + ' edição(ões) nova(s), ' + c.edAtual + ' atualizada(s); ' +
+                    c.matNovas + ' matéria(s) nova(s), ' + c.matAtual + ' atualizada(s).';
+          if (c.forcadas) msg += ' ' + c.forcadas + ' edição(ões) entraram como Fechada porque já existe outra Editando.';
+          if (c.ignoradas) msg += ' ' + c.ignoradas + ' item(ns) ignorado(s).';
+          mostrarAlerta(c.forcadas || c.ignoradas ? 'warning' : 'success', msg);
+        } catch (e) {
+          console.error(e);
+          mostrarAlerta('danger', 'O arquivo não é um JSON válido.');
+        }
+      };
+      leitor.readAsText(arquivo);
+      event.target.value = ''; // permite importar o mesmo arquivo de novo
+    }
+
+    // ── Eventos ─────────────────────────────────────────────
+    $('corpoTabela').addEventListener('click', aoClicarTabela);
+    $('btnNova').addEventListener('click', () => abrirModalEdicao());
+    $('formEdicao').addEventListener('submit', salvarEdicao);
+    $('edData').addEventListener('input', atualizarPrevisaoArquivo);
+    $('btnConfirmar').addEventListener('click', aoConfirmar);
+    $('btnExportar').addEventListener('click', exportarJSON);
+    $('btnImportar').addEventListener('click', () => $('inputImportar').click());
+    $('inputImportar').addEventListener('change', importarJSON);
+
+    $('btnBuscar').addEventListener('click', renderTabela);
+    $('campoBusca').addEventListener('input', renderTabela);
+    $('campoBusca').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); renderTabela(); } });
+    $('filtroStatus').addEventListener('change', renderTabela);
+
+    // Voltando pelo histórico (bfcache) o JS não roda de novo: redesenha a tabela
+    window.addEventListener('pageshow', (e) => { if (e.persisted) renderTabela(); });
+
+    // ── Início ──────────────────────────────────────────────
+    const migracao = NewsDados.migrarLegado();
+    renderTabela();
+    if (migracao) {
+      mostrarAlerta('info', migracao.quantidade + ' matéria(s) do formato antigo foram migradas para "' + tituloDe(migracao.edicao) + '".');
+    }
+  })();
+  </script>
+
+  <!-- //////////////////////////////////;;;;;;;;///////// -->
+  <!-- FOOTER -->
+  <!-- /////////////////////////////////////////////////// -->
+
+    <footer class="border-top mt-4 py-3 text-center small text-body-secondary">
+      <div class="fw-bold fs-5">Constantino <span class="text-success">News</span></div>
+      <p class="mb-0">© 2026 Felipe Rodrigues - FullTime Technology. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- /////////////////////////////////////////// -->
+    <!-- DEPENDÊNCIAS DE SCRIPTS DO ECOSSISTEMA CORE -->
+    <!-- /////////////////////////////////////////// -->
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Fallback: se o Bootstrap JS local não carregou, usa o CDN oficial da jsDelivr
+        if (typeof bootstrap === 'undefined') {
+            alert('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            console.warn('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            document.write('<script src="https://jsdelivr.net" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');
+        }
+    </script>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- iNCLUDE PARA USAR HTML EXTERNO -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/include.js"></script>
+
+<!-- //////////////////////////////////////////////////////// -->
+
+</body>
+</html>

@@ -1,0 +1,840 @@
+<!-- =========================================================
+  ARQUIVO: cadMaterias.html
+
+  CADASTRO DE MATERIAS DO JORNAL CONSTANTINO NEWS
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+  Dados: NewsDados (./js/news-dados.js) - as matérias ficam dentro da edição ativa
+  - NEWS_EDICAO_ATIVA : edição em que se está trabalhando
+  - NEWS_EDITAR       : id da matéria a editar (gravado por tabMaterias.html)
+  - SUGESTAO_CADASTRO : { coluna, ordem } sugeridos pela grade para matéria nova
+
+  Autor: Felipe Rodrigues - FullTime Technology
+========================================================= -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro de Matérias - Constantino News</title>
+
+<!-- ////////////////////////////////////////////////////////////////////////////////// -->
+<!-- SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3 -->
+<!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3 -->
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <script src="./js/color-modes.js"></script>
+
+        <script>
+            if (!document.documentElement.hasAttribute('data-bs-theme')) {
+                alert('./js/color-modes.js local não carregou. Usando CDN como reserva.');
+                console.warn('color-modes.js local não carregou. Usando CDN como reserva.');
+
+                const scriptTheme = document.createElement('script');
+                scriptTheme.src = 'https://jsdelivr.net';
+                document.head.appendChild(scriptTheme);
+            }
+        </script>
+
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- Bootstrap CSS v5.3.8 -->
+        <!-- BOOTSTRAP 5.3.3 CSS LOCAL -->
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <link id="bootstrap-css-local" href="./css/bootstrap.min.css" rel="stylesheet">
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                let cssCarregado = false;
+                for (let i = 0; i < document.styleSheets.length; i++) {
+                    try {
+                        let sheet = document.styleSheets[i];
+                        if (sheet.href && sheet.href.indexOf("bootstrap.min.css") !== -1) {
+                            if (sheet.cssRules && sheet.cssRules.length > 0) {
+                                cssCarregado = true;
+                                break;
+                            }
+                        }
+                    } catch (e) {
+                        // Captura restrições de segurança de CORS se houverem
+                    }
+                }
+
+                if (!cssCarregado) {
+                    alert('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                    console.warn('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                    
+                    let cdn = document.createElement("link");
+                    cdn.rel = "stylesheet";
+                    cdn.href = "https://jsdelivr.net";
+                    cdn.integrity = "sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH";
+                    cdn.crossOrigin = "anonymous";
+                    document.head.appendChild(cdn);
+                }
+            });
+        </script>
+ 
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- CONTROLE DE TEMA IMEDIATO (Renderização ultrarrápida antes do carregamento do DOM) -->
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <script>
+            (() => {
+                const getStoredTheme = () => localStorage.getItem('theme');
+                const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                const resolveTheme = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+                document.documentElement.setAttribute('data-bs-theme', resolveTheme(getStoredTheme() || 'auto'));
+            })();
+        </script>
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+  <style>
+
+    /* Espaço para a NAV fixa do sistema (56px) */
+    body { padding-top: 56px; }
+
+    #nav-sistema-placeholder {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 56px;
+      z-index: 1050;
+    }
+
+    /* Toolbar fica colada logo abaixo da NAV */
+    .toolbar-cad { top: 56px; z-index: 1020; }
+
+    #previewImg { max-height: 180px; max-width: 100%; object-fit: contain; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV DO SISTEMA (injetada pelo include.js) -->
+  <div id="nav-sistema-placeholder"></div>
+
+  <!-- ── TOOLBAR ─────────────────────────────────────────────── -->
+  <div class="bg-body-tertiary border-bottom sticky-top toolbar-cad">
+    <div class="container-fluid px-4 py-2 d-flex flex-wrap align-items-center gap-2">
+      <button type="button" id="btnNovo" class="btn btn-sm btn-outline-success">🆕 Novo</button>
+      <button type="button" id="btnSalvar" class="btn btn-sm btn-success">💾 Salvar</button>
+      <button type="button" id="btnLimpar" class="btn btn-sm btn-outline-secondary">🧹 Limpar</button>
+
+      <span class="vr"></span>
+
+      <button type="button" id="btnExportar" class="btn btn-sm btn-outline-secondary">⬇ JSON</button>
+      <button type="button" id="btnImportar" class="btn btn-sm btn-outline-secondary">📂 Importar</button>
+      <input type="file" id="inputImportar" accept=".json,application/json" hidden />
+
+      <span class="vr"></span>
+
+      <a id="btnTabela" href="tabMaterias.html" class="btn btn-sm btn-outline-secondary">📋 Tabela</a>
+      <a id="btnEdicoes" href="tabEdicoes.html" class="btn btn-sm btn-outline-secondary">📰 Edições</a>
+
+      <div class="input-group input-group-sm ms-auto" style="max-width: 320px;">
+        <input type="search" id="campoBusca" class="form-control" placeholder="Buscar por título, categoria ou autor" aria-label="Buscar matéria" />
+        <button type="button" id="btnBuscar" class="btn btn-outline-success" title="Buscar">🔍</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTEÚDO ────────────────────────────────────────────── -->
+  <main class="container-fluid px-4 py-3">
+
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+      <h1 class="h3 text-success mb-0">Cadastro de matérias</h1>
+      <span id="modoEdicao" class="badge text-bg-warning d-none">Editando</span>
+      <span id="infoEdicao" class="badge text-bg-secondary d-none"></span>
+    </div>
+    <p class="text-body-secondary small mb-3">
+      Cadastre as matérias de cada coluna do Constantino News. Os dados ficam salvos neste navegador; as imagens ficam na pasta <code>imagens/materias/</code> e o cadastro guarda só o caminho.
+    </p>
+
+    <div id="alerta" class="alert d-none" role="alert"></div>
+
+    <form id="formMateria" novalidate>
+      <input type="hidden" id="materiaId" />
+
+      <!-- Posição -->
+      <div class="card mb-3">
+        <div class="card-header fw-semibold text-success">Posição na página</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-6 col-md-3">
+              <label for="coluna" class="form-label">Coluna *</label>
+              <select id="coluna" class="form-select">
+                <option value="">Selecione...</option>
+                <option value="1">Coluna 1</option>
+                <option value="2">Coluna 2</option>
+                <option value="3">Coluna 3</option>
+              </select>
+              <div class="invalid-feedback">Escolha a coluna.</div>
+            </div>
+            <div class="col-6 col-md-2">
+              <label for="ordem" class="form-label">Ordem</label>
+              <input type="number" id="ordem" class="form-control" min="1" step="1" />
+              <div class="form-text">1 = topo da coluna.</div>
+            </div>
+            <div class="col-12 col-md-5">
+              <label for="tipo" class="form-label">Formato da matéria *</label>
+              <select id="tipo" class="form-select">
+                <option value="">Selecione...</option>
+                <option value="foto-esquerda">Foto pequena à esquerda</option>
+                <option value="imagem-grande">Imagem grande com legenda</option>
+                <option value="texto">Somente texto</option>
+                <option value="manchete">Manchete principal</option>
+                <option value="opiniao">Opinião (caixa)</option>
+              </select>
+              <div class="invalid-feedback">Escolha o formato.</div>
+              <div id="ajudaTipo" class="form-text"></div>
+            </div>
+            <div class="col-12 col-md-2">
+              <label for="status" class="form-label">Status</label>
+              <select id="status" class="form-select">
+                <option value="Ativo" selected>Ativo</option>
+                <option value="Inativo">Inativo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conteúdo -->
+      <div class="card mb-3">
+        <div class="card-header fw-semibold text-success">Conteúdo</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12 col-md-3">
+              <label for="categoria" class="form-label">Categoria</label>
+              <input type="text" id="categoria" class="form-control" list="listaCategorias" maxlength="40" placeholder="Ex.: Política" />
+              <datalist id="listaCategorias">
+                <option value="Brasil"></option>
+                <option value="Mundo"></option>
+                <option value="Política"></option>
+                <option value="Economia"></option>
+                <option value="Negócios"></option>
+                <option value="Esporte"></option>
+                <option value="Tecnologia"></option>
+                <option value="Saúde"></option>
+                <option value="Cultura"></option>
+                <option value="Opinião"></option>
+              </datalist>
+            </div>
+            <div class="col-12 col-md-9">
+              <label for="titulo" class="form-label">Título *</label>
+              <input type="text" id="titulo" class="form-control" maxlength="200" />
+              <div class="invalid-feedback">Informe o título da matéria.</div>
+            </div>
+            <div class="col-12">
+              <label for="link" class="form-label">Link da matéria</label>
+              <input type="text" id="link" class="form-control" placeholder="# ou endereço da página" />
+            </div>
+            <div class="col-12">
+              <label for="resumo" class="form-label">Matéria</label>
+              <textarea id="resumo" class="form-control" rows="5" maxlength="5000"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Autoria -->
+      <div class="card mb-3">
+        <div class="card-header fw-semibold text-success">Autoria e data</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12 col-md-8">
+              <label for="autor" class="form-label">Autor(es)</label>
+              <input type="text" id="autor" class="form-control" maxlength="120" placeholder="Ex.: Ana Ferreira" />
+            </div>
+            <div class="col-12 col-md-4">
+              <label for="tempo" class="form-label">Publicada</label>
+              <input type="text" id="tempo" class="form-control" maxlength="40" placeholder="Ex.: 3h atrás" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Imagem -->
+      <div class="card mb-3">
+        <div class="card-header fw-semibold text-success">Imagem</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12 col-lg-8">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label for="imagemUrl" class="form-label">Caminho da imagem</label>
+                  <input type="text" id="imagemUrl" class="form-control" placeholder="Ex.: ./imagens/materias/foto.jpg (ou só o nome do arquivo)" />
+                  <div class="form-text">Grava apenas o caminho; o arquivo da imagem fica na pasta <code>imagens/materias/</code>.</div>
+                </div>
+                <div class="col-12 col-md-8">
+                  <label for="imagemArquivo" class="form-label">Escolher arquivo</label>
+                  <input type="file" id="imagemArquivo" class="form-control" accept="image/*" />
+                  <div id="infoImagem" class="form-text"></div>
+                </div>
+                <div class="col-12 col-md-4 d-flex align-items-end">
+                  <button type="button" id="btnRemoverImagem" class="btn btn-outline-danger w-100">Remover imagem</button>
+                </div>
+                <div class="col-12">
+                  <label for="legenda" class="form-label">Legenda</label>
+                  <input type="text" id="legenda" class="form-control" maxlength="200" placeholder="Ex.: Índice Bovespa registrou alta de 1,8% — REUTERS" />
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-lg-4">
+              <div class="form-label">Pré-visualização</div>
+              <div class="border rounded p-2 text-center bg-body-tertiary">
+                <img id="previewImg" class="d-none" alt="Pré-visualização da imagem da matéria" />
+                <span id="semImagem" class="text-body-secondary small">Nenhuma imagem selecionada</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <!-- ── MODAL DE BUSCA ──────────────────────────────────────── -->
+  <div class="modal fade" id="modalBusca" tabindex="-1" aria-labelledby="tituloModalBusca" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-5 text-success" id="tituloModalBusca">Resultado da busca</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body" id="resultadoBusca"></div>
+      </div>
+    </div>
+  </div>
+<!-- //////////////////////////////////////////////////////// -->
+<!-- Script de global -->
+<!-- //////////////////////////////////////////////////////// -->
+
+  <!-- Camada de dados do Constantino News -->
+  <script src="./js/news-dados.js"></script>
+
+  <script>
+  (() => {
+    'use strict';
+
+    // ── Chaves do localStorage ──────────────────────────────
+    // Os dados ficam em NewsDados (js/news-dados.js): cada edição guarda as próprias matérias.
+    const EDIT_KEY = 'NEWS_EDITAR';              // id da matéria a editar (gravado por tabMaterias.html)
+    const SUGESTAO_KEY = 'SUGESTAO_CADASTRO';    // { coluna, ordem } sugeridos pela grade
+    const PAGINA_TABELA = 'tabMaterias.html';
+
+    // ── Pasta física das imagens (relativa a esta página) ───
+    // O JSON guarda apenas PASTA_IMAGENS + nome do arquivo (ex.: ./imagens/materias/foto.jpg)
+    const PASTA_IMAGENS = './imagens/materias/';
+
+    // Texto de ajuda de cada formato (mesmos formatos de NewsDados.TIPOS)
+    const AJUDA_TIPO = {
+      'foto-esquerda': 'Miniatura de 130 px ao lado do título. Usa categoria, título, matéria e autor.',
+      'imagem-grande': 'Imagem na largura da coluna, com legenda, título e matéria.',
+      'texto': 'Sem imagem. Usa categoria, título, matéria e autor.',
+      'manchete': 'Destaque da coluna central, com imagem grande e matéria longa.',
+      'opiniao': 'Caixa com borda vermelha. Usa título, matéria e autor (colunista).'
+    };
+
+    const $ = (id) => document.getElementById(id);
+    let previewLocal = '';   // URL temporária do arquivo escolhido (só para pré-visualizar nesta sessão)
+    let imagemLegada = '';   // imagem antiga em base64 (cadastros feitos antes desta versão)
+    let timerAlerta = null;
+    let veioDaTabela = false; // true quando a edição foi aberta pelo botão Editar da tabela
+
+    // ── Armazenamento (via NewsDados) ───────────────────────
+    const temDados = () => typeof NewsDados !== 'undefined';
+
+    function edicaoAtual() {
+      return temDados() ? NewsDados.edicaoAtiva() : null;
+    }
+
+    // Matérias da edição ativa (lista vazia se não houver edição)
+    function lerMaterias() {
+      const ed = edicaoAtual();
+      return ed ? ed.materias : [];
+    }
+
+    // Grava a lista de matérias dentro da edição ativa
+    function gravarMaterias(lista) {
+      const ed = edicaoAtual();
+      if (!ed) { exigirEdicao(); return false; }
+      ed.materias = lista;
+      if (!NewsDados.salvarEdicao(ed)) {
+        mostrarAlerta('danger', 'Não foi possível gravar os dados. O armazenamento do navegador pode estar cheio; exporte o JSON e exclua edições antigas.');
+        return false;
+      }
+      return true;
+    }
+
+    function gerarId() {
+      return NewsDados.gerarId('mat');
+    }
+
+    function exigirEdicao() {
+      if (edicaoAtual()) return true;
+      mostrarAlerta('warning', temDados()
+        ? 'Nenhuma edição ativa. Abra ou crie uma edição em "📰 Edições" antes de cadastrar matérias.'
+        : 'Não foi possível carregar ./js/news-dados.js.');
+      return false;
+    }
+
+    function atualizarInfoEdicao() {
+      const ed = edicaoAtual();
+      const el = $('infoEdicao');
+      if (!ed) {
+        el.className = 'badge text-bg-danger';
+        el.textContent = 'Sem edição ativa';
+        return;
+      }
+      el.className = 'badge ' + (ed.status === 'Publicada' ? 'text-bg-success' : 'text-bg-info');
+      el.textContent = NewsDados.tituloEdicao(ed) + ' · ' + (ed.status || 'Rascunho');
+    }
+
+    function proximaOrdem(coluna, ignorarId) {
+      const ordens = lerMaterias()
+        .filter(m => Number(m.coluna) === Number(coluna) && String(m.id) !== String(ignorarId || ''))
+        .map(m => Number(m.ordem) || 0);
+      return (ordens.length ? Math.max(...ordens) : 0) + 1;
+    }
+
+    // ── Utilidades de tela ──────────────────────────────────
+    function mostrarAlerta(tipo, texto) {
+      const el = $('alerta');
+      el.className = 'alert alert-' + tipo;
+      el.textContent = texto;
+      clearTimeout(timerAlerta);
+      if (tipo === 'success') {
+        timerAlerta = setTimeout(() => el.classList.add('d-none'), 5000);
+      }
+    }
+
+    function esc(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto == null ? '' : String(texto);
+      return div.innerHTML;
+    }
+
+    function normalizar(texto) {
+      return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    function atualizarAjudaTipo() {
+      $('ajudaTipo').textContent = AJUDA_TIPO[$('tipo').value] || '';
+    }
+
+    function atualizarModoEdicao() {
+      $('modoEdicao').classList.toggle('d-none', !$('materiaId').value);
+    }
+
+    // Converte o que foi digitado em caminho final:
+    // - URL (http/https), blob: ou data: → mantém
+    // - já tem pasta (contém "/") → mantém
+    // - só o nome do arquivo → PASTA_IMAGENS + nome
+    function montarCaminhoImagem(valor) {
+      let v = String(valor || '').trim().replace(/\\/g, '/');
+      if (!v) return '';
+      if (/^(https?:|data:|blob:)/i.test(v) || v.includes('/')) return v;
+      return PASTA_IMAGENS + v;
+    }
+
+    function liberarPreviewLocal() {
+      if (previewLocal) URL.revokeObjectURL(previewLocal);
+      previewLocal = '';
+    }
+
+    function atualizarPreview() {
+      const caminho = montarCaminhoImagem($('imagemUrl').value);
+      const src = previewLocal || caminho || imagemLegada;
+      const img = $('previewImg');
+      const info = $('infoImagem');
+      $('semImagem').className = 'text-body-secondary small';
+      $('semImagem').textContent = 'Nenhuma imagem selecionada';
+      if (src) {
+        img.src = src;
+        img.classList.remove('d-none');
+        $('semImagem').classList.add('d-none');
+      } else {
+        img.removeAttribute('src');
+        img.classList.add('d-none');
+        $('semImagem').classList.remove('d-none');
+      }
+
+      if (previewLocal) {
+        info.className = 'form-text text-success fw-semibold';
+        info.textContent = 'Caminho definido: ' + caminho + ' — lembre-se de copiar o arquivo físico para essa pasta do site.';
+      } else if (caminho) {
+        info.className = 'form-text text-body-secondary';
+        info.textContent = 'Caminho salvo: ' + caminho;
+      } else if (imagemLegada) {
+        info.className = 'form-text text-warning-emphasis';
+        info.textContent = 'Esta matéria tem uma imagem antiga em base64. Escolha o arquivo físico para trocá-la por um caminho.';
+      } else {
+        info.className = 'form-text';
+        info.textContent = '';
+      }
+    }
+    // ── Formulário ──────────────────────────────────────────
+    function limparFormulario(coluna) {
+      $('formMateria').reset();
+      $('materiaId').value = '';
+      liberarPreviewLocal();
+      imagemLegada = '';
+      ['coluna', 'tipo', 'titulo'].forEach(id => $(id).classList.remove('is-invalid'));
+      if (coluna) {
+        $('coluna').value = String(coluna);
+        $('ordem').value = proximaOrdem(coluna);
+      }
+      atualizarPreview();
+      atualizarAjudaTipo();
+      atualizarModoEdicao();
+    }
+
+    function preencherFormulario(m) {
+      limparFormulario();
+      $('materiaId').value = m.id || '';
+      $('coluna').value = String(m.coluna || '');
+      $('ordem').value = m.ordem || '';
+      $('tipo').value = m.tipo || '';
+      $('status').value = m.status === 'Inativo' ? 'Inativo' : 'Ativo';
+      $('categoria').value = m.categoria || '';
+      $('titulo').value = m.titulo || '';
+      $('link').value = m.link || '';
+      $('resumo').value = m.resumo || '';
+      $('autor').value = m.autor || '';
+      $('tempo').value = m.tempo || '';
+      $('legenda').value = m.legenda || '';
+
+      const img = m.imagem || '';
+      if (img.startsWith('data:')) {
+        imagemLegada = img;       // mantém até o usuário escolher um arquivo físico
+        $('imagemUrl').value = '';
+      } else {
+        $('imagemUrl').value = img;
+      }
+      atualizarPreview();
+      atualizarAjudaTipo();
+      atualizarModoEdicao();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function coletarFormulario() {
+      return {
+        id: $('materiaId').value,
+        coluna: parseInt($('coluna').value, 10),
+        ordem: Math.max(1, parseInt($('ordem').value, 10) || 1),
+        tipo: $('tipo').value,
+        status: $('status').value,
+        categoria: $('categoria').value.trim(),
+        titulo: $('titulo').value.trim(),
+        link: $('link').value.trim() || '#',
+        resumo: $('resumo').value.trim(),
+        autor: $('autor').value.trim(),
+        tempo: $('tempo').value.trim(),
+        imagem: montarCaminhoImagem($('imagemUrl').value) || imagemLegada,
+        legenda: $('legenda').value.trim()
+      };
+    }
+
+    function validar() {
+      const colunaOk = ['1', '2', '3'].includes($('coluna').value);
+      const tipoOk = !!$('tipo').value;
+      const tituloOk = !!$('titulo').value.trim();
+
+      $('coluna').classList.toggle('is-invalid', !colunaOk);
+      $('tipo').classList.toggle('is-invalid', !tipoOk);
+      $('titulo').classList.toggle('is-invalid', !tituloOk);
+
+      if (!colunaOk) { $('coluna').focus(); return false; }
+      if (!tipoOk) { $('tipo').focus(); return false; }
+      if (!tituloOk) { $('titulo').focus(); return false; }
+      return true;
+    }
+
+    // ── Salvar ──────────────────────────────────────────────
+    function salvarMateria() {
+      if (!exigirEdicao()) return;
+      if (!validar()) {
+        mostrarAlerta('warning', 'Preencha os campos obrigatórios (*).');
+        return;
+      }
+
+      const dados = coletarFormulario();
+      const lista = lerMaterias();
+      const agora = new Date().toISOString();
+      const idx = dados.id ? lista.findIndex(m => String(m.id) === String(dados.id)) : -1;
+      const editando = idx >= 0;
+
+      if (editando) {
+        dados.criadoEm = lista[idx].criadoEm || agora;
+        dados.atualizadoEm = agora;
+        lista[idx] = { ...lista[idx], ...dados };
+      } else {
+        dados.id = gerarId();
+        dados.criadoEm = agora;
+        dados.atualizadoEm = agora;
+        lista.push(dados);
+      }
+
+      if (!gravarMaterias(lista)) return;
+
+      // Edição aberta pela tabela: volta para a tabela depois de salvar
+      if (editando && veioDaTabela) {
+        window.location.href = PAGINA_TABELA;
+        return;
+      }
+
+      limparFormulario(dados.coluna); // mantém a coluna para cadastrar a próxima matéria
+      mostrarAlerta('success', 'Matéria "' + dados.titulo + '" ' + (editando ? 'atualizada' : 'cadastrada') + ' na coluna ' + dados.coluna + '.');
+    }
+
+    // ── Edição vinda da tabela (NEWS_EDITAR) ────────────────
+    function carregarEdicao() {
+      const bruto = localStorage.getItem(EDIT_KEY);
+      if (!bruto) { aplicarSugestao(); return; }
+      localStorage.removeItem(EDIT_KEY);
+      localStorage.removeItem(SUGESTAO_KEY);
+
+      // Aceita o id puro (formato oficial) ou um objeto { id, edicaoId, materia }
+      let id = bruto, edicaoId = '';
+      try {
+        const obj = JSON.parse(bruto);
+        if (obj && typeof obj === 'object') { id = obj.id; edicaoId = obj.edicaoId || ''; }
+        else id = String(obj);
+      } catch (e) { /* o valor já é o próprio id */ }
+
+      if (edicaoId && temDados() && String(NewsDados.edicaoAtivaId()) !== String(edicaoId) && NewsDados.obterEdicao(edicaoId)) {
+        NewsDados.definirAtiva(edicaoId);
+        atualizarInfoEdicao();
+      }
+
+      const materia = lerMaterias().find(m => String(m.id) === String(id));
+      if (materia) { veioDaTabela = true; preencherFormulario(materia); }
+      else mostrarAlerta('warning', 'A matéria que seria editada não foi encontrada nesta edição.');
+    }
+    // Matéria nova vinda da grade: coluna e posição sugeridas
+    function aplicarSugestao() {
+      const bruto = localStorage.getItem(SUGESTAO_KEY);
+      if (!bruto) return;
+      localStorage.removeItem(SUGESTAO_KEY);
+      try {
+        const sug = JSON.parse(bruto);
+        if ([1, 2, 3].includes(Number(sug.coluna))) {
+          limparFormulario(Number(sug.coluna));
+          if (Number(sug.ordem) >= 1) $('ordem').value = Number(sug.ordem);
+        }
+      } catch (e) { /* sugestão inválida: ignora */ }
+    }
+
+    // ── Imagem ──────────────────────────────────────────────
+    // O navegador não grava arquivos na pasta do site: ele só informa o NOME do arquivo.
+    // Por isso guardamos PASTA_IMAGENS + nome, e o arquivo deve ser copiado para essa pasta.
+    function aoEscolherArquivo(event) {
+      const arquivo = event.target.files[0];
+      if (!arquivo) return;
+      if (!arquivo.type.startsWith('image/')) {
+        mostrarAlerta('danger', 'O arquivo escolhido não é uma imagem.');
+        event.target.value = '';
+        return;
+      }
+      liberarPreviewLocal();
+      previewLocal = URL.createObjectURL(arquivo);
+      imagemLegada = '';
+      $('imagemUrl').value = PASTA_IMAGENS + arquivo.name;
+      atualizarPreview();
+    }
+
+    function removerImagem() {
+      liberarPreviewLocal();
+      imagemLegada = '';
+      $('imagemUrl').value = '';
+      $('imagemArquivo').value = '';
+      atualizarPreview();
+    }
+
+    // ── Exportar / importar JSON ────────────────────────────
+    // Exporta a edição ativa inteira (edicao-ddmmaaaa.json), com as matérias dentro
+    function exportarJSON() {
+      const ed = edicaoAtual();
+      if (!ed) { exigirEdicao(); return; }
+      if (!ed.materias.length) {
+        mostrarAlerta('warning', 'A edição ainda não tem matérias para exportar.');
+        return;
+      }
+      NewsDados.exportarEdicao(ed);
+    }
+
+    // Aceita lista de matérias, uma matéria ou uma edição; tudo entra na edição ativa
+    function importarJSON(event) {
+      const arquivo = event.target.files[0];
+      if (!arquivo) return;
+      if (!exigirEdicao()) { event.target.value = ''; return; }
+
+      const leitor = new FileReader();
+      leitor.onerror = () => mostrarAlerta('danger', 'Não foi possível ler o arquivo.');
+      leitor.onload = () => {
+        try {
+          const dados = JSON.parse(leitor.result);
+          const ed = edicaoAtual();
+          if (!ed) { exigirEdicao(); return; }
+
+          const itens = Array.isArray(dados) ? dados : (dados && Array.isArray(dados.materias) ? dados.materias : [dados]);
+          const legadas = itens.filter(i => i && String(i.imagem || '').startsWith('data:')).length;
+          const r = NewsDados.mesclarMaterias(ed, dados);
+
+          if (!NewsDados.salvarEdicao(ed)) {
+            mostrarAlerta('danger', 'Não foi possível gravar os dados. O armazenamento do navegador pode estar cheio.');
+            return;
+          }
+          mostrarAlerta('success', 'Importação concluída: ' + r.novas + ' nova(s), ' + r.atualizadas + ' atualizada(s)' +
+            (r.ignoradas ? ', ' + r.ignoradas + ' ignorada(s) por não terem título' : '') + '.' +
+            (legadas ? ' Atenção: ' + legadas + ' matéria(s) ainda usam imagem em base64; troque por um arquivo físico.' : ''));
+        } catch (e) {
+          console.error(e);
+          mostrarAlerta('danger', 'O arquivo não é um JSON válido.');
+        }
+      };
+      leitor.readAsText(arquivo);
+      event.target.value = ''; // permite importar o mesmo arquivo de novo
+    }
+
+    // ── Busca ───────────────────────────────────────────────
+    function buscarMaterias() {
+      const termo = normalizar($('campoBusca').value.trim());
+      const lista = lerMaterias();
+      const achadas = termo
+        ? lista.filter(m => normalizar([m.titulo, m.categoria, m.autor, m.resumo].join(' ')).includes(termo))
+        : lista;
+
+      achadas.sort((a, b) => (a.coluna - b.coluna) || (a.ordem - b.ordem));
+
+      const corpo = $('resultadoBusca');
+      if (!achadas.length) {
+        corpo.innerHTML = '<p class="text-body-secondary mb-0">Nenhuma matéria encontrada.</p>';
+      } else {
+        corpo.innerHTML = '<div class="list-group">' + achadas.map(m =>
+          '<button type="button" class="list-group-item list-group-item-action" data-id="' + esc(m.id) + '">' +
+            '<div class="fw-semibold">' + esc(m.titulo) + '</div>' +
+            '<div class="small text-body-secondary">Coluna ' + esc(m.coluna) + ' · ordem ' + esc(m.ordem) +
+            (m.categoria ? ' · ' + esc(m.categoria) : '') +
+            (m.status === 'Inativo' ? ' · Inativo' : '') + '</div>' +
+          '</button>'
+        ).join('') + '</div>';
+      }
+
+      if (typeof bootstrap !== 'undefined') {
+        bootstrap.Modal.getOrCreateInstance($('modalBusca')).show();
+      }
+    }
+
+    function escolherResultado(event) {
+      const botao = event.target.closest('[data-id]');
+      if (!botao) return;
+      const materia = lerMaterias().find(m => String(m.id) === botao.dataset.id);
+      if (!materia) return;
+      bootstrap.Modal.getOrCreateInstance($('modalBusca')).hide();
+      preencherFormulario(materia);
+    }
+
+    // ── Eventos ─────────────────────────────────────────────
+    $('btnNovo').addEventListener('click', () => limparFormulario());
+    $('btnLimpar').addEventListener('click', () => limparFormulario());
+    $('btnSalvar').addEventListener('click', salvarMateria);
+    $('btnExportar').addEventListener('click', exportarJSON);
+    $('btnImportar').addEventListener('click', () => $('inputImportar').click());
+    $('inputImportar').addEventListener('change', importarJSON);
+    $('btnBuscar').addEventListener('click', buscarMaterias);
+    $('campoBusca').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); buscarMaterias(); } });
+    $('resultadoBusca').addEventListener('click', escolherResultado);
+
+    $('tipo').addEventListener('change', () => { $('tipo').classList.remove('is-invalid'); atualizarAjudaTipo(); });
+    $('titulo').addEventListener('input', () => $('titulo').classList.remove('is-invalid'));
+    $('coluna').addEventListener('change', () => {
+      $('coluna').classList.remove('is-invalid');
+      if ($('coluna').value) $('ordem').value = proximaOrdem($('coluna').value, $('materiaId').value);
+    });
+
+    $('imagemArquivo').addEventListener('change', aoEscolherArquivo);
+    $('imagemUrl').addEventListener('input', () => { liberarPreviewLocal(); imagemLegada = ''; atualizarPreview(); });
+    $('previewImg').addEventListener('error', () => {
+      // O caminho gravado ainda não existe na pasta: exibe aviso claro sem esconder o registro
+      const caminhoGravado = montarCaminhoImagem($('imagemUrl').value);
+      $('previewImg').classList.add('d-none');
+      $('semImagem').className = 'text-warning-emphasis fw-semibold small';
+      $('semImagem').textContent = 'Caminho salvo (' + caminhoGravado + '), aguardando o arquivo físico na pasta.';
+      $('semImagem').classList.remove('d-none');
+    });
+    $('btnRemoverImagem').addEventListener('click', removerImagem);
+    $('formMateria').addEventListener('submit', (e) => e.preventDefault());
+
+    // Voltando pelo histórico (bfcache) o JS não roda de novo: relê a chave de edição
+    window.addEventListener('pageshow', (e) => { if (e.persisted) carregarEdicao(); });
+
+    // ── Início ──────────────────────────────────────────────
+    // Matérias do formato antigo (NEWS_MATERIAS) viram uma edição, uma única vez
+    const migracao = temDados() ? NewsDados.migrarLegado() : null;
+
+    atualizarInfoEdicao();
+    atualizarPreview();
+    atualizarAjudaTipo();
+    if (migracao) {
+      mostrarAlerta('info', migracao.quantidade + ' matéria(s) do formato antigo foram colocadas na edição "' +
+        NewsDados.tituloEdicao(migracao.edicao) + '" (Rascunho).');
+    }
+    if (edicaoAtual()) carregarEdicao(); else if (!migracao) exigirEdicao();
+  })();
+  </script>
+
+  <!-- //////////////////////////////////;;;;;;;;///////// -->
+  <!-- FOOTER (injetado pelo include.js) -->
+  <!-- <div id="footer-placeholder"> -->
+  <!-- /////////////////////////////////////////////////// -->
+
+    <footer class="border-top mt-4 py-3 text-center small text-body-secondary">
+      <div class="fw-bold fs-5">Constantino <span class="text-success">News</span></div>
+      <p class="mb-0">© 2026 Felipe Rodrigues - FullTime Technology. Todos os direitos reservados.</p>
+    </footer>
+    
+<!-- /////////////////////////////////////////////////// -->
+  <!-- </div> -->
+<!-- /////////////////////////////////////////////////// -->
+
+    <!-- /////////////////////////////////////////// -->
+    <!-- DEPENDÊNCIAS DE SCRIPTS DO ECOSSISTEMA CORE -->
+    <!-- /////////////////////////////////////////// -->
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // CORREÇÃO: Fallback estável apontando para o arquivo completo do Bootstrap JS na jDelivr oficial
+        if (typeof bootstrap === 'undefined') {
+            alert('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            console.warn('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            document.write('<script src="https://jsdelivr.net" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');
+        }
+    </script>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- iNCLUDE PARA USART HTML EXTERNO -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/include.js"></script>
+
+<!-- //////////////////////////////////////////////////////// -->
+
+</body>
+</html>

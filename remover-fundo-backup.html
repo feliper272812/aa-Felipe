@@ -1,0 +1,396 @@
+<!-- =========================================================
+ARQUIVO: remover-fundo.html
+
+MÓDULO NATIVO DE REMOÇÃO DE FUNDO COM INTELIGÊNCIA ARTIFICIAL
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+  Autor: Felipe Rodrigues - FullTime Technology
+========================================================= -->
+
+<!DOCTYPE html>
+
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullTime Technology - Remover Fundo</title>
+
+    <!-- FALLBACKS (definidos ANTES de serem usados pelos onerror abaixo) -->
+    <script>
+      const carregarFallbackTema = () => {
+        alert('color-modes.js local não carregou. Usando CDN oficial do Bootstrap 5.3 como reserva.');
+        console.warn('color-modes.js local não carregou. Usando CDN oficial do Bootstrap 5.3 como reserva.');
+
+        const cdnScript = document.createElement('script');
+        cdnScript.src = 'https://getbootstrap.com/docs/5.3/assets/js/color-modes.js';
+        document.head.appendChild(cdnScript);
+      };
+
+      const carregarFallbackCss = (link) => {
+        link.onerror = null;
+        alert('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+        console.warn('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+
+        link.integrity = 'sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH';
+        link.crossOrigin = 'anonymous';
+        link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css';
+      };
+    </script>
+
+    <!-- SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3 -->
+    <script src="./js/color-modes.js" onerror="carregarFallbackTema()"></script>
+
+    <!-- BOOTSTRAP 5.3.3 CSS LOCAL (fallback automático via onerror, sem esperar o DOMContentLoaded) -->
+    <link id="bootstrap-css-local" href="./css/bootstrap.min.css" rel="stylesheet" onerror="carregarFallbackCss(this)">
+
+    <style>
+        /* Espaço vertical (igual em cima, entre NAV e card, e embaixo, entre card e footer) */
+        :root {
+            --gap-vertical: 2px;
+            --nav-h: 58px;      /* valores iniciais; o script de layout mede os reais */
+            --footer-h: 38px;
+        }
+
+        html, body {
+            height: 100% !important;
+            margin: 0 !important;
+            overflow: hidden !important;
+        }
+
+        body {
+            background-color: #121212;
+            padding: var(--nav-h) 0 var(--footer-h) 0 !important;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* MAIN: sem espaços laterais, só o espaço vertical */
+        .main-wrapper {
+            flex: 1 1 auto;
+            min-height: 0;
+            padding: var(--gap-vertical) 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* CARD: de ponta a ponta (sem bordas arredondadas, senão aparece vão nos cantos) */
+        .card-custom {
+            border-radius: 0;
+            box-shadow: 0 0 25px rgba(0,0,0,0.3);
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .card-custom .card-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .preview-row {
+            flex: 1;
+            min-height: 220px;
+        }
+
+        .preview-box {
+            width: 100%;
+            height: 100%;
+            min-height: 250px;
+            border: 2px dashed #198754;
+            border-radius: 12px;
+            background: #1e1e1e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Fundo quadriculado simulando transparência PNG */
+        .fundo-transparente {
+            background-color: #333;
+            background-image: linear-gradient(45deg, #444 25%, transparent 25%),
+                              linear-gradient(-45deg, #444 25%, transparent 25%),
+                              linear-gradient(45deg, transparent 75%, #444 75%),
+                              linear-gradient(-45deg, transparent 75%, #444 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        .preview-box img { max-width: 100%; max-height: 100%; object-fit: contain; z-index: 2; }
+
+        .spinner-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 5; color: #fff;
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///////      BARRA DE NAVEGAÇÃO FIXA (NAVBAR) /////////////////////////////////// -->
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+
+    <div id="nav-placeholder"></div>
+
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+
+    <main class="main-wrapper">
+        <div class="card card-custom bg-dark text-light border-0">
+            <div class="card-header bg-success text-white text-center py-2">
+                <h4 class="mb-0">🔮 Processador de Imagem - Fundo Transparente</h4>
+            </div>
+            <div class="card-body p-3">
+
+                <!-- SELEÇÃO DE ARQUIVO -->
+                <div class="mb-3 text-center">
+                    <label for="inputImagemOriginal" class="form-label fw-bold mb-1">Selecione a imagem do produto para processamento</label>
+                    <input type="file" id="inputImagemOriginal" accept="image/*" class="form-control bg-secondary text-white border-0">
+                    <small class="text-muted d-block mt-1">O processamento é feito localmente no seu computador por IA.</small>
+                </div>
+
+                <!-- PREVIEWS COMPARATIVOS -->
+                <div class="row g-3 preview-row">
+                    <div class="col-md-6 d-flex flex-column">
+                        <h6 class="text-center text-success fw-bold mb-2">Original</h6>
+                        <div class="preview-box flex-grow-1" id="boxOriginal">
+                            <span class="text-muted" id="txtPlaceholderOrig">Aguardando arquivo...</span>
+                            <img id="imgOriginalTag" class="d-none" alt="Original">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 d-flex flex-column">
+                        <h6 class="text-center text-success fw-bold mb-2">Resultado (PNG Transparente)</h6>
+                        <div class="preview-box fundo-transparente flex-grow-1" id="boxResultado">
+                            <span class="text-muted" id="txtPlaceholderRest">Aguardando processamento...</span>
+                            <img id="imgResultadoTag" class="d-none" alt="Sem Fundo">
+
+                            <div id="loadingOverlay" class="spinner-overlay d-none">
+                                <div class="spinner-border text-success mb-2" role="status"></div>
+                                <span class="fw-semibold">IA removendo o fundo...</span>
+                                <small class="text-secondary px-3 text-center" id="txtProgresso">Iniciando...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BARRA DE AÇÕES -->
+                <div class="mt-3 text-end d-none" id="barraAcoesResultado">
+                    <button type="button" class="btn btn-outline-secondary me-2" id="btnLimpar">🧹 Limpar</button>
+                    <button type="button" class="btn btn-success fw-bold" id="btnDownloadPng">💾 Download PNG</button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- RODAPÉ FIXO (FOOTER) -->
+    <div id="footer-placeholder"></div>
+
+    <!-- DEPENDÊNCIAS DE SCRIPTS DO ECOSSISTEMA CORE -->
+    <script src="./js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Fallback estável apontando para o bundle completo do Bootstrap JS na jsDelivr oficial
+        if (typeof bootstrap === 'undefined') {
+            alert('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            console.warn('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            document.write('<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');
+        }
+    </script>
+
+    <!-- LAYOUT + GUARDA DE ROTA (script comum: roda sempre, independente da CDN da IA) -->
+    <script>
+        (function () {
+            const raiz = document.documentElement.style;
+
+            // Mede NAV e FOOTER (injetados pelo include.js) e reserva o espaço só se forem "fixed"
+            function medirLayout() {
+                const nav = document.querySelector('#nav-placeholder nav, #nav-placeholder .navbar');
+                const rodape = document.querySelector('#footer-placeholder footer, #footer-placeholder > *');
+
+                if (nav) {
+                    const fixo = getComputedStyle(nav).position === 'fixed';
+                    raiz.setProperty('--nav-h', fixo ? Math.ceil(nav.getBoundingClientRect().bottom) + 'px' : '0px');
+                }
+                if (rodape) {
+                    const fixo = getComputedStyle(rodape).position === 'fixed';
+                    raiz.setProperty('--footer-h', fixo ? Math.ceil(window.innerHeight - rodape.getBoundingClientRect().top) + 'px' : '0px');
+                }
+            }
+
+            let agendado = false;
+            function agendarMedicao() {
+                if (agendado) return;
+                agendado = true;
+                requestAnimationFrame(() => { agendado = false; medirLayout(); });
+            }
+
+            ['nav-placeholder', 'footer-placeholder'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) new MutationObserver(agendarMedicao).observe(el, { childList: true, subtree: true });
+            });
+
+            window.addEventListener('resize', agendarMedicao);
+            window.addEventListener('load', agendarMedicao);
+
+            document.addEventListener('DOMContentLoaded', () => {
+                agendarMedicao();
+
+                // Guarda de Rota padrão do seu sistema
+                if (localStorage.getItem('PDV_HABILITADO') !== '1') {
+                    alert('Acesso negado! Por favor, realize o login.');
+                    window.location.href = 'index.html';
+                }
+            });
+        })();
+    </script>
+
+    <!-- INCLUDE PARA USAR HTML EXTERNO -->
+    <script src="./js/include.js"></script>
+
+    <!-- Script de proteção global -->
+    <script src="./js/autenticacao.js"></script>
+
+<!-- MOTOR DE IA: carregado sob demanda (só quando o usuário escolhe uma imagem),
+     para não atrasar a NAV nem o restante da página -->
+<script type="module">
+    const URL_BIBLIOTECA_IA = "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/+esm";
+
+    const inputArquivo       = document.getElementById("inputImagemOriginal");
+    const imgOriginalTag     = document.getElementById("imgOriginalTag");
+    const txtPlaceholderOrig = document.getElementById("txtPlaceholderOrig");
+    const imgResultadoTag    = document.getElementById("imgResultadoTag");
+    const txtPlaceholderRest = document.getElementById("txtPlaceholderRest");
+    const loadingOverlay     = document.getElementById("loadingOverlay");
+    const txtProgresso       = document.getElementById("txtProgresso");
+    const barraAcoes         = document.getElementById("barraAcoesResultado");
+    const btnDownload        = document.getElementById("btnDownloadPng");
+    const btnLimpar          = document.getElementById("btnLimpar");
+
+    let urlOriginal = null;
+    let urlResultado = null;
+    let promessaBiblioteca = null;
+
+    // Importa a biblioteca uma única vez; se falhar, permite tentar de novo
+    function carregarBiblioteca() {
+        if (!promessaBiblioteca) {
+            promessaBiblioteca = import(URL_BIBLIOTECA_IA).catch((erro) => {
+                promessaBiblioteca = null;
+                throw erro;
+            });
+        }
+        return promessaBiblioteca;
+    }
+
+    function liberarUrls() {
+        if (urlOriginal)  { URL.revokeObjectURL(urlOriginal);  urlOriginal = null; }
+        if (urlResultado) { URL.revokeObjectURL(urlResultado); urlResultado = null; }
+    }
+
+    async function processarRemocaoFundo(arquivo) {
+        liberarUrls();
+
+        // 1. Mostra o original imediatamente
+        urlOriginal = URL.createObjectURL(arquivo);
+        imgOriginalTag.src = urlOriginal;
+        imgOriginalTag.classList.remove("d-none");
+        txtPlaceholderOrig.classList.add("d-none");
+
+        // 2. Prepara o painel de resultado
+        imgResultadoTag.classList.add("d-none");
+        imgResultadoTag.removeAttribute("src");
+        txtPlaceholderRest.textContent = "Aguardando processamento...";
+        txtPlaceholderRest.classList.remove("d-none");
+        loadingOverlay.classList.remove("d-none");
+        txtProgresso.textContent = "Carregando biblioteca de IA...";
+        barraAcoes.classList.add("d-none");
+
+        try {
+            const { removeBackground } = await carregarBiblioteca();
+
+            txtProgresso.textContent = "Carregando modelo de IA (só na 1ª vez)...";
+
+            // 3. Remove o fundo (modelo baixado automaticamente do CDN oficial da biblioteca)
+            const blobResultado = await removeBackground(arquivo, {
+                output: { format: "image/png" },
+                progress: (chave, atual, total) => {
+                    if (total) {
+                        txtProgresso.textContent = `Baixando/processando: ${Math.round(atual / total * 100)}%`;
+                    }
+                }
+            });
+
+            // 4. Exibe o PNG transparente
+            urlResultado = URL.createObjectURL(blobResultado);
+            imgResultadoTag.src = urlResultado;
+            imgResultadoTag.classList.remove("d-none");
+            txtPlaceholderRest.classList.add("d-none");
+
+            btnDownload.onclick = () => {
+                const a = document.createElement("a");
+                a.href = urlResultado;
+                a.download = `fulltime_prod_${Date.now()}_sem_fundo.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
+            barraAcoes.classList.remove("d-none");
+
+        } catch (erro) {
+            console.error(erro);
+            alert("Falha no processamento da IA:\n" + erro.message);
+            txtPlaceholderRest.textContent = "Erro no processamento da imagem.";
+        } finally {
+            loadingOverlay.classList.add("d-none");
+        }
+    }
+
+    function resetarPainel() {
+        liberarUrls();
+        inputArquivo.value = "";
+        imgOriginalTag.classList.add("d-none");
+        imgOriginalTag.removeAttribute("src");
+        txtPlaceholderOrig.classList.remove("d-none");
+        imgResultadoTag.classList.add("d-none");
+        imgResultadoTag.removeAttribute("src");
+        txtPlaceholderRest.textContent = "Aguardando processamento...";
+        txtPlaceholderRest.classList.remove("d-none");
+        barraAcoes.classList.add("d-none");
+    }
+
+    ////////////////////////////////////////////////////
+    // Ao escolher o arquivo, processa automaticamente
+    ////////////////////////////////////////////////////
+
+    inputArquivo.addEventListener("change", (e) => {
+        const arquivo = e.target.files && e.target.files.item(0);
+        if (arquivo) processarRemocaoFundo(arquivo);
+    });
+
+    btnLimpar.addEventListener("click", resetarPainel);
+</script>
+
+</body>
+</html>

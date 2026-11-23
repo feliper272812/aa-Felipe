@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+    <script src="../assets/js/color-modes.js"></script>
+    <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+
+<!-- //////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+    <title>Exemplo de Jornal</title>
+    <!-- Incluindo o CSS do Bootstrap 5.3 via CDN -->
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <style>
+        .news-image { width: 100%; height: auto; }
+        .main-content { padding-top: 20px; }
+        .article-title { font-weight: bold; color: #333; }
+    </style>
+</head>
+
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///////      BARRA DE NAVEGAÇÃO FIXA (NAVBAR) /////////////////////////////////// -->
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-success shadow-sm">
+  <div class="container-fluid">
+    <!-- Dropdown Perfil/Menu -->
+    <div class="dropdown me-2">
+      <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+        <img src="./imagens/usuarios/Felipe.jpg" alt="Felipe" width="33" height="33" class="rounded-circle" />
+      </a>
+      <ul class="dropdown-menu text-small shadow">
+        <li><a class="dropdown-item" href="#">Novo projeto...</a></li>
+        <li><a class="dropdown-item" href="#">Configurações</a></li>
+        <li><a class="dropdown-item" href="#">Perfil</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="cadclientesPF.html">Cadastro de Clientes PF</a></li>
+        <li><a class="dropdown-item" href="cadclientesPJ.html">Cadastro de Clientes PJ</a></li>
+        <li><a class="dropdown-item" href="cadFornecedores.html">Cadastro de Fornecedores</a></li>
+        <li><a class="dropdown-item" href="cadusuarios.html">Cadastro de Usuários</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="cadProdutos.html">Cadastro de Produtos</a></li>
+        <li><a class="dropdown-item" href="tabProdutos.html">Tabela de Produtos</a></li>
+        <li><a class="dropdown-item" href="Ordemdeservico.html">Cadastro de Ordens de Serviço</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="cadusuarios.html">Usuários</a></li>
+        <li><a class="dropdown-item" href="tabusuarios.html">Tab. Usuários</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="felipe.html">Felipe Rodrigues</a></li>
+        <li><a class="dropdown-item" href="about.html">Sobre a FullTime</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="index-constantino.html">Constantino</a></li>
+        <li><a class="dropdown-item" href="index-brasil.html">Brasil</a></li>
+        <li><a class="dropdown-item" href="index-rs.html">Rio Grande do Sul</a></li>
+        <li><a class="dropdown-item" href="index-canoas.html">Canoas</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <!-- ALTERAÇÃO REALIZADA: id="btnSair" adicionado abaixo -->
+        <li><a id="btnSair" class="dropdown-item text-danger" href="#">Sair</a></li>
+      </ul>
+    </div>
+
+    <!-- Botão Hamburguer para Mobile -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <ul class="navbar-nav me-auto mb-2 mb-md-0">
+        <li class="nav-item"><a class="nav-link active text-light" href="index.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabClientesPF.html">Cliente PF</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabClientesPJ.html">Cliente PJ</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabFornecedores.html">Fornecedor</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabProdutos.html">Produto</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="frentedecaixa.html">PDV</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="taborcamentos.html">Orçamentos</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="Ordemdeservico.html">O.S.</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabusuarios.html">Usuários</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="index-sistema.html">Sistema</a></li>
+      </ul>
+
+      <!-- Seletor de Tema -->
+      <ul class="navbar-nav ms-md-auto mb-2 mb-md-0">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-light" href="#" id="themeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            🎨 Tema
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="themeDropdown">
+            <li>
+              <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', 'light'); localStorage.setItem('theme', 'light')">
+                ☀️ Modo Claro
+              </button>
+            </li>
+            <li>
+              <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', 'dark'); localStorage.setItem('theme', 'dark')">
+                🌙 Modo Escuro
+              </button>
+            </li>
+            <li>
+              <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); localStorage.setItem('theme', 'auto')">
+                💻 Automático
+              </button>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////// -->
+    <br><br>
+
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+
+<body>
+
+    <div class="container my-4">
+        <!-- Cabeçalho do Jornal -->
+        <header class="pb-3 mb-4 border-bottom">
+            <span class="fs-2">Diário Bootstrap</span>
+        </header>
+
+        <!-- Estrutura de Grid: Linha Principal -->
+        <div class="row">
+            <!-- Coluna Principal (Foto + Texto) -->
+            <div class="col-lg-8">
+                <article>
+                    <h1 class="article-title">Sistema de Grid do Bootstrap 5.3 Revoluciona Layouts</h1>
+                    <p class="text-muted">Por Redação - 15 de Maio, 2026</p>
+                    
+                    <figure class="figure">
+                        <!-- <img src="https://picsum.photos" class="news-image rounded" alt="Exemplo de layout grid"> -->
+			<img src="fulltimelogo.png" class="news-image rounded" alt="Exemplo de layout grid">
+                        <figcaption class="figure-caption text-center">A foto ilustra a estrutura de colunas flexíveis.</figcaption>
+                    </figure>
+
+                    <p class="lead mt-3">
+                        O Bootstrap 5.3 utiliza flexbox, permitindo layouts responsivos baseados em 12 colunas, facilitando a criação de sites modernos e adaptáveis.
+                    </p>
+                    <p>
+                        A nova versão traz melhorias no modo escuro, variáveis CSS mais robustas e suporte nativo ao <code>data-bs-theme</code>, facilitando a customização. 
+                        Com as classes <code>.row</code> e <code>.col-*</code>, é possível organizar o conteúdo de forma precisa.
+                    </p>
+                </article>
+            </div>
+
+            <!-- Coluna Lateral (Sidebar) -->
+            <aside class="col-lg-4">
+                <div class="p-4 bg-light rounded">
+                    <h4>Últimas Notícias</h4>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-decoration-none">Bootstrap 5.3.3 lançado</a></li>
+                        <li><a href="#" class="text-decoration-none">Flexbox vs CSS Grid</a></li>
+                        <li><a href="#" class="text-decoration-none">Templates de Notícias</a></li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Incluindo o JS do Bootstrap 5.3 -->
+    <script src="https://jsdelivr.net"></script>
+
+    <script
+      src="../assets/dist/js/bootstrap.bundle.min.js"
+      class="astro-vvvwv3sm"
+    ></script>
+    <script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+
+</body>
+</html>

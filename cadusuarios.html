@@ -1,0 +1,1016 @@
+<!-- =================================================================
+ARQUIVO: cadusuarios.html
+
+FORMULÁRIO DE CADASTRO DE USUÁRIOS COM MÍDIA RETANGULAR
+
+Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+Autor: Felipe Rodrigues - FullTime Technology (Ajuste Retangular)
+=================================================================== -->
+
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="auto">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuários</title>
+
+    <!-- CONTROLE DE TEMA IMEDIATO -->
+    <script>
+        (() => {
+            const getStoredTheme = () => localStorage.getItem('theme');
+            const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const resolveTheme = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+            document.documentElement.setAttribute('data-bs-theme', resolveTheme(getStoredTheme() || 'auto'));
+        })();
+    </script>
+
+    <!-- BOOTSTRAP 5.3.3 CSS (CDN oficial) -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous"> -->
+
+    <!-- BOOTSTRAP 5.3.3 CSS LOCAL -->
+    <link id="bootstrap-css-local" href="./css/bootstrap.min.css" rel="stylesheet">
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let cssCarregado = false;
+            for (let i = 0; i < document.styleSheets.length; i++) {
+                try {
+                    let sheet = document.styleSheets[i];
+                    if (sheet.href && sheet.href.indexOf("bootstrap.min.css") !== -1) {
+                        if (sheet.cssRules && sheet.cssRules.length > 0) {
+                            cssCarregado = true;
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    // Captura restrições de segurança de CORS se houverem
+                }
+            }
+
+            if (!cssCarregado) {
+                alert('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                console.warn('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                
+                let cdn = document.createElement("link");
+                cdn.rel = "stylesheet";
+                cdn.href = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css";
+                cdn.integrity = "sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH";
+                cdn.crossOrigin = "anonymous";
+                document.head.appendChild(cdn);
+            }
+        });
+    </script>
+
+    <style>
+        html, body {
+            min-height: 100%;
+            overflow-y: auto;
+        }
+        body {
+            background-color: #f5f7fb;
+            transition: background-color 0.3s ease;
+            padding-top: 57px;
+            padding-bottom: 40px;
+        }
+        [data-bs-theme="dark"] body {
+            background-color: #121414;
+        }
+        .card-custom {
+            border-radius: 16px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.08);
+        }
+        .titulo-secao {
+            color: var(--bs-success);
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .btn-custom {
+            width: 100%;
+            font-weight: bold;
+        }
+        .form-label {
+            font-weight: 600;
+        }
+        .btn-bd-primary {
+            --bs-btn-font-weight: 600;
+            --bs-btn-color: var(--bs-white);
+            --bs-btn-bg: transparent;
+            --bs-btn-border-color: transparent;
+            --bs-btn-hover-color: var(--bs-white);
+            --bs-btn-hover-bg: rgba(255, 255, 255, 0.1);
+            --bs-btn-hover-border-color: transparent;
+            --bs-btn-active-color: var(--bs-white);
+            --bs-btn-active-bg: rgba(255, 255, 255, 0.15);
+            --bs-btn-active-border-color: transparent;
+        }
+        .bd-mode-toggle {
+            z-index: 1500;
+        }
+        .bd-mode-toggle .bi {
+            width: 1em;
+            height: 1em;
+            fill: currentColor;
+        }
+        .bd-mode-toggle .dropdown-menu .active .bi {
+            display: block !important;
+        }
+
+        /* CONTAINER LATERAL DE IMAGEM ESPELHADO DO CADASTRO DE PRODUTOS */
+        .image-box-wrapper {
+            border: 1px solid var(--bs-border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: var(--bs-body-bg);
+        }
+        .image-box-header {
+            background-color: #0f8554;
+            color: #fff;
+            text-align: center;
+            font-size: 13px;
+            padding: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .avatar-display {
+            height: 260px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(13, 110, 253, 0.04);
+            margin: 15px;
+            border-radius: 6px;
+            border: 2px dashed rgba(13, 110, 253, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        [data-bs-theme="dark"] .avatar-display {
+            background-color: #1a222d;
+            border-color: #2c3747;
+        }
+        
+        /* AJUSTE PARA OCUPAR O RETÂNGULO INTEIRO DA MOLDURA APÓS CADASTRO */
+        .avatar-display img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Garante que a foto inteira caiba na moldura */
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 5;
+        }
+        
+        /* BOLINHA COM INICIAL: EXIBIDA SOMENTE COMO PLACEHOLDER PROVISÓRIO */
+        .avatar-circle {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background-color: #0d6efd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 38px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 2;
+        }
+        .avatar-info {
+            font-size: 14px;
+            font-weight: bold;
+            color: #0d6efd;
+            text-align: center;
+            max-width: 90%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            z-index: 2;
+        }
+        [data-bs-theme="dark"] .avatar-info {
+            color: #8bb4f8;
+        }
+        .avatar-footer {
+            font-size: 11px;
+            color: var(--bs-secondary-color);
+            margin-top: 5px;
+            text-align: center;
+            z-index: 2;
+        }
+        .btn-action {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--bs-border-color);
+            background-color: transparent;
+            color: var(--bs-body-color);
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-action.btn-select {
+            background-color: rgba(15, 133, 84, 0.12);
+            border-color: #0f8554;
+            color: #198754;
+        }
+        [data-bs-theme="dark"] .btn-action.btn-select {
+            color: #28c76f;
+        }
+        .btn-action.btn-camera {
+            background-color: rgba(13, 110, 253, 0.12);
+            border-color: #0d6efd;
+            color: #0d6efd;
+        }
+        [data-bs-theme="dark"] .btn-action.btn-camera {
+            color: #6ea8fe;
+        }
+        .btn-action.btn-remove {
+            background-color: rgba(220, 53, 69, 0.12);
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        [data-bs-theme="dark"] .btn-action.btn-remove {
+            color: #ea5455;
+        }
+        #camera-stream {
+            width: 100%;
+            max-height: 320px;
+            background-color: #000;
+            border-radius: 6px;
+            transform: scaleX(-1);
+        }
+    </style>
+</head>
+<body>
+
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///////      BARRA DE NAVEGAÇÃO FIXA (NAVBAR) /////////////////////////////////// -->
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-success shadow-sm">
+  <div class="container-fluid">
+    <!-- Dropdown Perfil/Menu -->
+    <div class="dropdown me-2">
+      <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+        <img src="./imagens/usuarios/Felipe.jpg" alt="Felipe" width="33" height="33" class="rounded-circle" />
+      </a>
+      <ul class="dropdown-menu text-small shadow">
+        <li><a class="dropdown-item" href="#">Novo projeto...</a></li>
+        <li><a class="dropdown-item" href="#">Configurações</a></li>
+        <li><a class="dropdown-item" href="#">Perfil</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="cadclientesPF.html">Cadastro de Clientes PF</a></li>
+        <li><a class="dropdown-item" href="cadclientesPJ.html">Cadastro de Clientes PJ</a></li>
+        <li><a class="dropdown-item" href="cadFornecedores.html">Cadastro de Fornecedores</a></li>
+        <li><a class="dropdown-item" href="cadusuarios.html">Cadastro de Usuários</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="cadProdutos.html">Cadastro de Produtos</a></li>
+        <li><a class="dropdown-item" href="tabProdutos.html">Tabela de Produtos</a></li>
+        <li><a class="dropdown-item" href="Ordemdeservico.html">Cadastro de Ordens de Serviço</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="cadusuarios.html">Usuários</a></li>
+        <li><a class="dropdown-item" href="tabusuarios.html">Tab. Usuários</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="felipe.html">Felipe Rodrigues</a></li>
+        <li><a class="dropdown-item" href="about.html">Sobre a FullTime</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="index-constantino.html">Constantino</a></li>
+        <li><a class="dropdown-item" href="index-brasil.html">Brasil</a></li>
+        <li><a class="dropdown-item" href="index-rs.html">Rio Grande do Sul</a></li>
+        <li><a class="dropdown-item" href="index-canoas.html">Canoas</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <!-- ALTERAÇÃO REALIZADA: id="btnSair" adicionado abaixo -->
+        <li><a id="btnSair" class="dropdown-item text-danger" href="#">Sair</a></li>
+      </ul>
+    </div>
+
+    <!-- Botão Hamburguer para Mobile -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <ul class="navbar-nav me-auto mb-2 mb-md-0">
+        <li class="nav-item"><a class="nav-link active text-light" href="index.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabClientesPF.html">Cliente PF</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabClientesPJ.html">Cliente PJ</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabFornecedores.html">Fornecedor</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabProdutos.html">Produto</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="frentedecaixa.html">PDV</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="taborcamentos.html">Orçamentos</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="Ordemdeservico.html">O.S.</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabusuarios.html">Usuários</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="index-sistema.html">Sistema</a></li>
+      </ul>
+
+      <!-- Seletor de Tema -->
+      <ul class="navbar-nav ms-md-auto mb-2 mb-md-0">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-light" href="#" id="themeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            🎨 Tema
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="themeDropdown">
+            <li>
+              <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', 'light'); localStorage.setItem('theme', 'light')">
+                ☀️ Modo Claro
+              </button>
+            </li>
+            <li>
+              <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', 'dark'); localStorage.setItem('theme', 'dark')">
+                🌙 Modo Escuro
+              </button>
+            </li>
+            <li>
+              <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); localStorage.setItem('theme', 'auto')">
+                💻 Automático
+              </button>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+    <!-- =====================================================
+         CONTAINER PRINCIPAL
+    ====================================================== -->
+    <!-- <div class="container-fluid"> -->
+        <!-- <div class="row justify-content-center"> -->
+            <!-- <div class="col-lg-11 col-xl-10"> -->
+
+                <div class="card card-custom border-0">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="mb-0 text-center">Cadastro de Usuários</h3>
+                    </div>
+
+                    <!-- =============================
+                                 BOTÕES
+                    ============================== -->
+                    <div class="sticky-top bg-body pt-2 pb-2 mb-3 border-bottom">
+                        <div class="d-flex flex-wrap align-items-center gap-1">&nbsp;
+                            <button class="btn btn-sm btn-primary" onclick="novoUsuario()">🆕 Novo</button>
+                            <button class="btn btn-sm btn-success" onclick="salvarUsuario(event)">💾 Salvar</button>
+                            <button class="btn btn-sm btn-secondary" onclick="limparFormulario()">🧹 Limpar</button>
+                            <button class="btn btn-sm btn-warning" onclick="baixarJSON()">⬇ JSON</button>
+                            <label for="arquivoJSONcad" class="btn btn-sm btn-info mb-0" style="cursor: pointer;">📂 Importar</label>
+                            <input type="file" id="arquivoJSONcad" accept=".json" class="d-none" onchange="importarPrimeiroUsuario(event)">
+                            <button class="btn btn-sm btn-outline-success" onclick="voltarTabela()">📋 Tabela</button>
+                            <div class="vr mx-2"></div>
+                            <div class="input-group input-group-sm ms-auto" style="max-width:380px">
+                                <input id="inputUsuarioNav" class="form-control" placeholder="Pesquisar Usuário">
+                                <button class="btn btn-outline-success" onclick="pesquisarUsuario(event)">🔍</button>&nbsp;&nbsp;
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- =====================================
+                         BODY (DISTRIBUÍDO EM DUAS COLUNAS)
+                    ====================================== -->
+                    <div class="card-body">
+                        <form id="formUsuario" autocomplete="off" novalidate>
+                            <div class="row g-4">
+                                
+                                <!-- COLUNA DA ESQUERDA: FORMULÁRIOS DE DADOS -->
+                                <div class="col-lg-8">
+                                    <h5 class="titulo-secao mb-3">Dados de Acesso e Lotação</h5>
+
+                                    <div class="row">
+                                        <!-- ID DO USUÁRIO (ESPELHANDO PRODUTOS) -->
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">ID</label>
+                                            <input type="text" id="usuarioIdDisplay" class="form-control bg-body-secondary text-muted" value="(auto)" disabled>
+                                        </div>
+                                        
+                                        <!-- USUÁRIO -->
+                                        <div class="col-md-9 mb-3">
+                                            <label class="form-label">Usuário</label>
+                                            <input type="text" id="usuario" class="form-control" placeholder="Nome de usuário para login" autocomplete="username" oninput="sincronizarPreviewMidia()">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <!-- SENHA -->
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Senha</label>
+                                            <input type="password" id="senha" class="form-control" placeholder="Digite a senha de acesso" autocomplete="new-password">
+                                        </div>
+
+                                        <!-- DEPARTAMENTO -->
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Departamento</label>
+                                            <input type="text" id="departamento" class="form-control" placeholder="Digite o departamento / setor do usuário" oninput="sincronizarPreviewMidia()">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- COLUNA DA DIREITA: CONTAINER DE IMAGEM ESPELHADO DO PRODUTO -->
+                                <div class="col-lg-4">
+                                    <div class="image-box-wrapper">
+                                        <div class="image-box-header">Imagem do Usuário</div>
+                                        <div class="avatar-display" id="avatarDisplayContainer">
+                                            <!-- Estado inicial: Bolinha e textos. A tag img entra dinamicamente sobrepondo tudo -->
+                                            <div class="avatar-circle" id="placeholderCircle">
+                                                <span id="avatarInitials">?</span>
+                                            </div>
+                                            <div class="avatar-info" id="avatarLabel">Novo Usuário</div>
+                                            <div class="avatar-footer" id="avatarSubLabel">Departamento não informado</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex flex-column gap-2 mt-3">
+                                        <button type="button" class="btn-action btn-select" onclick="document.getElementById('inputArquivoFoto').click()">
+                                            📷 Selecionar Imagem
+                                        </button>
+                                        <input type="file" id="inputArquivoFoto" accept="image/*" class="d-none" onchange="processarUploadFoto(event)">
+                                        
+                                        <button type="button" class="btn-action btn-camera" onclick="abrirModalCamera()">
+                                            📹 Usar Câmera
+                                        </button>
+                                        
+                                        <div class="text-center text-muted mt-1 mb-1" id="labelNomeArquivo" style="font-size: 11px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                            Nenhuma foto selecionada
+                                        </div>
+                                        
+                                        <button type="button" class="btn-action btn-remove" onclick="removerFotoUsuario()">
+                                            Remover Imagem
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </form>
+                    </div> <!-- Fim .card-body -->
+                </div> <!-- Fim .card-custom -->
+            <!-- </div> --><!-- Fim .col-lg-11 col-xl-10 -->
+        <!-- </div> --><!-- Fim .row -->
+    <!-- </div> --><!-- Fim .container-fluid --> 
+
+    <!-- MODAL DA CÂMERA (BOOTSTRAP INTEGRADO) -->
+    <div class="modal fade" id="modalCamera" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" style="font-size: 16px;">Capturar Foto do Usuário</h5>
+                    <button type="button" class="btn-close" onclick="fecharModalCamera()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <video id="camera-stream" autoplay playsinline></video>
+                    <canvas id="snapshot-canvas" style="display: none;"></canvas>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="fecharModalCamera()">Cancelar</button>
+                    <button type="button" class="btn btn-sm btn-success" onclick="capturarFotoWebcam()">Tirar Foto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- =====================================================
+         JAVASCRIPT DO SISTEMA DE USUÁRIOS
+    ====================================================== -->
+    <script>
+    const STORAGE_KEY = 'PDV_USUARIOS';
+    const EDIT_KEY = 'USUARIO_EDITAR';
+
+    ////////////////////////////////////////////////////////////////
+    // STATE
+    ////////////////////////////////////////////////////////////////
+    let formularioAlterado = false;
+    let fotoBase64Cache = null; 
+    let fluxoVideoWebcam = null; 
+    let bootstrapModalInstance = null;
+
+    ////////////////////////////////////////////////////////////////
+    // ATUALIZAÇÃO VISUAL DO AVATAR / PREVIEW
+    ////////////////////////////////////////////////////////////////
+    function sincronizarPreviewMidia() {
+        const usuarioInput = document.getElementById('usuario').value.trim();
+        const deptoInput = document.getElementById('departamento').value.trim();
+        
+        const label = document.getElementById('avatarLabel');
+        const subLabel = document.getElementById('avatarSubLabel');
+        const initials = document.getElementById('avatarInitials');
+        const circle = document.getElementById('placeholderCircle');
+
+        label.textContent = usuarioInput || "Novo Usuário";
+        subLabel.textContent = deptoInput || "Departamento não informado";
+
+        // Só reconstrói as iniciais se a foto não estiver preenchendo a tela
+        if (!fotoBase64Cache) {
+            if (circle) circle.style.display = 'flex';
+            if (usuarioInput) {
+                const partes = usuarioInput.split(' ').filter(p => p.trim() !== '');
+                let letras = partes[0].charAt(0).toUpperCase();
+                if (partes.length > 1 && partes[partes.length - 1]) {
+                    letras += partes[partes.length - 1].charAt(0).toUpperCase();
+                }
+                if (initials) initials.textContent = letras;
+            } else {
+                if (initials) initials.textContent = "?";
+            }
+        }
+    }
+
+    function renderizarFotoNoContainer(base64Data) {
+        const container = document.getElementById('avatarDisplayContainer');
+        const circle = document.getElementById('placeholderCircle');
+        
+        // Esconde a bolinha azul de placeholder para dar espaço ao retângulo completo
+        if (circle) circle.style.display = 'none';
+        
+        // Remove imagens antigas antes de injetar a nova foto cheia
+        const imagemAntiga = container.querySelector('img');
+        if (imagemAntiga) imagemAntiga.remove();
+
+        const novaImg = document.createElement('img');
+        novaImg.src = base64Data;
+        novaImg.alt = "Foto do Usuário";
+        container.appendChild(novaImg);
+    }
+
+    ////////////////////////////////////////////////////////////////
+    // UPLOAD E CÂMERA MÍDIA
+    ////////////////////////////////////////////////////////////////
+    function processarUploadFoto(event) {
+        const arquivo = event.target.files[0];
+        if (!arquivo) return;
+
+        document.getElementById('labelNomeArquivo').textContent = arquivo.name;
+
+        const leitor = new FileReader();
+        leitor.onload = function(e) {
+            fotoBase64Cache = e.target.result;
+            renderizarFotoNoContainer(fotoBase64Cache);
+            formularioAlterado = true;
+        };
+        leitor.readAsDataURL(arquivo);
+    }
+
+    async function abrirModalCamera() {
+        const video = document.getElementById('camera-stream');
+        
+        if (!bootstrapModalInstance) {
+            bootstrapModalInstance = new bootstrap.Modal(document.getElementById('modalCamera'));
+        }
+        bootstrapModalInstance.show();
+
+        try {
+            fluxoVideoWebcam = await navigator.mediaDevices.getUserMedia({
+                video: { width: 640, height: 480, facingMode: "user" }
+            });
+            video.srcObject = fluxoVideoWebcam;
+        } catch (erro) {
+            alert("Não foi possível acessar a câmera do dispositivo: " + erro.message);
+            fecharModalCamera();
+        }
+    }
+
+    function fecharModalCamera() {
+        if (bootstrapModalInstance) {
+            bootstrapModalInstance.hide();
+        }
+        if (fluxoVideoWebcam) {
+            fluxoVideoWebcam.getTracks().forEach(track => track.stop());
+            fluxoVideoWebcam = null;
+        }
+    }
+
+    function capturarFotoWebcam() {
+        const video = document.getElementById('camera-stream');
+        const canvas = document.getElementById('snapshot-canvas');
+        const contexto = canvas.getContext('2d');
+
+        if (!video.videoWidth) return;
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        contexto.translate(canvas.width, 0);
+        contexto.scale(-1, 1);
+        contexto.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        fotoBase64Cache = canvas.toDataURL('image/jpeg', 0.85);
+        renderizarFotoNoContainer(fotoBase64Cache);
+        
+        document.getElementById('labelNomeArquivo').textContent = "Captura_Webcam.jpg";
+        formularioAlterado = true;
+        
+        fecharModalCamera();
+    }
+
+    function removerFotoUsuario() {
+        fotoBase64Cache = null;
+        const container = document.getElementById('avatarDisplayContainer');
+        const imagem = container.querySelector('img');
+        if (imagem) imagem.remove();
+
+        document.getElementById('labelNomeArquivo').textContent = "Nenhuma foto selecionada";
+        document.getElementById('inputArquivoFoto').value = "";
+        formularioAlterado = true;
+        sincronizarPreviewMidia();
+    }
+    ////////////////////////////////////////////////////////////////
+    // INIT EDIT MODE 
+    ////////////////////////////////////////////////////////////////
+    function carregarEdicao() {
+        const editData = localStorage.getItem(EDIT_KEY);
+        if (!editData) return;
+
+        const usuarioData = JSON.parse(editData);
+        const form = document.getElementById('formUsuario');
+        if (form) form.dataset.editId = String(usuarioData.id).trim();
+
+        document.getElementById('usuarioIdDisplay').value = usuarioData.id;
+
+        const set = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val ?? '';
+        };
+
+        set('usuario', usuarioData.usuario);
+        set('senha', usuarioData.senha);
+        set('departamento', usuarioData.departamento);
+
+        if (usuarioData.imagem) {
+            fotoBase64Cache = usuarioData.imagem;
+            renderizarFotoNoContainer(fotoBase64Cache);
+            document.getElementById('labelNomeArquivo').textContent = "Imagem_Salva.jpg";
+        }
+
+        sincronizarPreviewMidia();
+    }
+
+    ////////////////////////////////////////////////////////////////
+    // LIMPAR FORM
+    ////////////////////////////////////////////////////////////////
+    function limparFormulario() {
+        const ids = ['usuario', 'senha', 'departamento'];
+
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+
+        const form = document.getElementById('formUsuario');
+        if (form) delete form.dataset.editId;
+
+        document.getElementById('usuarioIdDisplay').value = "(auto)";
+        localStorage.removeItem(EDIT_KEY);
+
+        fotoBase64Cache = null;
+        const container = document.getElementById('avatarDisplayContainer');
+        const imagem = container.querySelector('img');
+        if (imagem) imagem.remove();
+
+        document.getElementById('labelNomeArquivo').textContent = "Nenhuma foto selecionada";
+        document.getElementById('inputArquivoFoto').value = "";
+
+        sincronizarPreviewMidia();
+
+        const first = document.getElementById('usuario');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        setTimeout(() => {
+            if (first) first.focus();
+        }, 300);
+    }
+
+    ////////////////////////////////////////////////////////////////
+    // VOLTAR À TABELA
+    ////////////////////////////////////////////////////////////////
+    function voltarTabela() {
+        if (formularioAlterado) {
+            if (!confirm('Há alterações não salvas. Deseja sair mesmo assim?')) return;
+        }
+        formularioAlterado = false;
+        localStorage.removeItem(EDIT_KEY);
+        window.location.href = 'tabusuarios.html';
+    }
+
+    ////////////////////////////////////////////////////////////////
+    // NOVO USUÁRIO
+    ////////////////////////////////////////////////////////////////
+    function novoUsuario() {
+        if (formularioAlterado) {
+            if (!confirm('Descartar alterações?')) return;
+        }
+        localStorage.removeItem(EDIT_KEY);
+        formularioAlterado = false;
+        limparFormulario();
+    }
+
+    ////////////////////////////////////////////////////////////////
+    // GERAR ID
+    ////////////////////////////////////////////////////////////////
+    function gerarId() {
+        const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const maxId = lista.length ? Math.max(...lista.map(u => Number(u.id) || 0)) + 1 : 1;
+        return String(maxId);
+    }
+
+    ////////////////////////////////////////////////////////////////
+    // SALVAR
+    ////////////////////////////////////////////////////////////////
+    function salvarUsuario(e) {
+        if (e) {
+            e.preventDefault();
+        }
+        
+        if (!confirm('Deseja salvar este usuário?')) {
+            return;
+        }
+
+        const usuario = document.getElementById('usuario').value.trim();
+        const senha = document.getElementById('senha').value.trim();
+        const departamento = document.getElementById('departamento').value.trim();
+
+        if (!usuario) { alert('O campo Usuário é obrigatório!'); return; }
+        if (!senha) { alert('O campo Senha é obrigatório!'); return; }
+        if (!departamento) { alert('O campo Departamento é obrigatório!'); return; }
+
+        const form = document.getElementById('formUsuario');
+        const editId = form?.dataset.editId ? String(form.dataset.editId).trim() : null;
+
+        const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const agora = new Date().toISOString();
+
+        const usuarioData = {
+            id: editId || gerarId(),
+            usuario,
+            senha,
+            departamento,
+            imagem: fotoBase64Cache, 
+            dataAlteracao: agora
+        };
+
+        if (editId) {
+            const idx = lista.findIndex(u => String(u.id).trim() === editId);
+            if (idx !== -1) {
+                usuarioData.dataCadastro = lista[idx].dataCadastro;
+                lista[idx] = usuarioData;
+            }
+        } else {
+            usuarioData.dataCadastro = agora;
+            lista.push(usuarioData);
+        }
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+        formularioAlterado = false;
+        localStorage.removeItem(EDIT_KEY);
+
+        alert(editId ? 'Usuário atualizado com sucesso!' : 'Usuário salvo com sucesso!');
+        window.location.href = 'tabusuarios.html';
+    }
+    ////////////////////////////////////////////////////////////////
+    // BAIXAR JSON
+    ////////////////////////////////////////////////////////////////
+    function baixarJSON() {
+        let usuarios = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const json = JSON.stringify(usuarios, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'cadusuarios.json';
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    ////////////////////////////////////////////////////////////////
+    // INIT
+    ////////////////////////////////////////////////////////////////
+    document.addEventListener('DOMContentLoaded', () => {
+
+            // =======================================================
+            // LÓGICA DO LOGOUT: Captura o clique no botão Sair
+            // =======================================================
+            const btnSair = document.getElementById('btnSair');
+            if (btnSair) {
+                btnSair.addEventListener('click', function (event) {
+                    event.preventDefault(); // Evita o comportamento do link '#'
+                    
+                    // Modifica a variável para forçar novo login no sistema
+                    localStorage.setItem("PDV_HABILITADO", "0");
+                    
+                    // Recarrega a página para travar tudo novamente na hora
+                    window.location.reload();
+                });
+            }
+            // =======================================================
+
+        if (localStorage.getItem("PDV_HABILITADO") !== "1") {
+            alert("Acesso negado! Por favor, realize o login.");
+            window.location.href = "index.html";
+            return;
+        }
+        carregarEdicao();
+
+        const form = document.getElementById('formUsuario');
+        if (form) form.addEventListener('submit', salvarUsuario);
+
+        const campos = form?.querySelectorAll('input,select,textarea') || [];
+        campos.forEach(c => {
+            c.addEventListener('input', () => formularioAlterado = true);
+            c.addEventListener('change', () => formularioAlterado = true);
+        });
+
+        const first = document.getElementById('usuario');
+        if (first) first.focus();
+    });
+
+    ////////////////////////////////////////////////////////////////
+    // PROTEÇÃO BEFORE UNLOAD
+    ////////////////////////////////////////////////////////////////
+    window.addEventListener('beforeunload', (e) => {
+        if (formularioAlterado) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
+    ////////////////////////////////////////////////////////////////
+    // IMPORTAR JSON → CARREGA 1º ITEM NO FORMULÁRIO COM SUPORTE À IMAGEM
+    ////////////////////////////////////////////////////////////////
+    function importarPrimeiroUsuario(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function () {
+            try {
+                let dados = JSON.parse(reader.result);
+
+                if (!Array.isArray(dados)) dados = [dados];
+
+                if (!dados.length) {
+                    alert('O arquivo JSON está vazio.');
+                    return;
+                }
+
+                if (formularioAlterado) {
+                    if (!confirm('Descartar alterações atuais e carregar o JSON?')) return;
+                }
+
+                const u = dados[0];
+                const form = document.getElementById('formUsuario');
+                if (form) form.dataset.editId = u.id ? String(u.id).trim() : '';
+
+                document.getElementById('usuarioIdDisplay').value = u.id || '(auto)';
+
+                const set = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = val ?? '';
+                };
+
+                set('usuario', u.usuario);
+                set('senha', u.senha);
+                set('departamento', u.departamento);
+
+                if (u.imagem) {
+                    fotoBase64Cache = u.imagem;
+                    renderizarFotoNoContainer(fotoBase64Cache);
+                    document.getElementById('labelNomeArquivo').textContent = "Imagem_Importada.jpg";
+                } else {
+                    removerFotoUsuario();
+                }
+
+                formularioAlterado = false;
+                sincronizarPreviewMidia();
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setTimeout(() => document.getElementById('usuario')?.focus(), 300);
+
+                alert(`Usuário "${u.usuario || 'sem nome'}" carregado com sucesso!`);
+            } catch (err) {
+                alert('Erro ao ler o JSON: ' + err.message);
+            }
+            e.target.value = '';
+        };
+        reader.readAsText(file);
+    }
+
+    window.novoUsuario = novoUsuario;
+    </script>
+
+    <script>
+    /* PESQUISA USUÁRIO — carrega dados e foto diretamente no formulário */
+    function pesquisarUsuario(event){
+      event.preventDefault();
+      const termo = document.getElementById('inputUsuarioNav').value.toLowerCase().trim();
+      if(!termo){ alert('Digite um usuário para pesquisar.'); return; }
+      const lista = JSON.parse(localStorage.getItem('PDV_USUARIOS')||'[]');
+      const u = lista.find(user=>(user.usuario||'').toLowerCase().includes(termo));
+      if(!u){ alert('Nenhum usuário encontrado com o nome informado.'); return; }
+
+      const form = document.getElementById('formUsuario');
+      if(form) form.dataset.editId = String(u.id).trim();
+
+      document.getElementById('usuarioIdDisplay').value = u.id;
+
+      const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val ?? ''; };
+      set('usuario',      u.usuario);
+      set('senha',        u.senha);
+      set('departamento', u.departamento);
+
+      if (u.imagem) {
+          fotoBase64Cache = u.imagem;
+          renderizarFotoNoContainer(fotoBase64Cache);
+          document.getElementById('labelNomeArquivo').textContent = "Imagem_Pesquisada.jpg";
+      } else {
+          removerFotoUsuario();
+      }
+
+      formularioAlterado = false;
+      sincronizarPreviewMidia();
+      
+      document.getElementById('inputUsuarioNav').value = '';
+      window.scrollTo({top:0,behavior:'smooth'});
+      setTimeout(() => document.getElementById('usuario')?.focus(), 300);
+    }
+    </script>
+
+    <!-- =====================================================
+         CONTROLE DE TEMA — inicialização da UI e eventos de clique
+    ====================================================== -->
+    <script>
+    (() => {
+        const getStoredTheme = () => localStorage.getItem('theme');
+        const setStoredTheme = (tema) => localStorage.setItem('theme', tema);
+        const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const resolveTheme   = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+
+        const aplicarTema = (tema) => {
+            document.documentElement.setAttribute('data-bs-theme', resolveTheme(tema));
+        };
+
+        const atualizarUI = (tema) => {
+            const botaoPrincipal = document.getElementById('themeDropdown');
+            if (!botaoPrincipal) return;
+            botaoPrincipal.setAttribute('aria-label', `Toggle theme (${tema})`);
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const temaAtual = getStoredTheme() || 'auto';
+            aplicarTema(temaAtual);
+            atualizarUI(temaAtual);
+        });
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if ((getStoredTheme() || 'auto') === 'auto') aplicarTema('auto');
+        });
+    })();
+    </script>
+
+    <!-- //////////////////////////////////////////////////////// -->
+    <!-- RODAPÉ FIXO (FOOTER) -->
+    <!-- //////////////////////////////////////////////////////// -->
+
+    <div id="footer-placeholder"></div>
+
+    <!-- /////////////////////////////////////////// -->
+    <!-- DEPENDÊNCIAS DE SCRIPTS DO ECOSSISTEMA CORE -->
+    <!-- /////////////////////////////////////////// -->
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // CORREÇÃO: Fallback estável apontando para o arquivo completo do Bootstrap JS na jDelivr oficial
+        if (typeof bootstrap === 'undefined') {
+            alert('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            console.warn('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            document.write('src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');
+        }
+    </script>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- iNCLUDE PARA USART HTML EXTERNO -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/include.js"></script>
+    
+<!-- //////////////////////////////////////////////////////// -->
+<!-- Script de proteção global -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/autenticacao.js"></script>
+
+
+</body>
+</html>

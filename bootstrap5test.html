@@ -1,0 +1,1280 @@
+<!-- =========================================================
+  ARQUIVO: cadClientesPF.html
+  CADASTRO DE CLIENTES PESSOA FÍSICA
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+  Autor: Felipe Rodrigues - FullTime Technology
+========================================================= -->
+
+<!doctype html>
+<html lang="pt-BR" data-bs-theme="dark">
+    <head>
+        <title>Formulário Pessoa Física</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <!-- SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3 -->
+        <script src="./js/color-modes.js"></script>
+
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- CONTROLE DE TEMA IMEDIATO (Renderização ultrarrápida antes do carregamento do DOM) -->
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <script>
+            (() => {
+                const getStoredTheme = () => localStorage.getItem('theme');
+                const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                const resolveTheme = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+                document.documentElement.setAttribute('data-bs-theme', resolveTheme(getStoredTheme() || 'auto'));
+            })();
+        </script>
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- Bootstrap CSS v5.3.8 -->
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <link href="./css/bootstrap.min.css" rel="stylesheet">
+        
+
+        <!-- <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+            crossorigin="anonymous"
+        /> -->
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+
+<!-- ////////////////////////////////////////////////////////////////////////////////////////// -->
+
+<script>
+    
+////////////////////////////////////////////////////////////////
+// MÁSCARAS DE INPUT
+////////////////////////////////////////////////////////////////
+
+// ── Aplica máscara enquanto o usuário digita ──────────────
+
+function mascararCNPJ(e) {
+    // 00.000.000/0000-00
+    let v = e.target.value.replace(/\D/g, '').slice(0, 14);
+    if (v.length > 12)      v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
+    else if (v.length > 8)  v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/, '$1.$2.$3/$4');
+    else if (v.length > 5)  v = v.replace(/(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3');
+    else if (v.length > 2)  v = v.replace(/(\d{2})(\d{1,3})/, '$1.$2');
+    e.target.value = v;
+}
+
+function mascararIE(e) {
+    // Inscrição Estadual RS: 000/0000000 (9 dígitos)
+    let v = e.target.value.replace(/\D/g, '').slice(0, 9);
+    if (v.length > 3) v = v.replace(/(\d{3})(\d{1,7})/, '$1/$2');
+    e.target.value = v;
+}
+
+function mascararTelefone(e) {
+    // (99) 3333-3333  — 8 dígitos no número
+    let v = e.target.value.replace(/\D/g, '').slice(0, 10);
+    if (v.length > 6)      v = v.replace(/(\d{2})(\d{4})(\d{1,4})/, '($1) $2-$3');
+    else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,4})/, '($1) $2');
+    else if (v.length > 0) v = v.replace(/(\d{1,2})/, '($1');
+    e.target.value = v;
+}
+
+function mascararCelular(e) {
+    // (99) 99999-9999 — 9 dígitos no número
+    let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 7)      v = v.replace(/(\d{2})(\d{5})(\d{1,4})/, '($1) $2-$3');
+    else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,5})/, '($1) $2');
+    else if (v.length > 0) v = v.replace(/(\d{1,2})/, '($1');
+    e.target.value = v;
+}
+
+function mascararCEP(e) {
+    // 00000-000
+    let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 5) v = v.replace(/(\d{5})(\d{1,3})/, '$1-$2');
+    e.target.value = v;
+}
+
+// ── Validação de CNPJ no blur ─────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+
+            // =======================================================
+            // LÓGICA DO LOGOUT: Captura o clique no botão Sair
+            // =======================================================
+            const btnSair = document.getElementById('btnSair');
+            if (btnSair) {
+                btnSair.addEventListener('click', function (event) {
+                    event.preventDefault(); // Evita o comportamento do link '#'
+                    
+                    // Modifica a variável para forçar novo login no sistema
+                    localStorage.setItem("PDV_HABILITADO", "0");
+                    
+                    // Recarrega a página para travar tudo novamente na hora
+                    window.location.reload();
+                });
+            }
+            // =======================================================
+
+
+    // Guarda de Rota — Executado obrigatoriamente no início do DOMContentLoaded
+    if (localStorage.getItem("PDV_HABILITADO") !== "1") {
+        alert("Acesso negado! Por favor, realize o login.");
+        window.location.href = "index.html";
+        return;
+    }
+
+    const aplicar = (id, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', fn);
+    };
+
+    aplicar('cnpj',     mascararCNPJ);
+    aplicar('ie',       mascararIE);
+    aplicar('telefone', mascararTelefone);
+    aplicar('celular',  mascararCelular);
+    aplicar('cep',      mascararCEP);
+
+    // Validação CNPJ no blur
+    const elCnpj = document.getElementById('cnpj');
+    if (elCnpj) {
+        elCnpj.addEventListener('blur', function () {
+            const valor = this.value.trim();
+            if (valor === '') return;
+            if (!validarCNPJ(valor)) {
+                alert('CNPJ inválido! Por favor, corrija os dados.');
+                setTimeout(() => { this.focus(); this.select(); }, 10);
+            }
+        });
+    }
+});
+
+</script>
+
+
+<!-- ////////////////////////////////////////////////////////////////////////////////////////// -->
+
+    </head>
+
+    <body>
+        <header>
+
+            <!-- //////////////////////////////////////////////////////////////////////////////////-->
+            <!-- ///////      BARRA DE NAVEGAÇÃO FIXA (NAVBAR) /////////////////////////////////// -->
+            <!-- //////////////////////////////////////////////////////////////////////////////////-->
+
+            <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-success shadow-sm">
+            <div class="container-fluid">
+                <!-- Dropdown Perfil/Menu -->
+                <div class="dropdown me-2">
+                <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                    <img src="./imagens/usuarios/Felipe.jpg" alt="Felipe" width="33" height="33" class="rounded-circle" />
+                </a>
+                <ul class="dropdown-menu text-small shadow">
+                    <li><a class="dropdown-item" href="#">Novo projeto...</a></li>
+                    <li><a class="dropdown-item" href="#">Configurações</a></li>
+                    <li><a class="dropdown-item" href="#">Perfil</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="cadclientesPF.html">Cadastro de Clientes PF</a></li>
+                    <li><a class="dropdown-item" href="cadclientesPJ.html">Cadastro de Clientes PJ</a></li>
+                    <li><a class="dropdown-item" href="cadFornecedores.html">Cadastro de Fornecedores</a></li>
+                    <li><a class="dropdown-item" href="cadusuarios.html">Cadastro de Usuários</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="cadProdutos.html">Cadastro de Produtos</a></li>
+                    <li><a class="dropdown-item" href="tabProdutos.html">Tabela de Produtos</a></li>
+                    <li><a class="dropdown-item" href="Ordemdeservico.html">Cadastro de Ordens de Serviço</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="cadusuarios.html">Usuários</a></li>
+                    <li><a class="dropdown-item" href="tabusuarios.html">Tab. Usuários</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="felipe.html">Felipe Rodrigues</a></li>
+                    <li><a class="dropdown-item" href="about.html">Sobre a FullTime</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="index-constantino.html">Constantino</a></li>
+                    <li><a class="dropdown-item" href="index-brasil.html">Brasil</a></li>
+                    <li><a class="dropdown-item" href="index-rs.html">Rio Grande do Sul</a></li>
+                    <li><a class="dropdown-item" href="index-canoas.html">Canoas</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <!-- ALTERAÇÃO REALIZADA: id="btnSair" adicionado abaixo -->
+                    <li><a id="btnSair" class="dropdown-item text-danger" href="#">Sair</a></li>
+                </ul>
+                </div>
+
+                <!-- Botão Hamburguer para Mobile -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item"><a class="nav-link active text-light" href="index.html">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link text-light" href="tabProdutos.html">Produto</a></li>
+                    <li class="nav-item"><a class="nav-link text-light" href="frentedecaixa.html">PDV</a></li>
+                    <li class="nav-item"><a class="nav-link text-light" href="tabusuarios.html">Usuários</a></li>
+                    <li class="nav-item"><a class="nav-link text-light" href="index-sistema.html">Sistema</a></li>
+                    <li class="nav-item"><a class="nav-link active text-light" href="remover-fundo.html">Remover Fundo</a></li>
+                </ul>
+
+                <!-- Seletor de Tema -->
+                <ul class="navbar-nav ms-md-auto mb-2 mb-md-0">
+                    <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-light" href="#" id="themeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        🎨 Tema
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="themeDropdown">
+                        <li>
+                        <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', 'light'); localStorage.setItem('theme', 'light')">
+                            ☀️ Modo Claro
+                        </button>
+                        </li>
+                        <li>
+                        <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', 'dark'); localStorage.setItem('theme', 'dark')">
+                            🌙 Modo Escuro
+                        </button>
+                        </li>
+                        <li>
+                        <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); localStorage.setItem('theme', 'auto')">
+                            💻 Automático
+                        </button>
+                        </li>
+                    </ul>
+                    </li>
+                </ul>
+                </div>
+            </div>
+            </nav>
+
+            <!-- ////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+        </header>
+
+            <br><br><br>
+            <div class="card card-custom border-0">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0 text-center">Formulário de Clientes Pessoa Jurídica</h3>
+                </div>
+                <BR>
+<!-- /////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+                  <!-- BARRA DE BOTÕES DE AÇÃO -->
+                
+                  <!-- <div class="sticky-top bg-body pt-2 pb-2 mb-3 border-bottom"> -->
+                  <div class="sticky-top bg-body-tertiary pt-2 pb-2 mb-3 border-bottom">
+
+                    <div class="d-flex flex-wrap align-items-center gap-1">
+                    &nbsp;
+                    <button class="btn btn-sm btn-primary" onclick="novoCliente()">🆕 Novo</button>
+                    <button class="btn btn-sm btn-success" onclick="salvarCadastro(event)">💾 Salvar</button>
+                    <button class="btn btn-sm btn-secondary" onclick="limparFormulario()">🧹 Limpar</button>
+                    <button class="btn btn-sm btn-warning" onclick="baixarJSON()">⬇ JSON</button>
+                    <label for="arquivoJSONcad" class="btn btn-sm btn-info mb-0">📂 Importar</label><input type="file" id="arquivoJSONcad" accept=".json" class="d-none" onchange="importarPrimeiroCliente(event)">
+                    <button class="btn btn-sm btn-outline-success" onclick="voltarTabela()">📋 Tabela</button>
+                    <div class="vr mx-2"></div>
+                    <div class="input-group input-group-sm ms-auto" style="max-width:380px">
+                    <input id="inputCNPJCad" class="form-control" placeholder="Pesquisar (Razão Social, CNPJ, Rua ou Fantasia)" onkeydown="if(event.key==='Enter'){pesquisarCNPJ(event);}">
+                    <button class="btn btn-outline-success" onclick="pesquisarCNPJ(event)">🔍</button>
+                    &nbsp;&nbsp;
+                    </div>
+                    </div>
+                    </div>
+<!-- /////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+                <div class="card-body">
+
+                        <!-- =================================
+                             FORMULÁRIO
+                        ================================== -->
+                        <form id="formClientePJ" autocomplete="off" novalidate>
+
+                            <!-- =============================
+                                 DADOS DA EMPRESA
+                            ============================== -->
+                            <h5 class="titulo-secao mb-3 text-success-emphasis">Dados da Empresa
+                            </h5>
+
+                            <div class="row">
+
+                                <!-- RAZÃO SOCIAL -->
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label">
+                                        Razão Social
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="razaoSocial"
+                                        class="form-control"
+                                        value=""
+                                        placeholder="Razão social da empresa"
+                                        autocomplete="organization">
+                                </div>
+
+                                <!-- CNPJ -->
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        CNPJ
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="cnpj"
+                                        class="form-control"
+                                        value=""
+                                        maxlength="18"
+                                        placeholder="00.000.000/0000-00">
+
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <!-- NOME FANTASIA -->
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label">
+                                        Nome Fantasia
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="nomeFantasia"
+                                        class="form-control"
+                                        value=""
+                                        placeholder="Nome fantasia da empresa">
+                                </div>
+
+                                <!-- INSCRIÇÃO ESTADUAL -->
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        Inscrição Estadual
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="ie"
+                                        maxlength="11"
+                                        placeholder="000/0000000">
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <!-- DATA DE ABERTURA -->
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        Data de Abertura
+                                    </label>
+
+                                    <input
+                                        type="date" id="dataAbertura" class="form-control">
+                                </div>
+
+                                <!-- PORTE DA EMPRESA -->
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        Porte da Empresa
+                                    </label>
+
+                                    <select id="porte" class="form-select">
+                                        <option value="" selected>
+                                            Selecione
+                                        </option>
+                                        <option value="MEI">MEI</option>
+                                        <option value="ME">ME – Microempresa</option>
+                                        <option value="EPP">EPP – Empresa de Pequeno Porte</option>
+                                        <option value="Média">Empresa de Médio Porte</option>
+                                        <option value="Grande">Grande Empresa</option>
+                                    </select>
+                                </div>
+
+                                <!-- REGIME TRIBUTÁRIO -->
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        Regime Tributário
+                                    </label>
+
+                                    <select id="regimeTributario" class="form-select">
+                                        <option value="" selected>
+                                            Selecione
+                                        </option>
+                                        <option value="Simples Nacional">Simples Nacional</option>
+                                        <option value="Lucro Presumido">Lucro Presumido</option>
+                                        <option value="Lucro Real">Lucro Real</option>
+                                        <option value="MEI">MEI</option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            <!-- =============================
+                                 RESPONSÁVEL / CONTATO
+                            ============================== -->
+                            <h5 class="titulo-secao mt-4 mb-3 text-success-emphasis">Responsável / Contato
+                            </h5>
+
+                            <div class="row">
+
+                                <!-- NOME DO RESPONSÁVEL -->
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label">
+                                        Nome do Responsável
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="nomeResponsavel"
+                                        class="form-control"
+                                        value=""
+                                        placeholder="Nome completo do responsável">
+                                </div>
+
+                                <!-- CARGO -->
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        Cargo
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="cargo"
+                                        class="form-control"
+                                        value=""
+                                        placeholder="Ex: Diretor, Gerente, Sócio">
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <!-- TELEFONE -->
+                                <div class="col-md-4 mb-3">
+
+                                    <label class="form-label">
+                                        Telefone Comercial
+                                    </label>
+
+                                    <input type="text"
+                                           id="telefone"
+                                           class="form-control"
+                                           maxlength="14"
+                                           placeholder="(51) 3333-3333">
+
+                                </div>
+
+                                <!-- CELULAR -->
+                                <div class="col-md-4 mb-3">
+
+                                    <label class="form-label">
+                                        Celular / WhatsApp
+                                    </label>
+
+                                    <input type="text"
+                                           id="celular"
+                                           class="form-control"
+                                           maxlength="15"
+                                           placeholder="(51) 99999-9999">
+
+                                </div>
+
+                                <!-- E-MAIL -->
+                                <div class="col-md-4 mb-3">
+
+                                    <label class="form-label">
+                                        E-mail
+                                    </label>
+
+                                    <input type="email"
+                                           class="form-control"
+                                           id="email"
+                                           autocomplete="email"
+                                           maxlength="80"
+                                           placeholder="empresa@email.com">
+
+                                </div>
+
+                            </div>
+
+                            <!-- =============================
+                                 ENDEREÇO
+                            ============================== -->
+                            <h5 class="titulo-secao mt-4 mb-3 text-success-emphasis">Endereço
+                            </h5>
+
+                            <div class="row">
+
+                                <!-- CEP -->
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">
+                                        CEP
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="cep"
+                                        maxlength="9"
+                                        placeholder="00000-000">
+                                </div>
+
+                                <!-- RUA -->
+                                <div class="col-md-7 mb-3">
+                                    <label class="form-label">
+                                        Rua
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="rua"
+                                        value=""
+                                        placeholder="Nome da rua">
+                                </div>
+
+                                <!-- NÚMERO -->
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label">
+                                        Número
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="numero"
+                                        value=""
+                                        placeholder="123">
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <!-- BAIRRO -->
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        Bairro
+                                    </label>
+
+                                    <input type="text" id="bairro" class="form-control">
+                                </div>
+
+                                <!-- CIDADE -->
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        Cidade
+                                    </label>
+
+                                    <input type="text" id="cidade" class="form-control">
+                                </div>
+
+                                <!-- ESTADO -->
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        Estado
+                                    </label>
+
+                                    <select id="estado" class="form-select">
+
+                                        <option value="" selected>
+                                            Selecione
+                                        </option>
+                                        <option>AC</option>
+                                        <option>AL</option>
+                                        <option>AP</option>
+                                        <option>AM</option>
+                                        <option>BA</option>
+                                        <option>CE</option>
+                                        <option>DF</option>
+                                        <option>ES</option>
+                                        <option>GO</option>
+                                        <option>MA</option>
+                                        <option>MT</option>
+                                        <option>MS</option>
+                                        <option>MG</option>
+                                        <option>PA</option>
+                                        <option>PB</option>
+                                        <option>PR</option>
+                                        <option>PE</option>
+                                        <option>PI</option>
+                                        <option>RJ</option>
+                                        <option>RN</option>
+                                        <option>RS</option>
+                                        <option>RO</option>
+                                        <option>RR</option>
+                                        <option>SC</option>
+                                        <option>SP</option>
+                                        <option>SE</option>
+                                        <option>TO</option>
+
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            <!-- =============================
+                                 OBSERVAÇÕES
+                            ============================== -->
+                            <div class="mb-4">
+
+                                <label class="form-label">
+                                    Observações
+                                </label>
+
+                                <textarea id="observacoes"
+                                    class="form-control"
+                                    rows="4"
+                                    placeholder="Digite observações adicionais..."></textarea>
+
+                            </div>
+
+                            
+                        </form>
+                </div>
+
+
+<!-- /////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+        <main></main>
+<!-- /////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+<!-- /////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+    <!-- =====================================================
+         JAVASCRIPT PRINCIPAL E GERENCIAMENTO DE DADOS
+    ====================================================== -->
+    <!-- =====================================================
+         JAVASCRIPT BOOTSTRAP
+    ====================================================== -->
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Fallback: se o bootstrap.bundle.min.js local não carregar (caminho errado,
+        // arquivo ausente, etc.), o dropdown de tema para de funcionar. Este script
+        // detecta isso e carrega a mesma versão via CDN como reserva.
+        if (typeof bootstrap === 'undefined') {
+            console.warn('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            alert('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            document.write('<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"><\/script>');
+        }
+    </script>
+
+<script>
+
+const STORAGE_KEY = 'PDV_CLIENTES_PJ';
+const EDIT_KEY    = 'CLIENTE_PJ_EDITAR';
+
+////////////////////////////////////////////////////////////////
+// CNPJ VALIDATOR
+////////////////////////////////////////////////////////////////
+function validarCNPJ(cnpj) {
+    const numeros = cnpj.replace(/\D/g, '');
+
+    if (numeros.length !== 14) return false;
+    if (/^(\d)\1+$/.test(numeros)) return false;
+
+    const calcDigito = (base, pesos) => {
+        let soma = 0;
+        for (let i = 0; i < base.length; i++) soma += parseInt(base[i]) * pesos[i];
+        const resto = soma % 11;
+        return resto < 2 ? 0 : 11 - resto;
+    };
+
+    const pesos1 = [5,4,3,2,9,8,7,6,5,4,3,2];
+    const pesos2 = [6,5,4,3,2,9,8,7,6,5,4,3,2];
+
+    const d1 = calcDigito(numeros.slice(0, 12), pesos1);
+    const d2 = calcDigito(numeros.slice(0, 13), pesos2);
+
+    return d1 === parseInt(numeros[12]) && d2 === parseInt(numeros[13]);
+}
+
+////////////////////////////////////////////////////////////////
+// STATE
+////////////////////////////////////////////////////////////////
+
+let formularioAlterado = false;
+
+////////////////////////////////////////////////////////////////
+// INIT EDIT MODE
+////////////////////////////////////////////////////////////////
+
+function carregarEdicao() {
+
+    const editData = localStorage.getItem(EDIT_KEY);
+    if (!editData) return;
+
+    const cliente = JSON.parse(editData);
+
+    const form = document.getElementById('formClientePJ');
+    if (form) form.dataset.editId = cliente.id;
+
+    const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val ?? '';
+    };
+
+    set('razaoSocial',      cliente.razaoSocial);
+    set('cnpj',             cliente.cnpj);
+    set('nomeFantasia',     cliente.nomeFantasia);
+    set('ie',               cliente.ie);
+    set('dataAbertura',     cliente.dataAbertura);
+    set('porte',            cliente.porte);
+    set('regimeTributario', cliente.regimeTributario);
+    set('nomeResponsavel',  cliente.nomeResponsavel);
+    set('cargo',            cliente.cargo);
+    set('telefone',         cliente.telefone);
+    set('celular',          cliente.celular);
+    set('email',            cliente.email);
+    set('cep',              cliente.cep);
+    set('rua',              cliente.rua);
+    set('numero',           cliente.numero);
+    set('bairro',           cliente.bairro);
+    set('cidade',           cliente.cidade);
+    set('estado',           cliente.estado);
+    set('observacoes',      cliente.observacoes);
+
+    localStorage.removeItem(EDIT_KEY);
+}
+
+////////////////////////////////////////////////////////////////
+// LIMPAR FORM
+////////////////////////////////////////////////////////////////
+
+function limparFormulario() {
+
+    const ids = [
+        'razaoSocial','cnpj','nomeFantasia','ie','dataAbertura',
+        'porte','regimeTributario','nomeResponsavel','cargo',
+        'telefone','celular','email','cep','rua',
+        'numero','bairro','cidade','estado','observacoes'
+    ];
+
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+
+    const form = document.getElementById('formClientePJ');
+    if (form) delete form.dataset.editId;
+
+    const first = document.getElementById('razaoSocial');
+
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+    setTimeout(() => {
+        if (first) first.focus();
+    }, 300);
+}
+
+////////////////////////////////////////////////////////////////
+// VOLTAR À TABELA
+////////////////////////////////////////////////////////////////
+
+function voltarTabela() {
+    if (formularioAlterado) {
+        if (!confirm('Há alterações não salvas. Deseja sair mesmo assim?')) return;
+    }
+    formularioAlterado = false;
+    window.location.href = 'tabClientePJ.html';
+}
+
+////////////////////////////////////////////////////////////////
+// NOVO CLIENTE
+////////////////////////////////////////////////////////////////
+
+function novoCliente() {
+    if (formularioAlterado) {
+        if (!confirm('Descartar alterações?')) return;
+    }
+
+    localStorage.removeItem(EDIT_KEY);
+    formularioAlterado = false;
+
+    limparFormulario();
+}
+
+////////////////////////////////////////////////////////////////
+// GERAR ID
+////////////////////////////////////////////////////////////////
+
+function gerarId() {
+    const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    return lista.length ? Math.max(...lista.map(c => Number(c.id)||0)) + 1 : 1;
+}
+
+////////////////////////////////////////////////////////////////
+// SALVAR
+////////////////////////////////////////////////////////////////
+
+function salvarCadastro(e) {
+    if (e && typeof e.preventDefault === 'function') {
+        e.preventDefault();
+    }
+
+    if (!confirm('Deseja salvar este cliente?')) {
+        return;
+    }
+
+    const cnpj = document.getElementById('cnpj').value.trim();
+
+    if (!cnpj || !validarCNPJ(cnpj)) {
+        alert('CNPJ inválido');
+        return;
+    }
+
+    const form = document.getElementById('formClientePJ');
+    const editId = form?.dataset.editId ? Number(form.dataset.editId) : null;
+
+    const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const agora = new Date().toISOString();
+
+    const cliente = {
+        id: editId || gerarId(),
+        razaoSocial: document.getElementById('razaoSocial').value,
+        cnpj,
+        nomeFantasia: document.getElementById('nomeFantasia').value,
+        ie: document.getElementById('ie').value,
+        dataAbertura: document.getElementById('dataAbertura').value,
+        porte: document.getElementById('porte').value,
+        regimeTributario: document.getElementById('regimeTributario').value,
+        nomeResponsavel: document.getElementById('nomeResponsavel').value,
+        cargo: document.getElementById('cargo').value,
+        telefone: document.getElementById('telefone').value,
+        celular: document.getElementById('celular').value,
+        email: document.getElementById('email').value,
+        cep: document.getElementById('cep').value,
+        rua: document.getElementById('rua').value,
+        numero: document.getElementById('numero').value,
+        bairro: document.getElementById('bairro').value,
+        cidade: document.getElementById('cidade').value,
+        estado: document.getElementById('estado').value,
+        observacoes: document.getElementById('observacoes').value,
+        dataAlteracao: agora
+    };
+
+    if (editId) {
+        const idx = lista.findIndex(c => c.id === editId);
+        if (idx !== -1) {
+            cliente.dataCadastro = lista[idx].dataCadastro;
+            lista[idx] = cliente;
+        }
+    } else {
+        cliente.dataCadastro = agora;
+        lista.push(cliente);
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+
+    formularioAlterado = false;
+
+    alert(editId ? 'Cliente atualizado com sucesso!' : 'Cliente salvo com sucesso!');
+
+    window.location.href = 'tabClientePJ.html';
+}
+
+
+////////////////////////////////////////////////////////////////
+// BAIXAR JSON
+////////////////////////////////////////////////////////////////
+
+function baixarJSON() {
+
+    let clientes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+    const json = JSON.stringify(clientes, null, 2);
+
+    const blob = new Blob([json], { type: 'application/json' });
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cadclientesPJ.json';
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+}
+
+////////////////////////////////////////////////////////////////
+// INIT
+////////////////////////////////////////////////////////////////
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    carregarEdicao();
+
+    const form = document.getElementById('formClientePJ');
+    if (form) form.addEventListener('submit', salvarCadastro);
+
+    const campos = form?.querySelectorAll('input,select,textarea') || [];
+
+    campos.forEach(c => {
+        c.addEventListener('input', () => formularioAlterado = true);
+        c.addEventListener('change', () => formularioAlterado = true);
+    });
+
+    const first = document.getElementById('razaoSocial');
+    if (first) first.focus();
+});
+
+////////////////////////////////////////////////////////////////
+// PROTEÇÃO BEFORE UNLOAD
+////////////////////////////////////////////////////////////////
+
+window.addEventListener('beforeunload', (e) => {
+    if (formularioAlterado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
+////////////////////////////////////////////////////////////////
+// IMPORTAR JSON → CARREGA 1º ITEM NO FORMULÁRIO
+////////////////////////////////////////////////////////////////
+
+function importarPrimeiroCliente(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function () {
+        try {
+            let dados = JSON.parse(reader.result);
+
+            // aceita objeto único ou array
+            if (!Array.isArray(dados)) dados = [dados];
+
+            if (!dados.length) {
+                alert('O arquivo JSON está vazio.');
+                return;
+            }
+
+            if (formularioAlterado) {
+                if (!confirm('Descartar alterações atuais e carregar o JSON?')) return;
+            }
+
+            const c = dados[0];
+
+            const form = document.getElementById('formClientePJ');
+            if (form) form.dataset.editId = c.id || '';
+
+            const set = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val ?? '';
+            };
+
+            set('razaoSocial',      c.razaoSocial);
+            set('cnpj',             c.cnpj);
+            set('nomeFantasia',     c.nomeFantasia);
+            set('ie',               c.ie);
+            set('dataAbertura',     c.dataAbertura);
+            set('porte',            c.porte);
+            set('regimeTributario', c.regimeTributario);
+            set('nomeResponsavel',  c.nomeResponsavel);
+            set('cargo',            c.cargo);
+            set('telefone',         c.telefone);
+            set('celular',          c.celular);
+            set('email',            c.email);
+            set('cep',              c.cep);
+            set('rua',              c.rua);
+            set('numero',           c.numero);
+            set('bairro',           c.bairro);
+            set('cidade',           c.cidade);
+            set('estado',           c.estado);
+            set('observacoes',      c.observacoes);
+
+            formularioAlterado = false;
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => document.getElementById('razaoSocial')?.focus(), 300);
+
+            alert(`Cliente "${c.razaoSocial || 'sem nome'}" carregado com sucesso!`);
+        } catch (err) {
+            alert('Erro ao ler o JSON: ' + err.message);
+        }
+        // limpa o input para permitir reimportar o mesmo arquivo
+        e.target.value = '';
+    };
+    reader.readAsText(file);
+}
+
+////////////////////////////////////////////////////////////////
+// sobrescrita segura do botão novo (caso exista externo)
+////////////////////////////////////////////////////////////////
+
+window.novoCliente = novoCliente;
+
+</script>
+
+
+<!-- ///////////////////////////////////////////////////// -->
+<!--      Este modal talvez não seja mais necessário       -->
+<!-- ///////////////////////////////////////////////////// -->
+
+<!-- =========================================================
+     MODAL — RESULTADO DE PESQUISA POR CNPJ
+========================================================== -->
+<div class="modal fade" id="modalCNPJCad" tabindex="-1" aria-labelledby="modalCNPJCadLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalCNPJCadLabel">Resultado da Pesquisa</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modalCNPJCadBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+////////////////////////////////////////////////////////////////
+// PESQUISA POR CNPJ — (cadclientesPJ.html)
+////////////////////////////////////////////////////////////////
+
+const STORAGE_KEY_CAD = "PDV_CLIENTES_PJ";
+
+function mascaraCNPJCad(input) {
+  // Formato: 00.000.000/0000-00
+  let v = input.value.replace(/\D/g, "").slice(0, 14);
+  if (v.length > 12)      v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, "$1.$2.$3/$4-$5");
+  else if (v.length > 8)  v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/, "$1.$2.$3/$4");
+  else if (v.length > 5)  v = v.replace(/(\d{2})(\d{3})(\d{1,3})/, "$1.$2.$3");
+  else if (v.length > 2)  v = v.replace(/(\d{2})(\d{1,3})/, "$1.$2");
+  input.value = v;
+}
+
+function escaparHTMLCad(str) {
+  if (str == null) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function formatarDataCad(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso.includes("T") ? iso : iso + "T00:00:00");
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString("pt-BR");
+}
+
+function normalizarTextoCad(str) {
+  return String(str || "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase().trim();
+}
+
+function pesquisarCNPJ(event) {
+  event.preventDefault();
+  const termoOriginal = document.getElementById("inputCNPJCad").value.trim();
+  if (!termoOriginal) { alert("Digite algo para pesquisar (Razão Social, CNPJ, Rua ou Fantasia)."); return; }
+
+  const contemLetra = /[a-zA-Z\u00C0-\u017F]/.test(termoOriginal);
+  const termoTexto = normalizarTextoCad(termoOriginal);
+  const termoDigitos = termoOriginal.replace(/\D/g, "");
+
+  let lista = [];
+  try { lista = JSON.parse(localStorage.getItem(STORAGE_KEY_CAD)) || []; } catch { lista = []; }
+
+  const resultado = lista.filter(c => {
+    // Termo só com números (ex.: CNPJ digitado com ou sem máscara) -> busca só por CNPJ
+    if (!contemLetra && termoDigitos) {
+      return (c.cnpj || "").replace(/\D/g, "").includes(termoDigitos);
+    }
+    // Termo com letras -> busca só nos campos de texto (Razão Social, Rua, Fantasia)
+    const razaoMatch = normalizarTextoCad(c.razaoSocial).includes(termoTexto);
+    const ruaMatch = normalizarTextoCad(c.rua).includes(termoTexto);
+    const fantasiaMatch = normalizarTextoCad(c.nomeFantasia).includes(termoTexto);
+    return razaoMatch || ruaMatch || fantasiaMatch;
+  });
+  const body = document.getElementById("modalCNPJCadBody");
+
+  if (resultado.length === 0) {
+    body.innerHTML = `<p class="text-center text-muted py-3">Nenhum cliente encontrado para o termo informado.</p>`;
+  } else {
+    body.innerHTML = resultado.map(c => `
+      <div class="card mb-3 border-success">
+        <div class="card-header bg-success text-white fw-bold">
+          #${escaparHTMLCad(c.id)} &mdash; ${escaparHTMLCad(c.razaoSocial)}
+        </div>
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col-sm-6"><strong>CNPJ:</strong> ${escaparHTMLCad(c.cnpj)}</div>
+            <div class="col-sm-6"><strong>Nome Fantasia:</strong> ${escaparHTMLCad(c.nomeFantasia)}</div>
+            <div class="col-sm-6"><strong>Inscrição Estadual:</strong> ${escaparHTMLCad(c.ie)}</div>
+            <div class="col-sm-6"><strong>Data de Abertura:</strong> ${formatarDataCad(c.dataAbertura)}</div>
+            <div class="col-sm-6"><strong>Porte:</strong> ${escaparHTMLCad(c.porte)}</div>
+            <div class="col-sm-6"><strong>Regime Tributário:</strong> ${escaparHTMLCad(c.regimeTributario)}</div>
+            <div class="col-sm-6"><strong>Responsável:</strong> ${escaparHTMLCad(c.nomeResponsavel)}</div>
+            <div class="col-sm-6"><strong>Cargo:</strong> ${escaparHTMLCad(c.cargo)}</div>
+            <div class="col-sm-6"><strong>Telefone:</strong> ${escaparHTMLCad(c.telefone)}</div>
+            <div class="col-sm-6"><strong>Celular:</strong> ${escaparHTMLCad(c.celular)}</div>
+            <div class="col-sm-12"><strong>E-mail:</strong> ${escaparHTMLCad(c.email)}</div>
+            <div class="col-sm-12"><strong>Endereço:</strong>
+              ${escaparHTMLCad(c.rua)}, ${escaparHTMLCad(c.numero)} &mdash;
+              ${escaparHTMLCad(c.bairro)}, ${escaparHTMLCad(c.cidade)} /
+              ${escaparHTMLCad(c.estado)} &mdash; CEP: ${escaparHTMLCad(c.cep)}
+            </div>
+          </div>
+          <div class="mt-3">
+            <button class="btn btn-sm btn-success"
+              onclick="carregarClienteNoForm(${Number(c.id)}); bootstrap.Modal.getInstance(document.getElementById('modalCNPJCad')).hide();">
+              ✏️ Carregar para Edição
+            </button>
+          </div>
+        </div>
+      </div>`).join("");
+  }
+  new bootstrap.Modal(document.getElementById("modalCNPJCad")).show();
+}
+
+function carregarClienteNoForm(id) {
+  let lista = [];
+  try { lista = JSON.parse(localStorage.getItem(STORAGE_KEY_CAD)) || []; } catch { lista = []; }
+  const cliente = lista.find(c => Number(c.id) === Number(id));
+  if (!cliente) { alert("Cliente não encontrado."); return; }
+
+  const form = document.getElementById("formClientePJ");
+  if (form) form.dataset.editId = cliente.id;
+
+  const set = (fieldId, val) => {
+    const el = document.getElementById(fieldId);
+    if (el) el.value = val ?? "";
+  };
+  set("razaoSocial",      cliente.razaoSocial);
+  set("cnpj",             cliente.cnpj);
+  set("nomeFantasia",     cliente.nomeFantasia);
+  set("ie",               cliente.ie);
+  set("dataAbertura",     cliente.dataAbertura);
+  set("porte",            cliente.porte);
+  set("regimeTributario", cliente.regimeTributario);
+  set("nomeResponsavel",  cliente.nomeResponsavel);
+  set("cargo",            cliente.cargo);
+  set("telefone",         cliente.telefone);
+  set("celular",          cliente.celular);
+  set("email",            cliente.email);
+  set("cep",              cliente.cep);
+  set("rua",              cliente.rua);
+  set("numero",           cliente.numero);
+  set("bairro",           cliente.bairro);
+  set("cidade",           cliente.cidade);
+  set("estado",           cliente.estado);
+  set("observacoes",      cliente.observacoes);
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  setTimeout(() => document.getElementById("razaoSocial")?.focus(), 300);
+}
+</script>
+    <!-- =====================================================
+         CONTROLE DE TEMA — inicialização da UI e eventos de clique
+    ====================================================== -->
+    <script>
+    (() => {
+        const getStoredTheme = () => localStorage.getItem('theme');
+        const setStoredTheme = (tema) => localStorage.setItem('theme', tema);
+        const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const resolveTheme   = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+
+        const aplicarTema = (tema) => {
+            document.documentElement.setAttribute('data-bs-theme', resolveTheme(tema));
+        };
+
+        const atualizarUI = (tema) => {
+            const botaoPrincipal = document.getElementById('bd-theme');
+            const itemAtivo = document.querySelector(`[data-bs-theme-value="${tema}"]`);
+            if (!botaoPrincipal || !itemAtivo) return;
+
+            document.querySelectorAll('[data-bs-theme-value]').forEach(el => {
+                el.classList.remove('active');
+                el.setAttribute('aria-pressed', 'false');
+                el.querySelector('.bi.ms-auto')?.classList.add('d-none');
+            });
+
+            itemAtivo.classList.add('active');
+            itemAtivo.setAttribute('aria-pressed', 'true');
+            itemAtivo.querySelector('.bi.ms-auto')?.classList.remove('d-none');
+
+            const hrefIcone = itemAtivo.querySelector('svg use')?.getAttribute('href');
+            const iconePrincipal = botaoPrincipal.querySelector('.theme-icon-active use');
+            if (hrefIcone && iconePrincipal) iconePrincipal.setAttribute('href', hrefIcone);
+
+            botaoPrincipal.setAttribute('aria-label', `Toggle theme (${tema})`);
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const temaAtual = getStoredTheme() || 'auto';
+            aplicarTema(temaAtual);
+            atualizarUI(temaAtual);
+
+            document.querySelectorAll('[data-bs-theme-value]').forEach(botao => {
+                botao.addEventListener('click', () => {
+                    const tema = botao.getAttribute('data-bs-theme-value');
+                    setStoredTheme(tema);
+                    aplicarTema(tema);
+                    atualizarUI(tema);
+                });
+            });
+        });
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if ((getStoredTheme() || 'auto') === 'auto') aplicarTema('auto');
+        });
+    })();
+    </script>
+
+
+<!-- ////////////////////////////////////////////////////////////////////////////////// -->
+<script src="./js/bootstrap.bundle.min.js"></script>
+<!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+    <!-- Script de proteção de tela -->
+    <script src="./js/autenticacao.js"></script>
+
+    <!-- ////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+
+<!-- /////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+        <!-- =========================================================
+            RODAPÉ FIXO (FOOTER)
+        ========================================================== -->
+        <footer class="footer mt-auto py-2 bg-body-tertiary fixed-bottom">
+            <div class="container-fluid">
+                <p class="text-center text-success-emphasis mb-0 small">
+                    &copy; 2026 Felipe Rodrigues - FullTime Technology
+                </p>
+            </div>
+        </footer>
+
+        <!-- Bootstrap JavaScript Bundle (includes Popper) -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+            crossorigin="anonymous"
+        ></script>
+    </body>
+</html>

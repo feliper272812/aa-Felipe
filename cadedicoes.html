@@ -1,0 +1,802 @@
+<!-- =========================================================
+  ARQUIVO: cadedicoes.html
+
+  CADASTRO DE MATERIAS VINCULADO ÀS EDIÇÕES DO JORNAL CONSTANTINO NEWS
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+  Autor: Felipe Rodrigues - FullTime Technology
+========================================================= -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro de Matérias - Constantino News</title>
+
+<!-- ////////////////////////////////////////////////////////////////////////////////// -->
+<!-- SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3 -->
+<!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <script src="./js/color-modes.js"></script>
+
+        <script>
+            if (!document.documentElement.hasAttribute('data-bs-theme')) {
+                alert('./js/color-modes.js local não carregou. Usando CDN como reserva.');
+                console.warn('color-modes.js local não carregou. Usando CDN como reserva.');
+
+                const scriptTheme = document.createElement('script');
+                scriptTheme.src = 'https://jsdelivr.net';
+                document.head.appendChild(scriptTheme);
+            }
+        </script>
+
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- Bootstrap CSS v5.3.8 -->
+        <!-- BOOTSTRAP 5.3.3 CSS LOCAL -->
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <link id="bootstrap-css-local" href="./css/bootstrap.min.css" rel="stylesheet">
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                let cssCarregado = false;
+                for (let i = 0; i < document.styleSheets.length; i++) {
+                    try {
+                        let sheet = document.styleSheets[i];
+                        if (sheet.href && sheet.href.indexOf("bootstrap.min.css") !== -1) {
+                            if (sheet.cssRules && sheet.cssRules.length > 0) {
+                                cssCarregado = true;
+                                break;
+                            }
+                        }
+                    } catch (e) {
+                        // Captura restrições de segurança de CORS se houverem
+                    }
+                }
+
+                if (!cssCarregado) {
+                    alert('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                    console.warn('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                    
+                    let cdn = document.createElement("link");
+                    cdn.rel = "stylesheet";
+                    cdn.href = "https://jsdelivr.net";
+                    cdn.integrity = "sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH";
+                    cdn.crossOrigin = "anonymous";
+                    document.head.appendChild(cdn);
+                }
+            });
+        </script>
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- CONTROLE DE TEMA IMEDIATO (Renderização ultrarrápida antes do carregamento do DOM) -->
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <script>
+            (() => {
+                const getStoredTheme = () => localStorage.getItem('theme');
+                const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                const resolveTheme = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+                document.documentElement.setAttribute('data-bs-theme', resolveTheme(getStoredTheme() || 'auto'));
+            })();
+        </script>
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+  <style>
+
+    /* Espaço para a NAV fixa do sistema (56px) */
+    body { padding-top: 56px; }
+
+    #nav-sistema-placeholder {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 56px;
+      z-index: 1050;
+    }
+
+    /* Toolbar fica colada logo abaixo da NAV */
+    .toolbar-cad { top: 56px; z-index: 1020; }
+
+    #previewImg { max-height: 180px; max-width: 100%; object-fit: contain; }
+
+    #imagemArquivo::file-selector-button {
+        background-color: var(--bs-primary);
+        color: #fff;
+        border-color: var(--bs-primary);
+        transition: background-color 0.15s ease-in-out;
+    }
+    #imagemArquivo:hover::file-selector-button {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV DO SISTEMA (injetada pelo include.js) -->
+  <div id="nav-sistema-placeholder"></div>
+
+  <!-- ── TOOLBAR ─────────────────────────────────────────────── -->
+  <div class="bg-body-tertiary border-bottom sticky-top toolbar-cad">
+    <div class="container-fluid px-4 py-2 d-flex flex-wrap align-items-center gap-2">
+      <button type="button" id="btnNovo" class="btn btn-sm btn-outline-success">🆕 Novo</button>
+      <button type="button" id="btnSalvar" class="btn btn-sm btn-success">💾 Salvar</button>
+      <button type="button" id="btnLimpar" class="btn btn-sm btn-outline-secondary">🧹 Limpar</button>
+
+      <span class="vr"></span>
+
+      <button type="button" id="btnExportar" class="btn btn-sm btn-outline-secondary">⬇ JSON Edição</button>
+      <button type="button" id="btnImportar" class="btn btn-sm btn-outline-secondary">📂 Importar JSON</button>
+      <input type="file" id="inputImportar" accept=".json,application/json" hidden />
+
+      <span class="vr"></span>
+
+      <a id="btnTabela" href="tabmaterias2.html" class="btn btn-sm btn-outline-secondary">📋 Ver Grade/Capa</a>
+      <a href="tabEdicoes.html" class="btn btn-sm btn-outline-primary">📰 Lista de Edições</a>
+
+      <div class="input-group input-group-sm ms-auto" style="max-width: 320px;">
+        <input type="search" id="campoBusca" class="form-control" placeholder="Buscar por título, categoria ou autor" aria-label="Buscar matéria" />
+        <button type="button" id="btnBuscar" class="btn btn-outline-success" title="Buscar">🔍</button>
+      </div>
+    </div>
+  </div>
+  <!-- ── CONTEÚDO ────────────────────────────────────────────── -->
+  <main class="container-fluid px-4 py-3">
+
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+      <h1 class="h3 text-success mb-0">Cadastro de matérias</h1>
+      <span id="modoEdicao" class="badge text-bg-warning d-none">Editando</span>
+    </div>
+
+    <!-- DETALHE SOLICITADO: Exibição dinâmica dos metadados da Edição Ativa no topo -->
+    <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center gap-2 small" id="infoEdicaoAtiva" style="max-width: fit-content;">
+      <span class="fw-bold">📰 Edição Alvo:</span>
+      <span id="labelEdicaoData" class="fw-semibold text-primary">...</span>
+      <span id="labelEdicaoNome" class="text-body-secondary"></span>
+    </div>
+
+    <p class="text-body-secondary small mb-3">
+      Cadastre as matérias de cada coluna do Constantino News. Os dados ficam salvos neste navegador.
+    </p>
+
+    <div id="alerta" class="alert d-none" role="alert"></div>
+
+    <form id="formMateria" novalidate>
+      <input type="hidden" id="materiaId" />
+
+      <!-- Posição -->
+      <div class="card mb-3">
+        <div class="card-header fw-semibold text-success">Posição na página</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-6 col-md-3">
+              <label for="coluna" class="form-label">Coluna *</label>
+              <select id="coluna" class="form-select">
+                <option value="">Selecione...</option>
+                <option value="1">Coluna 1</option>
+                <option value="2">Coluna 2</option>
+                <option value="3">Coluna 3</option>
+              </select>
+              <div class="invalid-feedback">Escolha a coluna.</div>
+            </div>
+            <div class="col-6 col-md-2">
+              <label for="ordem" class="form-label">Ordem</label>
+              <input type="number" id="ordem" class="form-control" min="1" step="1" />
+              <div class="form-text">1 = topo da coluna.</div>
+            </div>
+            <div class="col-12 col-md-5">
+              <label for="tipo" class="form-label">Formato da matéria *</label>
+              <select id="tipo" class="form-select">
+                <option value="">Selecione...</option>
+                <option value="foto-esquerda">Foto pequena à esquerda</option>
+                <option value="imagem-grande">Imagem grande com legenda</option>
+                <option value="texto">Somente texto</option>
+                <option value="manchete">Manchete principal</option>
+                <option value="opiniao">Opinião (caixa)</option>
+              </select>
+              <div class="invalid-feedback">Escolha o formato.</div>
+              <div id="ajudaTipo" class="form-text"></div>
+            </div>
+            <div class="col-12 col-md-2">
+              <label for="status" class="form-label">Status</label>
+              <select id="status" class="form-select">
+                <option value="Ativo" selected>Ativo</option>
+                <option value="Inativo">Inativo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conteúdo -->
+      <div class="card mb-3">
+        <div class="card-header fw-semibold text-success">Conteúdo</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12 col-md-3">
+              <label for="categoria" class="form-label">Categoria</label>
+              <input type="text" id="categoria" class="form-control" list="listaCategorias" maxlength="40" placeholder="Ex.: Política" />
+              <datalist id="listaCategorias">
+                <option value="Brasil"></option>
+                <option value="Mundo"></option>
+                <option value="Política"></option>
+                <option value="Economia"></option>
+                <option value="Negócios"></option>
+                <option value="Esporte"></option>
+                <option value="Tecnologia"></option>
+                <option value="Saúde"></option>
+                <option value="Cultura"></option>
+                <option value="Opinião"></option>
+              </datalist>
+            </div>
+            <div class="col-12 col-md-9">
+              <label for="titulo" class="form-label">Título *</label>
+              <input type="text" id="titulo" class="form-control" maxlength="200" />
+              <div class="invalid-feedback">Informe o título da matéria.</div>
+            </div>
+            <div class="col-12">
+              <label for="link" class="form-label">Link da matéria</label>
+              <input type="text" id="link" class="form-control" placeholder="# ou endereço da página" />
+            </div>
+            <div class="col-12">
+              <label for="resumo" class="form-label">Resumo</label>
+              <textarea id="resumo" class="form-control" rows="3" maxlength="800"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Autoria -->
+      <div class="card mb-3">
+        <div class="card-header fw-semibold text-success">Autoria e data</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12 col-md-8">
+              <label for="autor" class="form-label">Autor(es)</label>
+              <input type="text" id="autor" class="form-control" maxlength="120" placeholder="Ex.: Ana Ferreira" />
+            </div>
+            <div class="col-12 col-md-4">
+              <label for="tempo" class="form-label">Publicada</label>
+              <input type="text" id="tempo" class="form-control" maxlength="40" placeholder="Ex.: 3h atrás" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Imagem -->
+      <div class="card mb-3">
+        <div class="card-header fw-semibold text-success">Imagem</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12 col-lg-8">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label for="imagemUrl" class="form-label">Endereço da imagem</label>
+                  <input type="text" id="imagemUrl" class="form-control" placeholder="Cole uma URL ou envie um arquivo abaixo" />
+                </div>
+                <div class="col-12 col-md-8">
+                  <label for="imagemArquivo" class="form-label">Enviar arquivo</label>
+                  <input type="file" id="imagemArquivo" class="form-control" accept="image/*" />
+                  <div id="infoImagem" class="form-text"></div>
+                </div>
+                <div class="col-12 col-md-4 d-flex align-items-end">
+                  <button type="button" id="btnRemoverImagem" class="btn btn-outline-danger w-100">Remover imagem</button>
+                </div>
+                <div class="col-12">
+                  <label for="legenda" class="form-label">Legenda</label>
+                  <input type="text" id="legenda" class="form-control" maxlength="200" placeholder="Ex.: Índice Bovespa registrou alta de 1,8% — REUTERS" />
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-lg-4">
+              <div class="form-label">Pré-visualização</div>
+              <div class="border rounded p-2 text-center bg-body-tertiary">
+                <img id="previewImg" class="d-none" alt="Pré-visualização da imagem da matéria" />
+                <span id="semImagem" class="text-body-secondary small">Nenhuma imagem selecionada</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <!-- ── MODAL DE BUSCA ──────────────────────────────────────── -->
+  <div class="modal fade" id="modalBusca" tabindex="-1" aria-labelledby="tituloModalBusca" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-5 text-success" id="tituloModalBusca">Resultado da busca</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body" id="resultadoBusca"></div>
+      </div>
+    </div>
+  </div>
+  <!-- CAMADA DE DADOS E INFRAESTRUTURA CORE -->
+  <script src="./js/news-dados.js"></script>
+
+  <!-- CONTROLADOR PRINCIPAL DE CADASTRO POR EDIÇÃO -->
+  <script>
+  (() => {
+    'use strict';
+
+    const EDIT_KEY = 'NEWS_EDITAR';
+    const AJUDA_TIPO = {
+      'foto-esquerda': 'Miniatura de 130 px ao lado do título. Usa categoria, título e autor.',
+      'imagem-grande': 'Imagem na largura da coluna, com legenda, título e resumo.',
+      'texto': 'Sem imagem. Usa categoria, título, resumo e autor.',
+      'manchete': 'Destaque da coluna central, com imagem grande e resumo longo.',
+      'opiniao': 'Caixa com borda vermelha. Usa título e autor (colunista).'
+    };
+
+    const $ = (id) => document.getElementById(id);
+    let imagemBase64 = '';
+    let timerAlerta = null;
+    let veioDaTabela = false;
+
+    // DETALHE REQUERIDO: Busca e exibe a Edição Ativa no topo do formulário
+    function gerenciarCabecalhoEdicao() {
+      if (typeof NewsDados === 'undefined') return null;
+      const edicaoId = NewsDados.edicaoAtivaId();
+      
+      if (!edicaoId) {
+        $('labelEdicaoData').textContent = 'Nenhuma Edição Selecionada';
+        $('labelEdicaoNome').textContent = ' (Abra uma edição em tabEdicoes.html)';
+        return null;
+      }
+
+      const edicao = NewsDados.obterEdicao(edicaoId);
+      if (edicao) {
+        $('labelEdicaoData').textContent = NewsDados.dataBR(edicao.data);
+        $('labelEdicaoNome').textContent = edicao.nome ? ' — ' + edicao.nome : ' — (Edição sem nome)';
+        return edicao;
+      }
+      return null;
+    }
+
+    function lerMaterias() {
+      const edicao = NewsDados.obterEdicao(NewsDados.edicaoAtivaId());
+      return edicao ? (edicao.materias || []) : [];
+    }
+
+    function gravarMaterias(listaMaterias) {
+      const edicaoId = NewsDados.edicaoAtivaId();
+      if (!edicaoId) {
+        mostrarAlerta('danger', 'Não há nenhuma edição ativa selecionada para salvar.');
+        return false;
+      }
+      
+      const edicoes = NewsDados.lerEdicoes();
+      const idx = edicoes.findIndex(e => String(e.id) === String(edicaoId));
+      if (idx >= 0) {
+        edicoes[idx].materias = listaMaterias;
+        edicoes[idx].atualizadoEm = new Date().toISOString();
+        try {
+          localStorage.setItem('NEWS_EDICOES', JSON.stringify(edicoes));
+          return true;
+        } catch (e) {
+          console.error('Erro de cota de armazenamento no localStorage:', e);
+          mostrarAlerta('danger', 'Erro ao salvar. O limite de espaço do navegador foi excedido.');
+          return false;
+        }
+      }
+      return false;
+    }
+
+    function gerarId() {
+      return 'mat_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    }
+
+    function proximaOrdem(coluna, ignorarId) {
+      const ordens = lerMaterias()
+        .filter(m => Number(m.coluna) === Number(coluna) && String(m.id) !== String(ignorarId || ''))
+        .map(m => Number(m.ordem) || 0);
+      return (ordens.length ? Math.max(...ordens) : 0) + 1;
+    }
+
+    // DETALHE REQUERIDO: Intercepta e auto-preenche a lacuna livre mapeada pela grade
+    function verificarSugestaoPosicionamento() {
+      const sugestaoBruta = localStorage.getItem('SUGESTAO_CADASTRO');
+      if (!sugestaoBruta) return;
+      localStorage.removeItem('SUGESTAO_CADASTRO');
+
+      try {
+        const lacuna = JSON.parse(sugestaoBruta);
+        if (lacuna && lacuna.coluna) {
+          $('coluna').value = String(lacuna.coluna);
+          $('ordem').value = String(lacuna.ordem);
+          atualizarAjudaTipo();
+        }
+      } catch (e) {
+        console.error('Falha ao processar posicionamento sugerido:', e);
+      }
+    }
+
+    // ── Utilidades de tela ──────────────────────────────────
+    function mostrarAlerta(tipo, texto) {
+      const el = $('alerta');
+      el.className = 'alert alert-' + tipo;
+      el.textContent = texto;
+      clearTimeout(timerAlerta);
+      el.classList.remove('d-none');
+      if (tipo === 'success') {
+        timerAlerta = setTimeout(() => el.classList.add('d-none'), 5000);
+      }
+    }
+
+    function esc(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto == null ? '' : String(texto);
+      return div.innerHTML;
+    }
+
+    function normalizar(texto) {
+      return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    function atualizarAjudaTipo() {
+      $('ajudaTipo').textContent = AJUDA_TIPO[$('tipo').value] || '';
+    }
+
+    function atualizarModoEdicao() {
+      $('modoEdicao').classList.toggle('d-none', !$('materiaId').value);
+    }
+
+    function atualizarPreview() {
+      const src = imagemBase64 || $('imagemUrl').value.trim();
+      const img = $('previewImg');
+      if (src) {
+        img.src = src;
+        img.classList.remove('d-none');
+        $('semImagem').classList.add('d-none');
+      } else {
+        img.removeAttribute('src');
+        img.classList.add('d-none');
+        $('semImagem').classList.remove('d-none');
+      }
+      $('infoImagem').textContent = imagemBase64 ? 'Imagem enviada e comprimida; ficará salva neste navegador.' : '';
+    }
+
+    // ── Formulário ──────────────────────────────────────────
+    function limparFormulario(coluna) {
+      $('formMateria').reset();
+      $('materiaId').value = '';
+      imagemBase64 = '';
+      ['coluna', 'tipo', 'titulo'].forEach(id => $(id).classList.remove('is-invalid'));
+      if (coluna) {
+        $('coluna').value = String(coluna);
+        $('ordem').value = proximaOrdem(coluna);
+      }
+      atualizarPreview();
+      atualizarAjudaTipo();
+      atualizarModoEdicao();
+    }
+    function preencherFormulario(m) {
+      limparFormulario();
+      $('materiaId').value = m.id || '';
+      $('coluna').value = String(m.coluna || '');
+      $('ordem').value = m.ordem || '';
+      $('tipo').value = m.tipo || '';
+      $('status').value = m.status === 'Inativo' ? 'Inativo' : 'Ativo';
+      $('categoria').value = m.categoria || '';
+      $('titulo').value = m.titulo || '';
+      $('link').value = m.link || '';
+      $('resumo').value = m.resumo || '';
+      $('autor').value = m.autor || '';
+      $('tempo').value = m.tempo || '';
+      $('legenda').value = m.legenda || '';
+
+      const img = m.imagem || '';
+      if (img.startsWith('data:')) {
+        imagemBase64 = img;
+        $('imagemUrl').value = '';
+      } else {
+        $('imagemUrl').value = img;
+      }
+      atualizarPreview();
+      atualizarAjudaTipo();
+      atualizarModoEdicao();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function coletarFormulario() {
+      return {
+        id: $('materiaId').value,
+        coluna: parseInt($('coluna').value, 10),
+        ordem: Math.max(1, parseInt($('ordem').value, 10) || 1),
+        tipo: $('tipo').value,
+        status: $('status').value,
+        categoria: $('categoria').value.trim(),
+        titulo: $('titulo').value.trim(),
+        link: $('link').value.trim() || '#',
+        resumo: $('resumo').value.trim(),
+        autor: $('autor').value.trim(),
+        tempo: $('tempo').value.trim(),
+        imagem: imagemBase64 || $('imagemUrl').value.trim(),
+        legenda: $('legenda').value.trim()
+      };
+    }
+
+    function validar() {
+      const colunaOk = ['1', '2', '3'].includes($('coluna').value);
+      const tipoOk = !!$('tipo').value;
+      const tituloOk = !!$('titulo').value.trim();
+
+      $('coluna').classList.toggle('is-invalid', !colunaOk);
+      $('tipo').classList.toggle('is-invalid', !tipoOk);
+      $('titulo').classList.toggle('is-invalid', !tituloOk);
+
+      if (!colunaOk) { $('coluna').focus(); return false; }
+      if (!tipoOk) { $('tipo').focus(); return false; }
+      if (!tituloOk) { $('titulo').focus(); return false; }
+      return true;
+    }
+
+    // ── Salvar Incremental com Redirecionamento ──────────────
+    function salvarMateria() {
+      if (!validar()) {
+        mostrarAlerta('warning', 'Preencha os campos obrigatórios (*).');
+        return;
+      }
+
+      const dados = coletarFormulario();
+      const lista = lerMaterias();
+      const agora = new Date().toISOString();
+      const idx = dados.id ? lista.findIndex(m => String(m.id) === String(dados.id)) : -1;
+      const editando = idx >= 0;
+
+      if (editando) {
+        dados.criadoEm = lista[idx].criadoEm || agora;
+        dados.atualizadoEm = agora;
+        lista[idx] = { ...lista[idx], ...dados };
+      } else {
+        dados.id = gerarId();
+        dados.criadoEm = agora;
+        dados.atualizadoEm = agora;
+        lista.push(dados);
+      }
+
+      if (!gravarMaterias(lista)) return;
+
+      // COMPORTAMENTO EXIGIDO: Salva a matéria parcial e retorna à grade de monitoramento
+      window.location.href = 'tabmaterias2.html';
+    }
+
+    // ── Edição vinda da tabela (NEWS_EDITAR) ────────────────
+    function carregarEdicao() {
+      const bruto = localStorage.getItem(EDIT_KEY);
+      if (!bruto) return;
+      localStorage.removeItem(EDIT_KEY);
+
+      let id = bruto;
+      try {
+        const obj = JSON.parse(bruto);
+        if (obj && typeof obj === 'object') id = obj.id;
+        else id = String(obj);
+      } catch (e) {}
+
+      const materia = lerMaterias().find(m => String(m.id) === String(id));
+      if (materia) { veioDaTabela = true; preencherFormulario(materia); }
+      else mostrarAlerta('warning', 'A matéria que seria editada não foi encontrada nesta edição.');
+    }
+
+    // ── Imagem ──────────────────────────────────────────────
+    function comprimirImagem(arquivo, maxLado, qualidade) {
+      return new Promise((resolve, reject) => {
+        const leitor = new FileReader();
+        leitor.onerror = () => reject(new Error('Falha ao ler o arquivo.'));
+        leitor.onload = () => {
+          const img = new Image();
+          img.onerror = () => reject(new Error('Arquivo de imagem inválido.'));
+          img.onload = () => {
+            const escala = Math.min(1, maxLado / Math.max(img.width, img.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(img.width * escala);
+            canvas.height = Math.round(img.height * escala);
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', qualidade));
+          };
+          img.src = leitor.result;
+        };
+        leitor.readAsDataURL(arquivo);
+      });
+    }
+
+    async function aoEscolherArquivo(event) {
+      const arquivo = event.target.files && event.target.files.item(0);
+      if (!arquivo) return;
+      try {
+        imagemBase64 = await comprimirImagem(arquivo, 800, 0.8);
+        $('imagemUrl').value = '';
+        atualizarPreview();
+      } catch (e) {
+        console.error(e);
+        mostrarAlerta('danger', e.message);
+        event.target.value = '';
+      }
+    }
+
+    function removerImagem() {
+      imagemBase64 = '';
+      $('imagemUrl').value = '';
+      $('imagemArquivo').value = '';
+      atualizarPreview();
+    }
+    // ── Exportar / importar JSON ────────────────────────────
+    function exportarJSON() {
+      const edicaoId = NewsDados.edicaoAtivaId();
+      if (!edicaoId) return;
+      const edicao = NewsDados.obterEdicao(edicaoId);
+      if (!edicao) return;
+
+      const blob = new Blob([JSON.stringify(edicao, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'edicao-' + edicao.data + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function importarJSON(event) {
+      const arquivo = event.target.files && event.target.files.item(0);
+      if (!arquivo) return;
+
+      const leitor = new FileReader();
+      leitor.onerror = () => mostrarAlerta('danger', 'Não foi possível ler o arquivo.');
+      leitor.onload = () => {
+        try {
+          const dados = JSON.parse(leitor.result);
+          let listaMateriasNovas = [];
+
+          if (dados && typeof dados === 'object' && !Array.isArray(dados) && dados.materias) {
+            listaMateriasNovas = dados.materias;
+          } else if (Array.isArray(dados)) {
+            listaMateriasNovas = dados;
+          } else if (dados && typeof dados === 'object' && dados.titulo) {
+            listaMateriasNovas = [dados];
+          }
+
+          if (!listaMateriasNovas.length) {
+            mostrarAlerta('warning', 'Nenhuma matéria válida encontrada no JSON.');
+            return;
+          }
+
+          const listaAtual = lerMaterias();
+          const agora = new Date().toISOString();
+
+          listaMateriasNovas.forEach(item => {
+            if (!item || !String(item.titulo || '').trim()) return;
+            const m = {
+              ...item,
+              id: item.id || gerarId(),
+              coluna: [1, 2, 3].includes(Number(item.coluna)) ? Number(item.coluna) : 1,
+              ordem: Math.max(1, Number(item.ordem) || 1),
+              tipo: item.tipo || 'texto',
+              status: item.status === 'Inativo' ? 'Inativo' : 'Ativo',
+              criadoEm: item.criadoEm || agora,
+              atualizadoEm: agora
+            };
+            const idx = listaAtual.findIndex(curr => String(curr.id) === String(m.id));
+            if (idx >= 0) listaAtual[idx] = m;
+            else listaAtual.push(m);
+          });
+
+          if (gravarMaterias(listaAtual)) {
+            mostrarAlerta('success', 'Matérias importadas com sucesso nesta edição.');
+            if (listaAtual.length > 0) preencherFormulario(listaAtual[listaAtual.length - 1]);
+          }
+        } catch (e) {
+          console.error(e);
+          mostrarAlerta('danger', 'O arquivo não é um JSON estruturado válido.');
+        }
+      };
+      leitor.readAsText(arquivo);
+      event.target.value = '';
+    }
+
+    // ── Busca ───────────────────────────────────────────────
+    function buscarMaterias() {
+      const termo = normalizar($('campoBusca').value.trim());
+      const lista = lerMaterias();
+      const achadas = termo
+        ? lista.filter(m => normalizar([m.titulo, m.categoria, m.autor, m.resumo].join(' ')).includes(termo))
+        : lista;
+
+      achadas.sort((a, b) => (a.coluna - b.coluna) || (a.ordem - b.ordem));
+
+      const corpo = $('resultadoBusca');
+      if (!achadas.length) {
+        corpo.innerHTML = '<p class="text-body-secondary mb-0 p-2">Nenhuma matéria encontrada nesta edição.</p>';
+      } else {
+        corpo.innerHTML = '<div class="list-group">' + achadas.map(m =>
+          '<button type="button" class="list-group-item list-group-item-action" data-id="' + esc(m.id) + '">' +
+            '<div class="fw-semibold">' + esc(m.titulo) + '</div>' +
+            '<div class="small text-body-secondary">Coluna ' + esc(m.coluna) + ' · Ordem ' + esc(m.ordem) + '</div>' +
+          '</button>'
+        ).join('') + '</div>';
+      }
+
+      if (typeof bootstrap !== 'undefined') {
+        bootstrap.Modal.getOrCreateInstance($('modalBusca')).show();
+      }
+    }
+
+    function escolherResultado(event) {
+      const botao = event.target.closest('[data-id]');
+      if (!botao) return;
+      const m = lerMaterias().find(curr => String(curr.id) === String(botao.dataset.id));
+      if (!m) return;
+      bootstrap.Modal.getOrCreateInstance($('modalBusca')).hide();
+      preencherFormulario(m);
+    }
+
+    $('btnNovo').addEventListener('click', () => limparFormulario());
+    $('btnLimpar').addEventListener('click', () => limparFormulario());
+    $('btnSalvar').addEventListener('click', salvarMateria);
+    $('btnExportar').addEventListener('click', exportarJSON);
+    $('btnImportar').addEventListener('click', () => $('inputImportar').click());
+    $('inputImportar').addEventListener('change', importarJSON);
+    $('btnBuscar').addEventListener('click', buscarMaterias);
+    $('campoBusca').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); buscarMaterias(); } });
+    $('resultadoBusca').addEventListener('click', escolherResultado);
+
+    $('tipo').addEventListener('change', () => { $('tipo').classList.remove('is-invalid'); atualizarAjudaTipo(); });
+    $('titulo').addEventListener('input', () => $('titulo').classList.remove('is-invalid'));
+    $('coluna').addEventListener('change', () => {
+      $('coluna').classList.remove('is-invalid');
+      if ($('coluna').value) $('ordem').value = proximaOrdem($('coluna').value, $('materiaId').value);
+    });
+
+    $('imagemArquivo').addEventListener('change', aoEscolherArquivo);
+    $('imagemUrl').addEventListener('input', () => { imagemBase64 = ''; atualizarPreview(); });
+    $('btnRemoverImagem').addEventListener('click', removerImagem);
+
+    window.addEventListener('pageshow', (e) => { if (e.persisted) carregarEdicao(); });
+
+    // ── Inicialização do Módulo ─────────────────────────────
+    gerenciarCabecalhoEdicao();
+    verificarSugestaoPosicionamento();
+    atualizarPreview();
+    atualizarAjudaTipo();
+    carregarEdicao();
+  })();
+  </script>
+
+  <footer class="border-top mt-4 py-3 text-center small text-body-secondary">
+    <div class="fw-bold fs-5">Constantino <span class="text-success">News</span></div>
+    <p class="mb-0">© 2026 Felipe Rodrigues - FullTime Technology. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="./js/bootstrap.bundle.min.js"></script>
+  <script>
+      if (typeof bootstrap === 'undefined') {
+          alert('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+          console.warn('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+          document.write('<script src="https://jsdelivr.net" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');
+      }
+  </script>
+  <script src="./js/include.js"></script>
+</body>
+</html>

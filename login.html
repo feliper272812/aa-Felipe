@@ -1,0 +1,93 @@
+<!-- ========================================================================= -->
+<!-- MODAL DE LOGIN OBRIGATÓRIO (BLOQUEANTE)                                   -->
+<!-- ========================================================================= -->
+<div class="modal fade" id="loginModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="loginModalLabel">Acesso ao Sistema - FullTime</h5>
+            </div>
+            <div class="modal-body p-4">
+                <form id="loginForm">
+                    <!-- Campo de Usuário -->
+                    <div class="mb-3">
+                        <label for="username" class="form-label text-secondary">Usuário</label>
+                        <input type="text" class="form-control" id="username" placeholder="Digite seu usuário" required>
+                    </div>
+                    
+                    <!-- Campo de Senha -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label text-secondary">Senha</label>
+                        <input type="password" class="form-control" id="password" placeholder="Digite sua senha" required>
+                    </div>
+
+                    <!-- Controle Provisório PDV -->
+                    <div class="form-check form-switch my-4 p-3 bg-light rounded border">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" id="chkPdvHabilitado">
+                        <label class="form-check-label fw-bold text-success-emphasis" for="chkPdvHabilitado">
+                            Allowed (PDV_HABILITADO)
+                        </label>
+                    </div>
+
+                    <!-- Botão de Envio -->
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-success py-2 fw-bold">Entrar e Liberar Sistema</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+  /* Camada fosca que desabilita visualmente o fundo do site */
+  body.autenticacao-pendente {
+    overflow: hidden; /* Impede a rolagem da página atrás do modal */
+  }
+
+  body.autenticacao-pendente nav,
+  body.autenticacao-pendente main,
+  body.autenticacao-pendente footer,
+  body.autenticacao-pendente .bd-mode-toggle {
+    filter: blur(5px) grayscale(40%); /* Aplica desfoque e remove cor */
+    opacity: 0.4;                     /* Deixa o fundo bem opaco */
+    pointer-events: none;             /* Desativa todos os cliques e links */
+    user-select: none;                /* Impede seleção de textos */
+  }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Inicializa o elemento do modal do Bootstrap
+        const loginModalEl = document.getElementById('loginModal');
+        const loginModal = new bootstrap.Modal(loginModalEl);
+        const loginForm = document.getElementById('loginForm');
+        const chkPdv = document.getElementById('chkPdvHabilitado');
+
+        // Força o efeito de tela opaca/disabled adicionando a classe ao body
+        document.body.classList.add('autenticacao-pendente');
+        
+        // Abre o modal na tela imediatamente
+        loginModal.show();
+
+        // Manipula o envio (submit) do formulário de login
+        loginForm.addEventListener('submit', function (event) {
+            event.preventDefault(); // Impede o recarregamento padrão da página
+
+            // Define o valor com base no estado do checkbox (1 se marcado, 0 se desmarcado)
+            const valorPdv = chkPdv.checked ? "1" : "0";
+
+            // Armazena na memória persistente do navegador (LocalStorage)
+            localStorage.setItem("PDV_HABILITADO", valorPdv);
+
+            // Remove o efeito opaco do body, devolvendo a interface ao estado normal
+            document.body.classList.remove('autenticacao-pendente');
+
+            // Esconde o modal de login de forma definitiva
+            loginModal.hide();
+            
+            console.log("Autenticação concluída. PDV_HABILITADO configurado para:", valorPdv);
+        });
+    });
+
+</script>

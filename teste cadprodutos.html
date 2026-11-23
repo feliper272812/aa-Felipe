@@ -1,0 +1,887 @@
+<!-- =========================================================
+  ARQUIVO: cadProdutos.html (PARTE 1 DE 5)
+  FORMULÁRIO DE CADASTRO DE PRODUTOS - LAYOUT COMPACTO
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+  Autor: Felipe Rodrigues - FullTime Technology
+========================================================= -->
+
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="auto">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos</title>
+
+    <!-- SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3 -->
+    <script src="../assets/js/color-modes.js"></script>
+
+    <!-- BOOTSTRAP 5.3 INTEGRADO LOCALMENTE -->
+    <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        /* ==============================================
+           FUNDO DA PÁGINA
+        ============================================== */
+        html, body {
+            min-height: 100%;
+            overflow-y: auto;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            transition: background-color 0.3s ease;
+            padding-top: 70px;
+        }
+
+        /* ==============================================
+           FUNDO DARK MODE
+        ============================================== */
+        [data-bs-theme="dark"] body {
+            background-color: #121212;
+        }
+
+        /* ==============================================
+           CARD PRINCIPAL
+        ============================================== */
+        .card-custom {
+            border-radius: 16px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.08);
+        }
+
+        /* ==============================================
+           TÍTULOS DAS SEÇÕES
+        ============================================== */
+        .titulo-secao {
+            color: var(--bs-success);
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* ==============================================
+           BOTÕES
+        ============================================== */
+        .btn-custom {
+            width: 100%;
+            font-weight: bold;
+        }
+
+        /* ==============================================
+           LABELS
+        ============================================== */
+        .form-label {
+            font-weight: 600;
+        }
+
+        /* ==============================================
+           BOTÃO OFICIAL DE TEMA
+        ============================================== */
+        .btn-bd-primary {
+            --bd-violet-bg: #712cf9;
+            --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+            --bs-btn-font-weight: 600;
+            --bs-btn-color: var(--bs-white);
+            --bs-btn-bg: var(--bd-violet-bg);
+            --bs-btn-border-color: var(--bd-violet-bg);
+            --bs-btn-hover-color: var(--bs-white);
+            --bs-btn-hover-bg: #6528e0;
+            --bs-btn-hover-border-color: #6528e0;
+            --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+            --bs-btn-active-color: var(--bs-btn-hover-color);
+            --bs-btn-active-bg: #5a23c8;
+            --bs-btn-active-border-color: #5a23c8;
+        }
+
+        /* ==============================================
+           CONTROLE DE TEMA
+        ============================================== */
+        .bd-mode-toggle {
+            z-index: 1500;
+        }
+
+        .bd-mode-toggle .bi {
+            width: 1em;
+            height: 1em;
+            fill: currentColor;
+        }
+
+        .bd-mode-toggle .dropdown-menu .active .bi {
+            display: block !important;
+        }
+
+        /* ==================================================
+            FOTO DO PRODUTO (PDV)
+        ================================================== */
+        .preview-image {
+            width: 320px;
+            height: 320px;
+            border: 2px solid #198754;
+            border-radius: 12px;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin: auto;
+            box-shadow: 0 4px 18px rgba(0,0,0,.15);
+            transition: .30s;
+        }
+
+        .preview-image:hover {
+            transform: scale(1.02);
+        }
+
+        .preview-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        #previewImagemPlaceholder {
+            color: #999;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        /* =========================================
+            LAYOUT FORMULÁRIO RESPONSIVO
+        ========================================= */
+        .colunaFormulario {
+            width: 70%;
+        }
+
+        .colunaImagem {
+            width: 30%;
+        }
+
+        @media (max-width: 992px) {
+            .colunaFormulario {
+                width: 100%;
+            }
+            .colunaImagem {
+                width: 100%;
+                margin-top: 30px;
+            }
+            .preview-image {
+                width: 260px;
+                height: 260px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- AREA OCULTA PARA EMISSÃO DO CUPOM IMPRESSO -->
+    <div id="area-impressao-cupom"></div>
+
+    <!-- ÍCONES SVG PARA ALTERNAÇÃO DE TEMA -->
+    <svg xmlns="http://w3.org" class="d-none">
+        <symbol id="check2" viewBox="0 0 16 16">
+            <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+        </symbol>
+        <symbol id="circle-half" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>
+        </symbol>
+        <symbol id="moon-stars-fill" viewBox="0 0 16 16">
+            <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+            <path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L13.863.1z"/>
+        </symbol>
+        <symbol id="sun-fill" viewBox="0 0 16 16">
+            <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+        </symbol>
+    </svg>
+
+    <div class="dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle">
+        <button class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (auto)">
+            <svg class="bi my-1 theme-icon-active" width="16" height="16"><use href="#circle-half"></use></svg>
+            <span class="visually-hidden" id="bd-theme-text">Alternar tema</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">
+            <li><button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light"><svg class="bi me-2 opacity-50" width="16" height="16"><use href="#sun-fill"></use></svg> Claro</button></li>
+            <li><button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark"><svg class="bi me-2 opacity-50" width="16" height="16"><use href="#moon-stars-fill"></use></svg> Escuro</button></li>
+            <li><button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto"><svg class="bi me-2 opacity-50" width="16" height="16"><use href="#circle-half"></use></svg> Auto</button></li>
+        </ul>
+    </div>
+
+    <!-- NAVBAR SUPERIOR -->
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-success">
+        <div class="container-fluid">
+            <div class="dropdown">
+                <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="Felipe.jpg" alt="Perfil" width="33" height="33" class="rounded-circle" />
+                </a>
+                <ul class="dropdown-menu text-small shadow">
+                    <li><a class="dropdown-item" href="#">Novo projeto...</a></li>
+                    <li><a class="dropdown-item" href="#">Configurações</a></li>
+                    <li><a class="dropdown-item" href="#">Perfil</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="cadclientesPF.html">Cadastro de Clientes PF</a></li>
+                    <li><a class="dropdown-item" href="cadclientesPJ.html">Cadastro de Clientes PJ</a></li>
+                    <li><a class="dropdown-item" href="cadFornecedores.html">Cadastro de Fornecedores</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="cadProdutos.html">Cadastro de Produtos</a></li>
+                    <li><a class="dropdown-item" href="Ordemdeservico.html">Cadastro de Ordens de Serviço</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="cadclientesPF_pronto.html">Cadastro Novo</a></li>
+                    <li><a class="dropdown-item" href="tabCliente2.html">Tabela Nova</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="felipe.html">Felipe Rodrigues</a></li>
+                    <li><a class="dropdown-item" href="about.html">Sobre a FullTime</a></li>
+                    <li><a class="dropdown-item" href="#">Sair</a></li>
+                </ul>
+            </div>
+            <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0 ms-md-2">
+                    <li class="nav-item"><a class="nav-link active text-light" href="index.html">Início</a></li>
+                    <li class="nav-item"><a class="nav-link text-light" href="tabClientePF.html">Cliente PF</a></li>
+                    <li class="nav-item"><a class="nav-link text-light" href="tabClientePJ.html">Cliente PJ</a></li>
+                    <li class="nav-item"><a class="nav-link text-light" href="tabFornecedores.html">Fornecedor</a></li>
+                    <li class="nav-item"><a class="nav-link text-light" href="tabProdutos.html">Produto</a></li>
+                    <li class="nav-item"><a class="nav-link text-light" href="Ordemdeservico.html">O.S.</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTAINER PRINCIPAL -->
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-11 col-xl-10">
+                <div class="card card-custom border-0">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="mb-0">Cadastro de Produtos</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- BARRA DE FERRAMENTAS FIXA (STICKY) -->
+                        <div class="sticky-top bg-body pt-2 pb-2 mb-3 border-bottom" style="z-index: 1020;">
+                            <div class="d-flex flex-wrap align-items-center gap-1">
+                                <button class="btn btn-sm btn-primary" onclick="novoProduto()">🆕 Novo</button>
+                                <button class="btn btn-sm btn-success" onclick="salvarProduto(event)">💾 Salvar</button>
+                                <button class="btn btn-sm btn-secondary" onclick="limparFormulario()">🧹 Limpar</button>
+                                <button class="btn btn-sm btn-warning" onclick="baixarJSON()">⬇ JSON</button>
+                                <label for="arquivoJSONcad" class="btn btn-sm btn-info mb-0 text-white">📂 Importar</label>
+                                <input id="arquivoJSONcad" type="file" class="d-none">
+                                <button class="btn btn-sm btn-outline-success" onclick="window.location.href='tabProdutos.html'">📋 Tabela</button>
+                                <div class="vr mx-2"></div>
+                                <div class="input-group input-group-sm ms-auto" style="max-width:380px">
+                                    <input id="inputCodigo" class="form-control" placeholder="Pesquisar produto (nome, código, marca...)">
+                                    <button class="btn btn-outline-success" onclick="pesquisarCodigo()">🔍</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FORMULÁRIO PRINCIPAL -->
+                        <form id="cadProdutos">
+                            <h5 class="titulo-secao mb-3">Dados do Produto</h5>
+                            
+                            <!-- GRID RESPONSIVO DE SEÇÃO COMPACTA -->
+                            <div class="row">
+                                <!-- COLUNA ESQUERDA: COMPACTAÇÃO COMPLETA DE TODOS OS INPUTS -->
+                                <div class="col-lg-8 colunaFormulario">
+                                    <!-- LINHA 1: IDENTIFICAÇÃO DIRETA -->
+                                    <div class="row">
+                                        <div class="col-md-2 mb-3">
+                                            <label class="form-label">ID</label>
+                                            <input type="text" id="produtoId" class="form-control" placeholder="(auto)" readonly>
+                                        </div>
+                                        <div class="col-md-7 mb-3">
+                                            <label class="form-label">Nome do Produto</label>
+                                            <input type="text" id="nome" class="form-control" placeholder="Digite o nome do produto">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Código</label>
+                                            <input type="text" id="codigo" class="form-control" placeholder="0001">
+                                        </div>
+                                    </div>
+
+                                    <!-- LINHA 2: LOGÍSTICA E MERCADO -->
+                                    <div class="row">
+                                        <div class="col-md-5 mb-3">
+                                            <label class="form-label">Código de Barras</label>
+                                            <input type="text" id="codigoBarras" class="form-control" placeholder="7890000000000">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">SKU</label>
+                                            <input type="text" id="sku" class="form-control" placeholder="SKU-001">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Status</label>
+                                            <select class="form-select" id="status">
+                                                <option selected>Ativo</option>
+                                                <option>Inativo</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- LINHA 3: MARCA E CATEGORIZAÇÃO -->
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">Marca</label>
+                                            <input type="text" id="marca" class="form-control" placeholder="Digite a marca">
+                                        </div>
+                                        <div class="col-md-5 mb-3">
+                                            <label class="form-label">Categoria</label>
+                                            <select class="form-select" id="categoria">
+                                                <option selected>Selecione</option>
+                                                <option>Informática</option>
+                                                <option>Eletrônicos</option>
+                                                <option>Periféricos</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Unidade</label>
+                                            <select class="form-select" id="unidade">
+                                                <option selected>UN</option>
+                                                <option>KG</option>
+                                                <option>CX</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- LINHA 4: PARTE FISCAL -->
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">NCM</label>
+                                            <input type="text" id="ncm" class="form-control" placeholder="0000.00.00">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">CEST</label>
+                                            <input type="text" id="cest" class="form-control" placeholder="00.000.00">
+                                        </div>
+                                    </div>
+
+                                    <!-- LINHA 5: FINANCEIRO (SUBIU DA PARTE INFERIOR) -->
+                                    <h5 class="titulo-secao mt-3 mb-3">Preços e Estoque</h5>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Preço de Custo</label>
+                                            <input type="number" id="precoCusto" step="0.01" class="form-control" placeholder="0,00">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Preço de Venda</label>
+                                            <input type="number" id="precoVenda" step="0.01" class="form-control" placeholder="0,00">
+                                        </div>
+                                    </div>
+
+                                    <!-- LINHA 6: CONTROLE DE VOLUMES (SUBIU DA PARTE INFERIOR) -->
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Estoque Atual</label>
+                                            <input type="number" id="estoque" class="form-control" placeholder="0">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Estoque Mínimo</label>
+                                            <input type="number" id="estoqueMinimo" class="form-control" placeholder="0">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- COLUNA DIREITA: CARREGAMENTO EXCLUSIVO DA IMAGEM -->
+                                <div class="col-lg-4 colunaImagem">
+                                    <div class="card shadow-sm border-success h-100 d-flex flex-column justify-content-between">
+                                        <div class="card-header bg-success text-white text-center">
+                                            <strong>Imagem do Produto</strong>
+                                        </div>
+                                        <div class="card-body text-center d-flex flex-column justify-content-center">
+                                            <div class="preview-image" id="previewImagemProduto">
+                                                <span id="previewImagemPlaceholder">Nenhuma imagem</span>
+                                                <img id="previewImagemTag" class="d-none" alt="Imagem do Produto">
+                                            </div>
+                                            <button class="btn btn-success w-100 mt-3" type="button" onclick="document.getElementById('inputImagemProduto').click();">
+                                                📷 Selecionar Imagem
+                                            </button>
+                                            <input type="file" id="inputImagemProduto" accept="image/*" class="d-none" onchange="handleImagemSelecionada(event)">
+                                            <div id="nomeArquivoImagem" class="small text-secondary mt-2 text-truncate">Nenhuma imagem selecionada</div>
+                                            <button id="btnRemoverImagem" type="button" class="btn btn-outline-danger w-100 mt-2 d-none" onclick="removerImagem()">
+                                                Remover Imagem
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> <!-- Fim da Seção Responsiva Principal -->
+
+                            <!-- SEÇÃO DE DESCRIÇÃO EXPANDIDA PARA VALORIZAR O ESPAÇO DA ESQUERDA -->
+                            <div class="row mt-2">
+                                <div class="col-lg-8">
+                                    <h5 class="titulo-secao mb-3">Descrição</h5>
+                                    <div class="mb-4">
+                                        <textarea class="form-control" id="descricao" rows="9" placeholder="Digite a descrição detalhada do produto..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT BOOTSTRAP INTEGRADO LOCALMENTE -->
+    <script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        ////////////////////////////////////////////////////////////////
+        // CONFIGURAÇÕES E CHAVES DO STORAGE
+        ////////////////////////////////////////////////////////////////
+        const STORAGE_KEY = 'PDV_PRODUTOS';
+        const EDIT_KEY = 'PRODUTO_EDITAR';
+
+        ////////////////////////////////////////////////////////////////
+        // STATE / ESTADO GLOBAL DO CADASTRO
+        ////////////////////////////////////////////////////////////////
+        let formularioAlterado = false;
+        let imagemAtualBase64 = null;
+        let imagemAtualNome = '';
+
+        ////////////////////////////////////////////////////////////////
+        // IMAGEM DO PRODUTO — SELEÇÃO, COMPRESSÃO E PRÉ-VISUALIZAÇÃO
+        ////////////////////////////////////////////////////////////////
+        function handleImagemSelecionada(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert('Selecione um arquivo de imagem válido.');
+                event.target.value = '';
+                return;
+            }
+
+            const MAX_MB = 2;
+            if (file.size > MAX_MB * 1024 * 1024) {
+                alert(`A imagem deve ter no máximo ${MAX_MB}MB.`);
+                event.target.value = '';
+                return;
+            }
+
+            console.log('[imagem] arquivo selecionado:', file.name, file.type, file.size, 'bytes');
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const dataUrlOriginal = e.target.result;
+                console.log('[imagem] FileReader concluído, tamanho base64 original:', dataUrlOriginal.length);
+
+                const img = new Image();
+                img.onload = function () {
+                    console.log('[imagem] Image carregada:', img.width, 'x', img.height);
+                    let dataUrlFinal = dataUrlOriginal;
+
+                    try {
+                        const MAX_LARGURA = 600;
+                        const escala = Math.min(1, MAX_LARGURA / img.width);
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.round(img.width * escala);
+                        canvas.height = Math.round(img.height * escala);
+
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) throw new Error('Contexto 2D do canvas indisponível.');
+
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        const comprimido = canvas.toDataURL('image/jpeg', 0.8);
+
+                        if (!comprimido || comprimido === 'data:,') {
+                            throw new Error('canvas.toDataURL retornou vazio.');
+                        }
+
+                        dataUrlFinal = comprimido;
+                        console.log('[imagem] compressão OK, tamanho base64 final:', dataUrlFinal.length);
+                    } catch (err) {
+                        console.error('[imagem] Falha ao comprimir via canvas, usando imagem original sem compressão:', err);
+                        dataUrlFinal = dataUrlOriginal;
+                    }
+
+                    imagemAtualBase64 = dataUrlFinal;
+                    imagemAtualNome = file.name;
+
+                    exibirPreviewImagem(dataUrlFinal);
+                    formularioAlterado = true;
+                    console.log('[imagem] imagemAtualBase64 definido, comprimento:', imagemAtualBase64.length);
+                };
+                img.onerror = function () {
+                    console.error('[imagem] Falha ao carregar a imagem no elemento Image().');
+                    alert('Não foi possível ler esta imagem. Tente outro arquivo.');
+                    event.target.value = '';
+                };
+                img.src = dataUrlOriginal;
+            };
+            reader.onerror = function () {
+                console.error('[imagem] Falha no FileReader ao ler o arquivo.');
+                alert('Não foi possível ler o arquivo selecionado.');
+                event.target.value = '';
+            };
+            reader.readAsDataURL(file);
+        }
+
+
+        function exibirPreviewImagem(dataUrl) {
+            const placeholder = document.getElementById('previewImagemPlaceholder');
+            const tag = document.getElementById('previewImagemTag');
+            const btnRemover = document.getElementById('btnRemoverImagem');
+
+            if (!tag) {
+                console.error('[imagem] Elemento #previewImagemTag não encontrado no DOM.');
+                return;
+            }
+
+            if (dataUrl) {
+                tag.src = dataUrl;
+                tag.classList.remove('d-none');
+                placeholder?.classList.add('d-none');
+                btnRemover?.classList.remove('d-none');
+                console.log('[imagem] preview exibido, comprimento base64:', dataUrl.length);
+            } else {
+                tag.src = '';
+                tag.classList.add('d-none');
+                placeholder?.classList.remove('d-none');
+                btnRemover?.classList.add('d-none');
+                console.log('[imagem] preview limpo (sem imagem).');
+            }
+        }
+
+        function removerImagem() {
+            imagemAtualBase64 = null;
+            imagemAtualNome = '';
+            const input = document.getElementById('inputImagemProduto');
+            if (input) input.value = '';
+            exibirPreviewImagem(null);
+            formularioAlterado = true;
+        }
+
+        ////////////////////////////////////////////////////////////////
+        // TRATAMENTO DE TEXTOS E FORMATAÇÕES
+        ////////////////////////////////////////////////////////////////
+        function escaparHTML(str) {
+            if (str == null) return "";
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function formatarMoedaProd(v) {
+            const n = Number(v);
+            if (isNaN(n)) return "—";
+            return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        ////////////////////////////////////////////////////////////////
+        // MOTORES DE BUSCA INTERNA
+        ////////////////////////////////////////////////////////////////
+        function pesquisarCodigo(){
+            const termo = (document.getElementById('inputCodigo').value || '').trim().toLowerCase();
+            if (!termo) { alert('Digite um termo para pesquisar (nome, código, marca, SKU ou código de barras).'); return; }
+
+            const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const resultado = lista.filter(x =>
+                String(x.codigo || '').toLowerCase().includes(termo) ||
+                String(x.codigoBarras || '').toLowerCase().includes(termo) ||
+                String(x.sku || '').toLowerCase().includes(termo) ||
+                String(x.nome || x.nomeProduto || '').toLowerCase().includes(termo) ||
+                String(x.marca || '').toLowerCase().includes(termo)
+            );
+
+            if (resultado.length === 0) {
+                alert('Produto não encontrado');
+                return;
+            }
+
+            const body = document.getElementById('modalPesquisaProdutoBody');
+            body.innerHTML = resultado.map(p => `
+                <div class="card mb-3 border-success">
+                    <div class="card-header bg-success text-white fw-bold">
+                        #${escaparHTML(p.id)} &mdash; ${escaparHTML(p.nome || p.nomeProduto)}
+                    </div>
+                    <div class="card-body">
+                        ${p.imagemBase64 ? `<img src="${p.imagemBase64}" alt="Imagem do produto" style="max-width:100px;max-height:100px;object-fit:contain;" class="mb-2 border rounded p-1">` : ''}
+                        <div class="row g-2">
+                            <div class="col-sm-4"><strong>Código:</strong> ${escaparHTML(p.codigo)}</div>
+                            <div class="col-sm-4"><strong>Cód. Barras:</strong> ${escaparHTML(p.codigoBarras)}</div>
+                            <div class="col-sm-4"><strong>SKU:</strong> ${escaparHTML(p.sku)}</div>
+                            <div class="col-sm-4"><strong>Marca:</strong> ${escaparHTML(p.marca)}</div>
+                            <div class="col-sm-4"><strong>Categoria:</strong> ${escaparHTML(p.categoria)}</div>
+                            <div class="col-sm-4"><strong>Status:</strong> ${escaparHTML(p.status || 'Ativo')}</div>
+                            <div class="col-sm-4"><strong>Preço Venda:</strong> ${formatarMoedaProd(p.precoVenda)}</div>
+                            <div class="col-sm-4"><strong>Estoque:</strong> ${escaparHTML(p.estoque)}</div>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-success" onclick="carregarProdutoNoForm(${Number(p.id)}); bootstrap.Modal.getInstance(document.getElementById('modalPesquisaProduto')).hide();">
+                                ✏️ Carregar para Edição
+                            </button>
+                        </div>
+                    </div>
+                </div>`).join("");
+
+            new bootstrap.Modal(document.getElementById('modalPesquisaProduto')).show();
+        }
+
+        ////////////////////////////////////////////////////////////////
+        // CARREGAMENTO DE DADOS NO FORMULÁRIO
+        ////////////////////////////////////////////////////////////////
+        function carregarProdutoNoForm(id) {
+            const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const produto = lista.find(p => Number(p.id) === Number(id) || String(p.id) === String(id));
+            if (!produto) {
+                console.warn('[carregarProdutoNoForm] produto não encontrado para id:', id, 'lista atual:', lista);
+                alert('Produto não encontrado.');
+                return;
+            }
+            console.log('[carregarProdutoNoForm] carregando produto:', { ...produto, imagemBase64: produto.imagemBase64 ? `[${produto.imagemBase64.length} chars]` : '(vazio)' });
+
+            const form = document.getElementById('cadProdutos');
+            if (form) form.dataset.editId = produto.id;
+
+            document.getElementById('produtoId').value = produto.id || '';
+            document.getElementById('codigo').value = produto.codigo || '';
+            document.getElementById('codigoBarras').value = produto.codigoBarras || '';
+            document.getElementById('sku').value = produto.sku || '';
+            document.getElementById('nome').value = produto.nome || produto.nomeProduto || '';
+            document.getElementById('marca').value = produto.marca || '';
+            document.getElementById('categoria').value = produto.categoria || '';
+            document.getElementById('unidade').value = produto.unidade || '';
+            document.getElementById('ncm').value = produto.ncm || '';
+            document.getElementById('cest').value = produto.cest || '';
+            document.getElementById('precoCusto').value = produto.precoCusto || '';
+            document.getElementById('precoVenda').value = produto.precoVenda || '';
+            document.getElementById('estoque').value = produto.estoque || '';
+            document.getElementById('estoqueMinimo').value = produto.estoqueMinimo || '';
+            document.getElementById('status').value = produto.status || 'Ativo';
+            document.getElementById('descricao').value = produto.descricao || '';
+
+            imagemAtualBase64 = produto.imagemBase64 || null;
+            imagemAtualNome = produto.imagemNome || '';
+            exibirPreviewImagem(imagemAtualBase64);
+
+            formularioAlterado = false;
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => document.getElementById('nome')?.focus(), 300);
+        }
+
+        ////////////////////////////////////////////////////////////////
+        // LIMPEZA E ESTADO DO FORMULÁRIO
+        ////////////////////////////////////////////////////////////////
+        function limparFormulario() {
+            const form = document.getElementById('cadProdutos');
+            if (form) {
+                form.reset();
+                delete form.dataset.editId;
+            }
+
+            const campoId = document.getElementById('produtoId');
+            if (campoId) campoId.value = '';
+
+            imagemAtualBase64 = null;
+            imagemAtualNome = '';
+            exibirPreviewImagem(null);
+
+            formularioAlterado = false;
+        }
+
+        function novoProduto() {
+            limparFormulario();
+            formularioAlterado = false;
+        }
+
+        function baixarJSON() {
+            const dados = localStorage.getItem(STORAGE_KEY) || '[]';
+            const blob = new Blob([dados], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'cadProdutos.json';
+            a.click();
+        }
+
+        ////////////////////////////////////////////////////////////////
+        // GRAVAÇÃO, ALTERAÇÃO E PERSISTÊNCIA (MOTO DE SALVAMENTO)
+        ////////////////////////////////////////////////////////////////
+        function gerarId() {
+            const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            if (lista.length === 0) return 1;
+            return Math.max(...lista.map(produto => Number(produto.id) || 0)) + 1;
+        }
+
+        function salvarProduto(e) {
+            if (!confirm('Deseja salvar este produto?')) return;
+
+            const codigo = document.getElementById('codigo')?.value.trim();
+            if (!codigo) {
+                alert('Código do produto é obrigatório');
+                return;
+            }
+
+            const form = document.getElementById('cadProdutos'); 
+            const editId = form?.dataset.editId ? Number(form.dataset.editId) : null;
+
+            const lista = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const agora = new Date().toISOString();
+
+            const produto = {
+                id: editId || gerarId(),
+                codigo: codigo,
+                codigoBarras: document.getElementById('codigoBarras')?.value || '',
+                sku: document.getElementById('sku')?.value || '',
+                nome: document.getElementById('nome')?.value || document.getElementById('nomeProduto')?.value || '',
+                marca: document.getElementById('marca')?.value || '',
+                categoria: document.getElementById('categoria')?.value || '',
+                unidade: document.getElementById('unidade')?.value || '',
+                ncm: document.getElementById('ncm')?.value || '',
+                cest: document.getElementById('cest')?.value || '',
+                precoCusto: Number(document.getElementById('precoCusto')?.value) || 0,
+                precoVenda: Number(document.getElementById('precoVenda')?.value) || 0,
+                estoque: Number(document.getElementById('estoque')?.value) || 0,
+                estoqueMinimo: Number(document.getElementById('estoqueMinimo')?.value) || 0,
+                status: document.getElementById('status')?.value || 'Ativo',
+                descricao: document.getElementById('descricao')?.value || '',
+                local: 'imagens/produtos/',
+                imagemNome: imagemAtualNome || '',
+                imagemBase64: imagemAtualBase64 || '',
+                dataAlteracao: agora
+            };
+
+            const campoId = document.getElementById('produtoId');
+            if (campoId) campoId.value = produto.id;
+
+            console.log('[salvar] imagemAtualBase64 no momento de salvar:', imagemAtualBase64 ? `presente (${imagemAtualBase64.length} chars)` : 'AUSENTE/VAZIO');
+
+            if (editId) {
+                const idx = lista.findIndex(p => Number(p.id) === editId);
+                if (idx !== -1) {
+                    produto.dataCadastro = lista[idx].dataCadastro;
+                    if (!produto.imagemBase64 && lista[idx].imagemBase64) {
+                        console.log('[salvar] nenhuma imagem nova selecionada, preservando imagem já existente do produto.');
+                        produto.imagemBase64 = lista[idx].imagemBase64;
+                        produto.imagemNome = lista[idx].imagemNome;
+                    }
+                    lista[idx] = produto;
+                }
+            } else {
+                produto.dataCadastro = agora;
+                lista.push(produto);
+            }
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+                console.log('[salvar] gravado com sucesso. imagemBase64 salva:', produto.imagemBase64 ? `${produto.imagemBase64.length} chars` : '(vazio)');
+            } catch (err) {
+                console.error('[salvar] ERRO ao gravar no localStorage:', err);
+                alert('Não foi possível salvar o produto. Provavelmente o espaço do navegador está cheio.\n\nDetalhe técnico: ' + err.message);
+                return;
+            }
+
+            formularioAlterado = false;
+            alert(editId ? 'Produto atualizado com sucesso!' : 'Produto salvo com sucesso!');
+            window.location.href = 'tabProdutos.html';
+        }
+
+        ////////////////////////////////////////////////////////////////
+        // CARREGAR PRODUTO VINDO DA TABELA DE BUSCA (EDIT_KEY)
+        ////////////////////////////////////////////////////////////////
+        function carregarProdutoEdicao() {
+            const json = localStorage.getItem(EDIT_KEY);
+            if (!json) return;
+
+            let produto;
+            try {
+                produto = JSON.parse(json);
+            } catch (err) {
+                console.error('[carregarProdutoEdicao] EDIT_KEY continha JSON inválido:', err);
+                localStorage.removeItem(EDIT_KEY);
+                return;
+            }
+
+            console.log('[carregarProdutoEdicao] carregando produto para edição:', { ...produto, imagemBase64: produto.imagemBase64 ? `[${produto.imagemBase64.length} chars]` : '(vazio)' });
+
+            const form = document.getElementById("cadProdutos");
+            if (form) form.dataset.editId = produto.id;
+
+            document.getElementById("produtoId").value = produto.id || "";
+            document.getElementById("codigo").value = produto.codigo || "";
+            document.getElementById("codigoBarras").value = produto.codigoBarras || "";
+            document.getElementById("sku").value = produto.sku || "";
+            document.getElementById("nome").value = produto.nome || "";
+            document.getElementById("marca").value = produto.marca || "";
+            document.getElementById("categoria").value = produto.categoria || "";
+            document.getElementById("unidade").value = produto.unidade || "";
+            document.getElementById("ncm").value = produto.ncm || "";
+            document.getElementById("cest").value = produto.cest || "";
+            document.getElementById("precoCusto").value = produto.precoCusto || "";
+            document.getElementById("precoVenda").value = produto.precoVenda || "";
+            document.getElementById("estoque").value = produto.estoque || "";
+            document.getElementById("estoqueMinimo").value = produto.estoqueMinimo || "";
+            document.getElementById("status").value = produto.status || "Ativo";
+            document.getElementById("descricao").value = produto.descricao || "";
+
+            imagemAtualBase64 = produto.imagemBase64 || null;
+            imagemAtualNome = produto.imagemNome || '';
+
+            exibirPreviewImagem(imagemAtualBase64);
+            formularioAlterado = false;
+            localStorage.removeItem(EDIT_KEY);
+        }
+
+        ////////////////////////////////////////////////////////////////
+        // MONITORES E ARRANQUE DO DOCUMENTO (INIT)
+        ////////////////////////////////////////////////////////////////
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('cadProdutos');
+            carregarProdutoEdicao();
+
+            if (!form) return;
+
+            const campos = form.querySelectorAll('input, select, textarea');
+            campos.forEach(campo => {
+                campo.addEventListener('input', () => { formularioAlterado = true; });
+                campo.addEventListener('change', () => { formularioAlterado = true; });
+            });
+        });
+
+        window.addEventListener('beforeunload', function (e) {
+            if (!formularioAlterado) return;
+            e.returnValue = '';
+        });
+    </script>
+
+    <!-- =========================================================
+         MODAL — RESULTADO DE PESQUISA POR CÓDIGO
+    ========================================================== -->
+    <div class="modal fade" id="modalPesquisaProduto" tabindex="-1" aria-labelledby="modalPesquisaProdutoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalPesquisaProdutoLabel">Resultado da Pesquisa</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalPesquisaProdutoBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         RODAPÉ FIXO (FOOTER)
+    ========================================================== -->
+    <footer class="footer mt-auto py-2 bg-body-tertiary fixed-bottom">
+        <div class="container-fluid">
+            <p class="text-center text-success-emphasis mb-0 small">
+                &copy; 2026 Felipe Rodrigues - FullTime Technology
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
+

@@ -1,0 +1,515 @@
+<!-- =========================================================
+  ARQUIVO: tabmaterias.html
+
+  GRADE DE VISUALIZAÇÃO E BALANÇO DE MATÉRIAS POR EDIÇÃO ATIVA
+  Simula o esqueleto das Colunas 1, 2 e 3 da capa do jornal.
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+  Autor: Felipe Rodrigues - FullTime Technology (2026)
+========================================================= -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tabela de Matérias</title>
+
+  <!-- ── SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3 ── -->
+  <script src="./js/color-modes.js"></script>
+  <script>
+    // O tema já é aplicado pelo script "Controle de tema imediato" logo abaixo; aqui só avisamos no console.
+    if (!document.documentElement.hasAttribute('data-bs-theme')) {
+      console.warn('./js/color-modes.js local não carregou. O tema será definido pelo script embutido.');
+    }
+  </script>
+
+  <!-- ── BOOTSTRAP 5.3.3 CSS LOCAL ── -->
+  <link id="bootstrap-css-local" href="./css/bootstrap.min.css" rel="stylesheet">
+  <script>
+    // Confere se o Bootstrap local carregou (lê uma variável CSS dele; funciona também em file://).
+    // Se não carregou, usa o CDN como reserva — sem alert para o usuário final.
+    window.addEventListener('load', function () {
+      const ok = getComputedStyle(document.documentElement).getPropertyValue('--bs-blue').trim() !== '';
+      if (ok) return;
+      console.warn('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+      const cdn = document.createElement('link');
+      cdn.rel = 'stylesheet';
+      cdn.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css';
+      cdn.integrity = 'sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH';
+      cdn.crossOrigin = 'anonymous';
+      document.head.appendChild(cdn);
+    });
+  </script>
+
+  <!-- ── CONTROLE DE TEMA IMEDIATO ── -->
+  <script>
+    (() => {
+        const getStoredTheme = () => localStorage.getItem('theme');
+        const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const resolveTheme = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+        document.documentElement.setAttribute('data-bs-theme', resolveTheme(getStoredTheme() || 'auto'));
+    })();
+  </script>
+
+  <style>
+    body { padding-top: 56px; }
+
+    #nav-sistema-placeholder {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 56px;
+      z-index: 1050;
+    }
+
+    .toolbar-cad { top: 56px; z-index: 1020; }
+    .btn-xs { --bs-btn-padding-y: 0.1rem; --bs-btn-padding-x: 0.35rem; --bs-btn-font-size: 0.75rem; }
+    .coluna-jornal { min-height: 400px; transition: background-color 0.2s; }
+    .border-dashed { border: 2px dashed var(--bs-border-color); }
+    .card-materia { transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out; }
+    .card-materia:hover { transform: translateY(-2px); box-shadow: var(--bs-box-shadow-sm) !important; }
+  </style>
+</head>
+
+<body>
+
+  <div id="nav-sistema-placeholder"></div>
+
+  <!-- ── TOOLBAR ─────────────────────────────────────────────── -->
+  <div class="bg-body-tertiary border-bottom sticky-top toolbar-cad">
+    <div class="container-fluid px-4 py-2 d-flex flex-wrap align-items-center gap-2">
+      <button type="button" id="btnCadastrarTopo" class="btn btn-sm btn-success">🆕 Cadastrar Matéria</button>
+      <a href="tabEdicoes.html" class="btn btn-sm btn-outline-primary">📰 Lista de Edições</a>
+      
+      <span class="vr"></span>
+      
+      <button type="button" id="btnPreviewPdf" class="btn btn-sm btn-outline-danger" title="Abrir preview do jornal para impressão ou PDF">👁️ Preview PDF</button>
+      <button type="button" id="btnExportarEdicao" class="btn btn-sm btn-outline-secondary" title="Exportar o JSON completo desta edição">⬇ JSON Edição</button>
+      <button type="button" id="btnRecarregar" class="btn btn-sm btn-outline-secondary">🔄 Atualizar Grade</button>
+
+      <div class="input-group input-group-sm ms-auto" style="max-width: 320px;">
+        <input type="search" id="campoBusca" class="form-control" placeholder="Filtrar matérias na grade..." aria-label="Buscar matéria" />
+        <button type="button" id="btnLimparBusca" class="btn btn-outline-secondary" title="Limpar Filtro">❌</button>
+      </div>
+    </div>
+  </div>
+  <!-- ── CONTEÚDO PRINCIPAL ──────────────────────────────────── -->
+  <main class="container-fluid px-4 py-3">
+
+    <!-- Painel Informativo da Edição Ativa -->
+    <div class="card bg-body-secondary border-0 mb-3 shadow-sm">
+      <div class="card-body py-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <span class="fs-4">📰</span>
+          <div>
+            <h5 class="mb-0 fw-bold text-success" id="cabecalhoEdicao">Carregando dados da edição...</h5>
+            <small class="text-body-secondary" id="subtituloEdicao">Mapeando distribuição de colunas</small>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span id="badgeStatusEdicao" class="badge bg-secondary">...</span>
+          <span id="contadorGeral" class="badge text-bg-dark">0 matéria(s)</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="alertaGlobal" class="alert d-none" role="alert"></div>
+
+    <!-- GRADE DE DISTRIBUIÇÃO SIMULANDO A CAPA DO JORNAL -->
+    <div class="row g-3">
+      
+      <!-- COLUNA 1: ESQUERDA -->
+      <div class="col-12 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-header bg-success-subtle text-success-emphasis fw-bold d-flex justify-content-between align-items-center py-2">
+            <span>⬅️ Coluna 1 — Esquerda</span>
+            <span id="cont-c1" class="badge text-bg-success">0</span>
+          </div>
+          <div class="card-body p-2 bg-body-tertiary coluna-jornal" id="grade-coluna-1">
+            <!-- Injetado dinamicamente -->
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUNA 2: CENTRAL -->
+      <div class="col-12 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-header bg-primary-subtle text-primary-emphasis fw-bold d-flex justify-content-between align-items-center py-2">
+            <span>🔲 Coluna 2 — Central</span>
+            <span id="cont-c2" class="badge text-bg-primary">0</span>
+          </div>
+          <div class="card-body p-2 bg-body-tertiary coluna-jornal" id="grade-coluna-2">
+            <!-- Injetado dinamicamente -->
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUNA 3: DIREITA -->
+      <div class="col-12 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-header bg-info-subtle text-info-emphasis fw-bold d-flex justify-content-between align-items-center py-2">
+            <span>➡️ Coluna 3 — Direita</span>
+            <span id="cont-c3" class="badge text-bg-info">0</span>
+          </div>
+          <div class="card-body p-2 bg-body-tertiary coluna-jornal" id="grade-coluna-3">
+            <!-- Injetado dinamicamente -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── MODAL INTERNA DE CONFIRMAÇÃO DE EXCLUSÃO ────────────── -->
+  <div class="modal fade" id="modalExcluirMateria" tabindex="-1" aria-labelledby="tituloModalExcluir" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header py-2">
+          <h5 class="modal-title text-danger fw-bold" id="tituloModalExcluir">Remover Matéria</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body py-3">
+          <p class="mb-0 small">Deseja retirar esta matéria desta edição permanentemente?</p>
+          <div class="fw-semibold text-truncate small mt-2 text-body-secondary" id="textMateriaExcluir"></div>
+        </div>
+        <div class="modal-footer py-1">
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Não</button>
+          <button type="button" id="btnConfirmarExclusaoMateria" class="btn btn-sm btn-danger">Sim, remover</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- DEPENDÊNCIAS DO ECOSSISTEMA DE DADOS CORE -->
+  <script src="./js/news-dados.js"></script>
+
+  <!-- CONTROLADOR PRINCIPAL DA GRADE DE CAPA -->
+  <script>
+  (() => {
+    'use strict';
+
+    const EDIT_KEY = 'NEWS_EDITAR';                   // matéria a editar (lida pelo cadastro)
+    const PAGINA_CADASTRO_MATERIA = 'cadMaterias.html';
+    const $ = (id) => document.getElementById(id);
+    let idMateriaParaRemover = null;
+    let timerAlerta = null;
+
+    // ── Barramento de Resgate da Edição Ativa ────────────────
+    function obterEdicaoAtiva() {
+      if (typeof NewsDados === 'undefined') return null;
+      const edicaoId = NewsDados.edicaoAtivaId();
+      if (!edicaoId) return null;
+      return NewsDados.obterEdicao(edicaoId);
+    }
+    function mostrarAlerta(tipo, texto) {
+      const el = $('alertaGlobal');
+      el.className = 'alert alert-' + tipo + ' mb-3';
+      el.textContent = texto;
+      el.classList.remove('d-none');
+      clearTimeout(timerAlerta);
+      if (tipo === 'success') {
+        timerAlerta = setTimeout(() => el.classList.add('d-none'), 5000);
+      }
+    }
+
+    function esc(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto == null ? '' : String(texto);
+      return div.innerHTML;
+    }
+
+    // Escape para uso dentro de atributos HTML (aspas incluídas)
+    function escAttr(texto) {
+      return String(texto == null ? '' : texto)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function normalizar(texto) {
+      return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    // DETALHE ADICIONADO: Algoritmo que calcula de forma preditiva a primeira vaga disponível no jornal
+    function calcularPrimeiraLacunaLivre(materias) {
+      const colunasMapeadas = { 1: [], 2: [], 3: [] };
+      materias.forEach(m => {
+        if (colunasMapeadas[m.coluna]) colunasMapeadas[m.coluna].push(Number(m.ordem) || 1);
+      });
+
+      // Passo 1: Procura se existe alguma coluna vazia do 1 ao 3
+      for (let c = 1; c <= 3; c++) {
+        if (colunasMapeadas[c].length === 0) return { coluna: c, ordem: 1 };
+      }
+
+      // Passo 2: Se todas têm registros, encontra a coluna com menor número de itens e a próxima sequência
+      let colunaSugerida = 1;
+      let ordemSugerida = 1;
+      let menorQuantidade = Infinity;
+
+      for (let c = 1; c <= 3; c++) {
+        const ordens = colunasMapeadas[c].sort((a, b) => a - b);
+        let proximaAposBuraco = 1;
+        for (let j = 0; j < ordens.length; j++) {
+          if (ordens[j] === proximaAposBuraco) {
+            proximaAposBuraco++;
+          } else if (ordens[j] > proximaAposBuraco) {
+            break;
+          }
+        }
+        if (ordens.length < menorQuantidade) {
+          menorQuantidade = ordens.length;
+          colunaSugerida = c;
+          ordemSugerida = proximaAposBuraco;
+        }
+      }
+
+      return { coluna: colunaSugerida, ordem: ordemSugerida };
+    }
+
+    // Direciona o fluxo gravando a sugestão de posicionamento calculada
+    window.redirecionarParaCadastroInteligente = function(colunaForcada = null) {
+      const edicao = obterEdicaoAtiva();
+      const materias = edicao ? (edicao.materias || []) : [];
+      
+      let lacuna = { coluna: colunaForcada, ordem: 1 };
+      if (!colunaForcada) {
+        lacuna = calcularPrimeiraLacunaLivre(materias);
+      } else {
+        const ordens = materias.filter(m => Number(m.coluna) === Number(colunaForcada)).map(m => Number(m.ordem) || 0);
+        lacuna.ordem = (ordens.length ? Math.max(...ordens) : 0) + 1;
+      }
+
+      localStorage.removeItem(EDIT_KEY); 
+      localStorage.setItem('SUGESTAO_CADASTRO', JSON.stringify(lacuna));
+      window.location.href = PAGINA_CADASTRO_MATERIA;
+    };
+
+    // ── Mecanismo de Renderização e Detecção de Faltas ──────
+    function renderizarGradeJornal() {
+      const edicao = obterEdicaoAtiva();
+      
+      if (!edicao) {
+        $('cabecalhoEdicao').textContent = 'Nenhuma edição aberta no sistema';
+        $('subtituloEdicao').textContent = 'Por favor, acesse a lista de edições para abrir uma.';
+        $('badgeStatusEdicao').className = 'badge bg-danger';
+        $('badgeStatusEdicao').textContent = 'Bloqueado';
+        for (let i = 1; i <= 3; i++) {
+          $(`grade-coluna-${i}`).innerHTML = '<div class="text-center text-body-secondary py-3 small">Aguardando abertura de edição...</div>';
+        }
+        return;
+      }
+
+      $('cabecalhoEdicao').textContent = 'Edição de ' + NewsDados.dataBR(edicao.data);
+      $('subtituloEdicao').textContent = edicao.nome ? edicao.nome : 'Edição sem descrição atribuída';
+      
+      const publicada = edicao.status === 'Publicada';
+      $('badgeStatusEdicao').className = 'badge ' + (publicada ? 'text-bg-success' : 'text-bg-warning');
+      $('badgeStatusEdicao').textContent = edicao.status || 'Rascunho';
+
+      const materiasTotais = edicao.materias || [];
+      $('contadorGeral').textContent = materiasTotais.length + ' matéria(s) cadastrada(s)';
+
+      const termoBusca = normalizar($('campoBusca').value.trim());
+      const materiasFiltradas = materiasTotais.filter(m => {
+        if (!termoBusca) return true;
+        return normalizar([m.titulo, m.categoria, m.autor, m.resumo].join(' ')).includes(termoBusca);
+      });
+
+      const colunas = {
+        1: materiasFiltradas.filter(m => Number(m.coluna) === 1).sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0)),
+        2: materiasFiltradas.filter(m => Number(m.coluna) === 2).sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0)),
+        3: materiasFiltradas.filter(m => Number(m.coluna) === 3).sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0))
+      };
+
+      $('cont-c1').textContent = colunas[1].length;
+      $('cont-c2').textContent = colunas[2].length;
+      $('cont-c3').textContent = colunas[3].length;
+
+      for (let i = 1; i <= 3; i++) {
+        const gradeAlvo = $(`grade-coluna-${i}`);
+        if (!gradeAlvo) continue;
+
+        if (colunas[i].length === 0) {
+          gradeAlvo.innerHTML = `
+            <div class="alert alert-warning border-dashed bg-body text-center py-4 my-2 d-flex flex-column align-items-center justify-content-center">
+              <span class="fs-4 mb-2">⚠️</span>
+              <div class="fw-bold mb-1 small text-warning-emphasis">Espaço de Matéria Pendente</div>
+              <p class="text-body-secondary small mb-3 px-2" style="font-size: 0.8rem;">A Coluna ${i} não possui registros nesta edição do jornal.</p>
+              <button type="button" class="btn btn-xs btn-outline-warning fw-bold py-1 px-3 small" onclick="redirecionarParaCadastroInteligente(${i})" style="font-size: 0.75rem;">+ Preencher Lacuna</button>
+            </div>`;
+        } else {
+          gradeAlvo.innerHTML = colunas[i].map(m => {
+            const inativa = m.status === 'Inativo';
+            return `
+              <div class="card card-materia bg-body mb-2 border-0 shadow-sm border-start border-3 ${inativa ? 'border-secondary opacity-75' : 'border-success'}">
+                <div class="card-body p-2">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="badge text-bg-success small" style="font-size: 0.7rem; padding: 0.2em 0.4em;">${esc(m.categoria || 'Geral')}</span>
+                    ${inativa ? '<span class="badge text-bg-secondary p-1 small" style="font-size: 0.65rem;">Oculto</span>' : ''}
+                  </div>
+                  <h6 class="card-title fw-bold text-body-emphasis mb-1 small text-truncate" title="${escAttr(m.titulo)}">${esc(m.titulo)}</h6>
+                  <p class="text-body-secondary small mb-2 text-truncate-2" style="font-size: 0.75rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.2em; line-height: 1.1em;">
+                    ${m.resumo ? esc(m.resumo) : '<span class="text-body-tertiary fst-italic">Sem resumo cadastrado...</span>'}
+                  </p>
+                  <div class="d-flex justify-content-between align-items-center pt-1 border-top border-light-subtle">
+                    <span class="text-body-tertiary" style="font-size: 0.7rem;">Posição: <strong class="text-body">${m.ordem}</strong></span>
+                    <div>
+                      <button type="button" class="btn btn-xs btn-outline-success py-0 px-1 me-1" data-acao="editar" data-id="${escAttr(m.id)}" title="Alterar ou editar esta matéria">✏️ Editar</button>
+                      <button type="button" class="btn btn-xs btn-outline-danger py-0 px-1" data-acao="remover" data-id="${escAttr(m.id)}" title="Retirar do jornal">🗑️</button>
+                    </div>
+                  </div>
+                </div>
+              </div>`;
+          }).join('');
+        }
+      }
+    }
+    // Abre o cadastro de matéria já preenchido com a matéria clicada.
+    // Grava em NEWS_EDITAR o id da matéria (contrato do news-dados.js); o cadastro a busca na edição ativa.
+    window.abrirAlteracaoMateria = function(id) {
+      const edicao = obterEdicaoAtiva();
+      const materia = edicao ? (edicao.materias || []).find(m => String(m.id) === String(id)) : null;
+
+      if (!materia) {
+        mostrarAlerta('warning', 'Matéria não encontrada nesta edição. Atualize a grade e tente novamente.');
+        return;
+      }
+
+      try {
+        localStorage.removeItem('SUGESTAO_CADASTRO'); // não misturar com o cadastro de matéria nova
+        NewsDados.definirAtiva(edicao.id);            // garante que o cadastro abra a mesma edição da grade
+        localStorage.setItem(EDIT_KEY, String(materia.id));
+      } catch (e) {
+        console.error('Erro ao enviar matéria para edição', e);
+        mostrarAlerta('danger', 'Não foi possível abrir a matéria para edição. O armazenamento do navegador pode estar cheio.');
+        return;
+      }
+      window.location.href = PAGINA_CADASTRO_MATERIA;
+    };
+
+    // Inicia o fluxo seguro de remoção de um nó da edição
+    window.solicitarRemocao = function(id, titulo) {
+      idMateriaParaRemover = id;
+      $('textMateriaExcluir').textContent = titulo;
+      if (typeof bootstrap !== 'undefined') {
+        bootstrap.Modal.getOrCreateInstance($('modalExcluirMateria')).show();
+      }
+    };
+
+    function executarExclusao() {
+      if (!idMateriaParaRemover) return;
+      const edicao = obterEdicaoAlvoLocal();
+      if (!edicao) return;
+
+      const listaFiltrada = (edicao.materias || []).filter(m => String(m.id) !== String(idMateriaParaRemover));
+      idMateriaParaRemover = null;
+
+      if (typeof bootstrap !== 'undefined') {
+        bootstrap.Modal.getOrCreateInstance($('modalExcluirMateria')).hide();
+      }
+
+      edicao.materias = listaFiltrada;
+      if (NewsDados.salvarEdicao(edicao)) {
+        renderizarGradeJornal();
+        mostrarAlerta('success', 'Matéria removida da edição com sucesso.');
+      } else {
+        mostrarAlerta('danger', 'Não foi possível gravar a edição. O armazenamento do navegador pode estar cheio.');
+      }
+    }
+
+    function obterEdicaoAlvoLocal() {
+      if (typeof NewsDados === 'undefined') return null;
+      const edicaoId = NewsDados.edicaoAtivaId();
+      return edicaoId ? NewsDados.obterEdicao(edicaoId) : null;
+    }
+
+    // Abre a página do jornal em modo preview/PDF com os dados da edição ativa
+    // Abre a página do jornal em modo preview/PDF na mesma aba com os dados da edição ativa
+    function abrirPreviewPDF() {
+      const edicao = obterEdicaoAlvoLocal();
+      if (!edicao) {
+        mostrarAlerta('warning', 'Nenhuma edição ativa selecionada para gerar o preview.');
+        return;
+      }
+      window.location.href = 'constantino-news.html?edicao=' + encodeURIComponent(edicao.id) + '&preview=1';
+    }
+
+    function exportarJSONLote() {
+      const edicao = obterEdicaoAlvoLocal();
+      if (!edicao) {
+        mostrarAlerta('warning', 'Nenhuma edição ativa para exportar.');
+        return;
+      }
+      const blob = new Blob([JSON.stringify(edicao, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'edicao-completa-' + (edicao.data || 'backup') + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function limparBuscaEGrade() {
+      $('campoBusca').value = '';
+      renderizarGradeJornal();
+    }
+
+    // ── Mapeamento Geral de Eventos ─────────────────────────
+    $('btnPreviewPdf').addEventListener('click', abrirPreviewPDF);
+    $('btnRecarregar').addEventListener('click', renderizarGradeJornal);
+    $('btnExportarEdicao').addEventListener('click', exportarJSONLote);
+    $('btnLimparBusca').addEventListener('click', limparBuscaEGrade);
+    $('campoBusca').addEventListener('input', renderizarGradeJornal);
+    $('btnConfirmarExclusaoMateria').addEventListener('click', executarExclusao);
+
+    // Configura o evento do botão principal de cadastro no topo da barra de ferramentas
+    $('btnCadastrarTopo').addEventListener('click', () => redirecionarParaCadastroInteligente());
+
+    // Botões ✏️ Editar dos cards (delegação: funciona após cada redesenho da grade)
+    document.querySelector('main').addEventListener('click', (e) => {
+      const botao = e.target.closest('[data-acao]');
+      if (!botao) return;
+      if (botao.dataset.acao === 'editar') window.abrirAlteracaoMateria(botao.dataset.id);
+      if (botao.dataset.acao === 'remover') {
+        const edicao = obterEdicaoAtiva();
+        const materia = edicao ? (edicao.materias || []).find(m => String(m.id) === String(botao.dataset.id)) : null;
+        if (materia) window.solicitarRemocao(materia.id, materia.titulo);
+      }
+    });
+
+    // Monitora o cache de histórico de retorno (bfcache)
+    window.addEventListener('pageshow', (e) => { if (e.persisted) renderizarGradeJornal(); });
+
+    // Inicialização da tela
+    renderizarGradeJornal();
+  })();
+  </script>
+
+  <!-- DEPENDÊNCIAS DE EXECUÇÃO DE INTERFACE E SCRIPTS CORE -->
+  <script src="./js/bootstrap.bundle.min.js"></script>
+  <script>
+      if (typeof bootstrap === 'undefined') {
+          console.warn('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+          const scriptCdn = document.createElement('script');
+          scriptCdn.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
+          scriptCdn.integrity = 'sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz';
+          scriptCdn.crossOrigin = 'anonymous';
+          document.body.appendChild(scriptCdn);
+      }
+  </script>
+  <script src="./js/include.js"></script>
+
+</body>
+</html>

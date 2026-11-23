@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt-br" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Tele de about, (Sobre nós)." />
+    <meta
+      name="author"
+      content="Felipe Rodrigues"
+    />
+    <meta name="generator" content="FullTime System - 1.00" />
+    <title>Gabriel Constantino</title>
+
+    <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+    <!-- SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3 -->
+    <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+    <script src="./js/color-modes.js"></script>
+
+    <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+    <!-- Bootstrap CSS v5.3.8 -->
+    <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+    <!-- BOOTSTRAP 5.3.3 CSS (CDN oficial) -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous"> -->
+
+    <!-- BOOTSTRAP 5.3.3 CSS LOCAL -->
+    <link id="bootstrap-css-local" href="./css/bootstrap.min.css" rel="stylesheet">
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let cssCarregado = false;
+            for (let i = 0; i < document.styleSheets.length; i++) {
+                try {
+                    let sheet = document.styleSheets[i];
+                    if (sheet.href && sheet.href.indexOf("bootstrap.min.css") !== -1) {
+                        if (sheet.cssRules && sheet.cssRules.length > 0) {
+                            cssCarregado = true;
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    // Captura restrições de segurança de CORS se houverem
+                }
+            }
+
+            if (!cssCarregado) {
+                alert('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                console.warn('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                
+                let cdn = document.createElement("link");
+                cdn.rel = "stylesheet";
+                cdn.href = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css";
+                cdn.integrity = "sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH";
+                cdn.crossOrigin = "anonymous";
+                document.head.appendChild(cdn);
+            }
+        });
+    </script>
+
+    <!-- CONTROLE DE TEMA IMEDIATO -->
+    <script>
+        (() => {
+            const getStoredTheme = () => localStorage.getItem('theme');
+            const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const resolveTheme = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+            document.documentElement.setAttribute('data-bs-theme', resolveTheme(getStoredTheme() || 'auto'));
+        })();
+    </script>
+
+</head>
+
+
+<body>
+
+<!-- ///////////////////////////////////////////////////////////////////////////////// -->
+
+  <header>
+
+    <!-- //////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ///////      BARRA DE NAVEGAÇÃO FIXA (NAVBAR) /////////////////////////////////// -->
+    <!-- //////////////////////////////////////////////////////////////////////////////////-->
+
+    <div id="nav-placeholder"></div>
+
+  </header>
+
+<!-- ///////////////////////////////////////////////////////////////////////////////// -->
+
+    <main class="container">
+      <h2 class="text-center text-danger">Vereador Gabriel Constantino - PT</h2>
+    <br><br>
+          <p class="lead" style="text-align: justify;">
+          Gabriel Constantino é canoense, nasceu no gracinha. Cresceu na Estância Velha e no Guajuviras,
+          estudou na EMEF Arthur Oscar Jochins e na EEEM Margot Giacomazzi, onde começou a fazer política 
+          no grêmio estudantil em 2016. Formado em Relações Internacionais pela UFRGS e mestrado em 
+          Planejamento Urbano e Regional também pela UFRGS, constrói diariamente sua trajetória política
+          transformando seu conhecimento técnico em ação concreta na cidade.
+
+          Gabriel sabe que a educação transforma vidas. Foi pela educação pública que construiu sua trajetória,
+          sem esquecer de onde veio e por quem faz política. Na Câmara, tem sido uma voz firme na fiscalização 
+          da Prefeitura de Canoas, na defesa da transparência, dos serviços públicos, pelo andamento das obras 
+          de reconstrução e a participação popular.
+
+          Com origem popular e atuação presente desde as vilas ao centro, Gabriel representa uma nova geração 
+          da esquerda: preparada, combativa e comprometida com uma cidade mais justa, democrática e humana.
+
+	<br><br>
+        </p>
+
+    </main>
+<!-- ================================================================================= -->
+<!-- LOGOTIPO 3D GIRANDO COMO MOEDA -->
+<!-- ================================================================================= -->
+
+<style>
+
+  /* ========================================================================= */
+  /* ÁREA CENTRAL DA MOEDA                                                     */
+  /* ========================================================================= */
+
+  .coin-container {
+
+    /* Centraliza o conteúdo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Define profundidade 3D */
+    perspective: 1200px;
+
+    /* Espaçamento */
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  /* ========================================================================= */
+  /* MOEDA                                                                     */
+  /* ========================================================================= */
+
+  .coin {
+
+    /* Tamanho da moeda */
+    width: 330px;
+    height: 330px;
+
+    /* Mantém efeito 3D */
+    transform-style: preserve-3d;
+
+    /* Animação contínua */
+    animation: girarMoeda 6s linear infinite;
+
+    /* Melhora renderização */
+    will-change: transform;
+
+    /* Sombra suave */
+    filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.35));
+  }
+
+  /* ========================================================================= */
+  /* IMAGEM DA MOEDA                                                           */
+  /* ========================================================================= */
+
+  .coin img {
+
+    width: 100%;
+    height: 100%;
+
+    /* Mantém formato circular */
+    border-radius: 50%;
+
+    /* Remove fundo branco visual */
+    object-fit: cover;
+
+    /* Transparência suave */
+    background: transparent;
+  }
+
+  /* ========================================================================= */
+  /* ANIMAÇÃO 3D                                                               */
+  /* ========================================================================= */
+
+  @keyframes girarMoeda {
+
+    /* Início */
+    0% {
+      transform: rotateY(0deg);
+    }
+
+    /* Meio da rotação */
+    50% {
+      transform: rotateY(180deg);
+    }
+
+    /* Final */
+    100% {
+      transform: rotateY(360deg);
+    }
+  }
+
+</style>
+
+<!-- ========================================================================= -->
+<!-- CONTAINER DA MOEDA                                                        -->
+<!-- ========================================================================= -->
+
+<div class="coin-container">
+
+  <!-- ======================================================================= -->
+  <!-- MOEDA GIRANDO                                                           -->
+  <!-- ======================================================================= -->
+
+  <div class="coin">
+
+    <!-- ===================================================================== -->
+    <!-- IMAGEM DA MOEDA                                                       -->
+    <!-- ===================================================================== -->
+
+    
+
+    <div class="text-center">
+
+    	<img src="./imagens/usuarios/Gabriel2.png" alt="logo.png" width="330" height="330" class="rounded-circle">
+
+    </div>
+
+    </div>
+
+</div>
+
+<!-- ================================================================================= -->
+<!-- FIM DO LOGOTIPO 3D GIRANDO                                                        -->
+<!-- ================================================================================= -->
+
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- RODAPÉ FIXO (FOOTER) -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <div id="footer-placeholder"></div>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- Bootstrap JS Bundle -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- iNCLUDE PARA USART HTML EXTERNO -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/include.js"></script>
+
+</body>
+
+</html>
+

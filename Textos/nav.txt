@@ -1,0 +1,90 @@
+<!-- ///////////////////////////////////////////////////////////////////////////////////// -->
+
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-success-subtle  text-success-emphasis ">
+    <!-- <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark text-success"> -->
+      <div class="container-fluid">
+
+            <!-- <div class="flex-shrink-0 dropdown"> -->
+              <a
+                href="#"
+                class="d-block link-body-emphasis text-decoration-none dropdown-toggle"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+
+                <!--  src="https://github.com/mdo.png" -->
+
+                <img
+                  src="Felipe.jpg"
+                  alt=""
+                  width="33"
+                  height="33"
+                  class="rounded-circle"
+                />
+              </a>
+              <ul class="dropdown-menu text-small shadow">
+                <li><a class="dropdown-item" href="#">Novo projeto...</a></li>
+                <li><a class="dropdown-item" href="#">Configurações</a></li>
+                <li><a class="dropdown-item" href="#">Perfil</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" href="cadclientesPF.html">Cadastro de Clientes PF</a></li>
+                <li><a class="dropdown-item" href="cadclientesPJ.html">Cadastro de Clientes PJ</a></li>
+                <li><a class="dropdown-item" href="cadFornecedores.html">Cadastro de Fornecedores</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" href="cadProdutos.html">Cadastro de Produtos</a></li>
+                <li><a class="dropdown-item" href="Ordemdeservico.html">Cadastro de Ordens de Serviço</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" href="about.html">Sobre a FullTime</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" href="#">Sair</a></li>
+              </ul>&nbsp;
+            <!-- </div> -->
+		&nbsp;&nbsp;
+
+<!-- ///////////////////////////////////////////////////////////////////////////////////// -->
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarCollapse"
+          aria-controls="navbarCollapse"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+          <ul class="navbar-nav me-auto mb-2 mb-md-0">
+            <li class="nav-item">
+              <a class="nav-link active text-success" aria-current="page" href="index.html">Inicio</a>
+            </li>
+            <li class="nav-item"><a class="nav-link text-success" href="cadclientesPF.html">Clientes PF</a></li>
+            <li class="nav-item"><a class="nav-link text-success" href="tabela.html">Tabela PF</a></li>
+            <li class="nav-item"><a class="nav-link text-success" href="cadclientesPJ.html">Clientes PJ</a></li>
+            <li class="nav-item"><a class="nav-link text-success" href="cadFornecedores.html">Fornecedores</a></li>
+            <li class="nav-item"><a class="nav-link text-success" href="cadProdutos.html">Produtos</a></li>
+            <li class="nav-item"><a class="nav-link text-success" href="Ordemdeservico.html">O.S.</a></li>
+            <li class="nav-item"><a class="nav-link text-success" href="jsonreader5.html">Json Reader.</a></li>
+            <li class="nav-item"><a class="nav-link text-success" href="jornal5.html">Jornal-1</a></li>
+            <li class="nav-item"><a class="nav-link text-success" href="fulltime-news.html">FullTime News</a></li>
+            <li class="nav-item">
+              <a class="nav-link disabled text-success" aria-disabled="true">Disabled</a>
+            </li>
+          </ul>
+          <form class="d-flex" role="search">
+            <input
+              class="form-control me-2"
+              type="search"
+              placeholder="Procurar"
+              aria-label="Search"
+            />
+            <button class="btn btn-outline-success" type="submit">
+              Procurar
+            </button>
+          </form>
+        </div>
+      </div>
+    </nav>
+    <br><br>
+
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////// -->

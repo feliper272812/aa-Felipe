@@ -1,0 +1,394 @@
+<!-- =========================================================
+  ARQUIVO: index.html
+  TELA INICIAL DE SISTEMA COM LOGIN AUTÊNTICO POR BANCO JSON
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+  Autor: Felipe Rodrigues - FullTime Technology
+========================================================= -->
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="auto">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FullTime Technology - Início</title>
+    
+    <!-- Controle de tema nativo imediato para evitar flash visual -->
+    <script>
+        (() => {
+            const getStoredTheme = () => localStorage.getItem('theme');
+            const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const resolveTheme = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+            document.documentElement.setAttribute('data-bs-theme', resolveTheme(getStoredTheme() || 'auto'));
+        })();
+    </script>
+
+    <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            transition: background-color 0.3s ease;
+            padding-top: 56px;
+        }
+
+        [data-bs-theme="dark"] body {
+            background-color: #121212;
+        }
+
+        /* CONFIGURAÇÃO DA MOEDA 3D NO CENTRO */
+        .coin-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1200px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .coin {
+            width: 330px;
+            height: 390px;
+            transform-style: preserve-3d;
+            animation: girarMoeda 6s linear infinite;
+            will-change: transform;
+            filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.35));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .coin img {
+            width: 330px;
+            height: 330px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: transparent;
+        }
+        .coin h4 {
+            margin-top: 15px;
+            margin-bottom: 0;
+            white-space: nowrap;
+            backface-visibility: visible;
+        }
+        @keyframes girarMoeda {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(180deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        /* FIXA O MODAL DO LOGIN NO LADO ESQUERDO DA TELA */
+        #loginModal .modal-dialog {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%) !important;
+            margin: 0;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        /* TRAVA O FUNDO SEM OPACIDADE OU BLUR */
+        body.autenticacao-pendente {
+            overflow: hidden;
+        }
+        body.autenticacao-pendente nav, 
+        body.autenticacao-pendente footer, 
+        body.autenticacao-pendente .bd-mode-toggle, 
+        body.autenticacao-pendente main {
+            pointer-events: none;
+            user-select: none;
+        }
+        #loginModal {
+            pointer-events: auto !important;
+        }
+    </style>
+</head>
+
+<body class="d-flex flex-column h-100 autenticacao-pendente">
+
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+<!-- ///////      BARRA DE NAVEGAÇÃO FIXA (NAVBAR) /////////////////////////////////// -->
+<!-- //////////////////////////////////////////////////////////////////////////////////-->
+
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-success shadow-sm">
+  <div class="container-fluid">
+    <!-- Dropdown Perfil/Menu -->
+    <div class="dropdown me-2">
+      <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+        <img src="./imagens/usuarios/Felipe.jpg" alt="Felipe" width="33" height="33" class="rounded-circle" />
+      </a>
+      <ul class="dropdown-menu text-small shadow">
+        <li><a class="dropdown-item" href="#">Novo projeto...</a></li>
+        <li><a class="dropdown-item" href="#">Configurações</a></li>
+        <li><a class="dropdown-item" href="#">Perfil</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="cadclientesPF.html">Cadastro de Clientes PF</a></li>
+        <li><a class="dropdown-item" href="cadclientesPJ.html">Cadastro de Clientes PJ</a></li>
+        <li><a class="dropdown-item" href="cadFornecedores.html">Cadastro de Fornecedores</a></li>
+        <li><a class="dropdown-item" href="cadusuarios.html">Cadastro de Usuários</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="cadProdutos.html">Cadastro de Produtos</a></li>
+        <li><a class="dropdown-item" href="tabProdutos.html">Tabela de Produtos</a></li>
+        <li><a class="dropdown-item" href="Ordemdeservico.html">Cadastro de Ordens de Serviço</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="cadusuarios.html">Usuários</a></li>
+        <li><a class="dropdown-item" href="tabusuarios.html">Tab. Usuários</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="felipe.html">Felipe Rodrigues</a></li>
+        <li><a class="dropdown-item" href="about.html">Sobre a FullTime</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="index-constantino.html">Constantino</a></li>
+        <li><a class="dropdown-item" href="index-brasil.html">Brasil</a></li>
+        <li><a class="dropdown-item" href="index-rs.html">Rio Grande do Sul</a></li>
+        <li><a class="dropdown-item" href="index-canoas.html">Canoas</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <!-- ALTERAÇÃO REALIZADA: id="btnSair" adicionado abaixo -->
+        <li><a id="btnSair" class="dropdown-item text-danger" href="#">Sair</a></li>
+      </ul>
+    </div>
+
+    <!-- Botão Hamburguer para Mobile -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <ul class="navbar-nav me-auto mb-2 mb-md-0">
+        <li class="nav-item"><a class="nav-link active text-light" href="index.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabClientesPF.html">Cliente PF</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabClientesPJ.html">Cliente PJ</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabFornecedores.html">Fornecedor</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabProdutos.html">Produto</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="frentedecaixa.html">PDV</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="taborcamentos.html">Orçamentos</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="Ordemdeservico.html">O.S.</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="tabusuarios.html">Usuários</a></li>
+        <li class="nav-item"><a class="nav-link text-light" href="index-sistema.html">Sistema</a></li>
+      </ul>
+
+      <!-- Seletor de Tema -->
+      <ul class="navbar-nav ms-md-auto mb-2 mb-md-0">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-light" href="#" id="themeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            🎨 Tema
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="themeDropdown">
+            <li>
+              <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', 'light'); localStorage.setItem('theme', 'light')">
+                ☀️ Modo Claro
+              </button>
+            </li>
+            <li>
+              <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', 'dark'); localStorage.setItem('theme', 'dark')">
+                🌙 Modo Escuro
+              </button>
+            </li>
+            <li>
+              <button type="button" class="dropdown-item" onclick="document.documentElement.setAttribute('data-bs-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); localStorage.setItem('theme', 'auto')">
+                💻 Automático
+              </button>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+    <!-- CONTAINER DA MOEDA 3D -->
+    <main class="container" style="margin-top: 85px; margin-bottom: 60px;">
+        <div class="text-center">
+            <div class="coin-container">
+                <div class="coin">
+                    <img src="./imagens/logotipos/logob-1-transparente.png" alt="Logo FullTime Technology">
+                    <h4 class="text-success-emphasis fw-bold text-center">&copy; Felipe Rodrigues — 2026</h4>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL DE LOGIN -->
+    <div class="modal fade" id="loginModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="loginModalLabel">Acesso ao Sistema - FullTime</h5>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label text-secondary">Usuário</label>
+                            <input type="text" class="form-control" id="username" placeholder="Digite seu usuário" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label text-secondary">Senha</label>
+                            <input type="password" class="form-control" id="password" placeholder="Digite sua senha" required>
+                        </div>
+
+                        <div class="mb-3 text-center">
+                            <span id="dbStatusBadge" class="badge bg-danger p-2 w-100">Base de Usuários Desconectada</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="btnLoadJson" class="btn btn-sm btn-outline-success w-100 text-light fw-bold">📂 Importar Base de Usuários (cadusuarios.json)</label>
+                            <input type="file" id="btnLoadJson" accept=".json" class="d-none" onchange="carregarBaseUsuarios(event)">
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success py-2 fw-bold">Entrar e Liberar Sistema</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- =========================================================
+         RODAPÉ FIXO (FOOTER)
+    ========================================================== -->
+    <footer class="footer mt-auto py-2 bg-body-tertiary fixed-bottom">
+        <div class="container-fluid">
+            <p class="text-center text-success-emphasis mb-0 small">
+                &copy; 2026 Felipe Rodrigues - FullTime Technology
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script de proteção global -->
+    <script src="autenticacao.js"></script>
+
+    <!-- Script exclusivo da Index para Autenticação por JSON e Gerenciamento do Modal -->
+    <script>
+        // Função global para carregar o arquivo cadusuarios.json externo para dentro do LocalStorage
+        function carregarBaseUsuarios(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    let dados = JSON.parse(e.target.result);
+                    
+                    if (!Array.isArray(dados)) {
+                        dados = [dados];
+                    }
+
+                    if (!dados.length) {
+                        alert("O arquivo JSON de usuários está vazio.");
+                        return;
+                    }
+
+                    localStorage.setItem("PDV_USUARIOS", JSON.stringify(dados));
+                    verificarStatusBase();
+                    alert("Base de dados de usuários carregada e integrada com sucesso!");
+                } catch (err) {
+                    alert("Erro crítico ao processar o JSON: " + err.message);
+                }
+                event.target.value = ""; 
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+
+        // Atualiza dinamicamente o badge visual indicando o estado atual da base de usuários
+        function verificarStatusBase() {
+            const badge = document.getElementById("dbStatusBadge");
+            const usuarios = localStorage.getItem("PDV_USUARIOS");
+            
+            if (usuarios && JSON.parse(usuarios).length > 0) {
+                badge.textContent = "Base de Usuários Ativa e Conectada";
+                badge.className = "badge bg-success p-2 w-100";
+            } else {
+                badge.textContent = "Base de Usuários Desconectada (Importe o JSON)";
+                badge.className = "badge bg-danger p-2 w-100";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const loginModalEl = document.getElementById('loginModal');
+            const loginModal = new bootstrap.Modal(loginModalEl);
+            const loginForm = document.getElementById('loginForm');
+
+            // Executa checagem inicial da base de dados local
+            verificarStatusBase();
+
+            const pdvHabilitado = localStorage.getItem("PDV_HABILITADO");
+
+            // Valida o estado de autenticação prévia do navegador
+            if (pdvHabilitado === "1") {
+                document.body.classList.remove('autenticacao-pendente');
+            } else {
+                document.body.classList.add('autenticacao-pendente');
+                loginModal.show();
+            }
+
+            // =======================================================
+            // LÓGICA DO LOGOUT: Captura o clique no botão Sair
+            // =======================================================
+            const btnSair = document.getElementById('btnSair');
+            if (btnSair) {
+                btnSair.addEventListener('click', function (event) {
+                    event.preventDefault(); // Evita o comportamento do link '#'
+                    
+                    // Modifica a variável para forçar novo login no sistema
+                    localStorage.setItem("PDV_HABILITADO", "0");
+                    
+                    // Recarrega a página para travar tudo novamente na hora
+                    window.location.reload();
+                });
+            }
+            // =======================================================
+
+            // Regra de processamento e validação real do login por Banco de Dados JSON
+            loginForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const userDigitado = document.getElementById("username").value.trim();
+                const senhaDigitada = document.getElementById("password").value.trim();
+
+                const baseBruta = localStorage.getItem("PDV_USUARIOS");
+                if (!baseBruta) {
+                    alert("Acesso negado! Nenhuma base de usuários ativa encontrada no sistema. Por favor, importe o arquivo cadusuarios.json.");
+                    return;
+                }
+
+                const listaUsuarios = JSON.parse(baseBruta);
+
+                // Busca linear exata na lista comparando strings de autenticação
+                const usuarioValido = listaUsuarios.find(u => 
+                    u.usuario && u.usuario.trim() === userDigitado && 
+                    u.senha && u.senha.toString().trim() === senhaDigitada
+                );
+
+                if (!usuarioValido) {
+                    alert("Falha na autenticação! Usuário ou senha incorretos.");
+                    localStorage.setItem("PDV_HABILITADO", "0");
+                    return;
+                }
+
+                // Liberação completa das rotas e fechamento seguro da camada de proteção
+                localStorage.setItem("PDV_HABILITADO", "1");
+                document.body.classList.remove('autenticacao-pendente');
+                loginModal.hide();
+                alert(`Bem-vindo, ${usuarioValido.usuario}! Sistema liberado.`);
+            });
+        });
+    </script>
+</body>
+</html>

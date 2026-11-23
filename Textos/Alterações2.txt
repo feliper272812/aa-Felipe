@@ -1,0 +1,9 @@
+
+Vou enviar tabclientePF.html, tabclientePJ.html,cadclientesPF.html e cadclientesPJ.html. Quero que tabclientePJ.html 
+seja idêntico ao tabclientePF.html, porém com o dados/inputs e labels de pessoa jurídica. TabclientePJ deve ter a mesma 
+dinâmica de integração com cadclientesPJ que tabclientePF tem com cadclientesPF. os scripts devem ser alterados para os 
+dados de pessoa jurídica e a pesquisa não será mais por cpf, mas por cnpj. Deve ser avaliado o tamanho do campo, 
+pois não deve quebrar linhas, mas apresentar o dado inteiro. A rolagem de tela deve ser idêntica, o item <H3> 
+deve ser posicionado no centro da tela e não rolar, ou seja deve ser como é com os arquivos de pessoa física. 
+Deve-se levar em consideração que o armazenameto na máquina cliente será em cadclientePJ.json e deve 
+ser isolado de pessoa física também no local storage...

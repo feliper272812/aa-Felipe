@@ -1,0 +1,592 @@
+
+<!-- =========================================================
+  ARQUIVO: tabEdicoes.html
+
+  EDIÇÕES DO JORNAL CONSTANTINO NEWS
+  Cada edição reúne várias matérias (colunas 1, 2 e 3).
+
+  Tecnologias:
+  - HTML5
+  - CSS3
+  - Bootstrap 5.3
+
+  Tema:
+  - Light
+  - Dark
+  - Auto
+
+  Dados (localStorage), via js/news-dados.js:
+  - NEWS_EDICOES      : lista de edições (cada uma com suas matérias)
+  - NEWS_EDICAO_ATIVA : edição aberta em tabMaterias.html / cadMaterias.html
+
+  Autor: Felipe Rodrigues - FullTime Technology
+========================================================= -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edições - Constantino News</title>
+
+<!-- ////////////////////////////////////////////////////////////////////////////////// -->
+<!-- SCRIPT OFICIAL DE TEMAS BOOTSTRAP 5.3 -->
+<!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <script src="./js/color-modes.js"></script>
+
+        <script>
+            if (!document.documentElement.hasAttribute('data-bs-theme')) {
+                alert('./js/color-modes.js local não carregou. Usando CDN como reserva.');
+                console.warn('color-modes.js local não carregou. Usando CDN como reserva.');
+
+                const scriptTheme = document.createElement('script');
+                scriptTheme.src = 'https://cdn.jsdelivr.net/gh/twbs/bootstrap@5.3.3/site/static/docs/5.3/assets/js/color-modes.js';
+                document.head.appendChild(scriptTheme);
+            }
+        </script>
+
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- BOOTSTRAP 5.3.3 CSS LOCAL -->
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <link id="bootstrap-css-local" href="./css/bootstrap.min.css" rel="stylesheet">
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                let cssCarregado = false;
+                for (let i = 0; i < document.styleSheets.length; i++) {
+                    try {
+                        let sheet = document.styleSheets[i];
+                        if (sheet.href && sheet.href.indexOf("bootstrap.min.css") !== -1) {
+                            if (sheet.cssRules && sheet.cssRules.length > 0) {
+                                cssCarregado = true;
+                                break;
+                            }
+                        }
+                    } catch (e) {
+                        // Captura restrições de segurança de CORS se houverem
+                    }
+                }
+
+                if (!cssCarregado) {
+                    alert('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+                    console.warn('bootstrap.min.css local não carregou. Usando CDN como reserva.');
+
+                    let cdn = document.createElement("link");
+                    cdn.rel = "stylesheet";
+                    cdn.href = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css";
+                    cdn.integrity = "sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH";
+                    cdn.crossOrigin = "anonymous";
+                    document.head.appendChild(cdn);
+                }
+            });
+        </script>
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+        <!-- CONTROLE DE TEMA IMEDIATO (Renderização ultrarrápida antes do carregamento do DOM) -->
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+        <script>
+            (() => {
+                const getStoredTheme = () => localStorage.getItem('theme');
+                const getSystemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                const resolveTheme = (tema) => tema === 'auto' ? getSystemTheme() : tema;
+                document.documentElement.setAttribute('data-bs-theme', resolveTheme(getStoredTheme() || 'auto'));
+            })();
+        </script>
+
+        <!-- ////////////////////////////////////////////////////////////////////////////////// -->
+
+  <style>
+
+    /* Espaço para a NAV fixa do sistema (56px) */
+    body { padding-top: 56px; }
+
+    #nav-sistema-placeholder {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 56px;
+      z-index: 1050;
+    }
+
+    /* Toolbar fica colada logo abaixo da NAV */
+    .toolbar-cad { top: 56px; z-index: 1020; }
+
+    .tabela-edicoes thead th { white-space: nowrap; }
+    .tabela-edicoes td { vertical-align: middle; }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV DO SISTEMA (injetada pelo include.js) -->
+  <div id="nav-sistema-placeholder"></div>
+
+  <!-- ── TOOLBAR ─────────────────────────────────────────────── -->
+  <div class="bg-body-tertiary border-bottom sticky-top toolbar-cad">
+    <div class="container-fluid px-4 py-2 d-flex flex-wrap align-items-center gap-2">
+      <button type="button" id="btnNova" class="btn btn-sm btn-outline-success">🆕 Nova edição</button>
+
+      <span class="vr"></span>
+
+      <button type="button" id="btnBackup" class="btn btn-sm btn-outline-secondary" title="Baixa todas as edições em um único JSON">⬇ Backup (todas)</button>
+      <button type="button" id="btnImportar" class="btn btn-sm btn-outline-secondary">📂 Importar</button>
+      <input type="file" id="inputImportar" accept=".json,application/json" hidden />
+
+      <div class="input-group input-group-sm ms-auto" style="max-width: 360px;">
+        <input type="search" id="campoBusca" class="form-control" placeholder="Buscar por data, nome ou título de matéria" aria-label="Buscar edição" />
+        <button type="button" id="btnBuscar" class="btn btn-outline-success" title="Buscar">🔍</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTEÚDO ────────────────────────────────────────────── -->
+  <main class="container-fluid px-4 py-3">
+
+    <h1 class="h3 text-success mb-1">Edições do jornal</h1>
+    <p class="text-body-secondary small mb-3">
+      Cada edição tem a sua data e reúne várias matérias nas colunas 1, 2 e 3. Abra uma edição para cadastrar ou editar as matérias dela. Os dados ficam salvos neste navegador.
+    </p>
+
+    <div id="alerta" class="alert d-none" role="alert"></div>
+
+    <!-- Filtros -->
+    <div class="row g-2 align-items-end mb-3">
+      <div class="col-6 col-md-2">
+        <label for="filtroStatus" class="form-label small mb-1">Status</label>
+        <select id="filtroStatus" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          <option value="Rascunho">Rascunho</option>
+          <option value="Publicada">Publicada</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-auto ms-md-auto">
+        <span id="contador" class="small text-body-secondary"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle mb-0 tabela-edicoes">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">Data</th>
+              <th scope="col">Nome</th>
+              <th scope="col" class="text-center">Matérias</th>
+              <th scope="col" class="text-center">Status</th>
+              <th scope="col">Atualizada em</th>
+              <th scope="col" class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="corpoTabela"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── MODAL: NOVA EDIÇÃO / DADOS DA EDIÇÃO ────────────────── -->
+  <div class="modal fade" id="modalEdicao" tabindex="-1" aria-labelledby="tituloModalEdicao" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-5 text-success" id="tituloModalEdicao">Nova edição</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div id="erroModal" class="alert alert-danger d-none" role="alert"></div>
+
+          <div class="row g-3">
+            <div class="col-12 col-md-5">
+              <label for="edData" class="form-label">Data da edição *</label>
+              <input type="date" id="edData" class="form-control" />
+            </div>
+            <div class="col-12 col-md-7">
+              <label for="edNome" class="form-label">Nome</label>
+              <input type="text" id="edNome" class="form-control" maxlength="80" placeholder="Ex.: Edição de sexta" />
+            </div>
+            <div class="col-12 col-md-5">
+              <label for="edStatus" class="form-label">Status</label>
+              <select id="edStatus" class="form-select">
+                <option value="Rascunho" selected>Rascunho</option>
+                <option value="Publicada">Publicada</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-7" id="blocoCopiar">
+              <label for="edCopiar" class="form-label">Começar de</label>
+              <select id="edCopiar" class="form-select"></select>
+              <div class="form-text">Copiar as matérias de outra edição poupa trabalho: depois é só trocar o que mudou.</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="btnSalvarEdicao" class="btn btn-success">💾 Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL: EXCLUIR EDIÇÃO ───────────────────────────────── -->
+  <div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="tituloModalExcluir" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-5 text-danger" id="tituloModalExcluir">Excluir edição</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-1">Deseja excluir a edição abaixo e todas as matérias dela?</p>
+          <p class="fw-semibold mb-1" id="nomeExcluir"></p>
+          <p class="small text-body-secondary mb-0">Esta ação não pode ser desfeita. Se precisar, exporte o JSON antes.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="btnConfirmarExcluir" class="btn btn-danger">Excluir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- Camada de dados compartilhada -->
+<!-- //////////////////////////////////////////////////////// -->
+
+  <script src="./js/news-dados.js"></script>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- Script de global -->
+<!-- //////////////////////////////////////////////////////// -->
+
+  <script>
+  (() => {
+    'use strict';
+
+    const $ = (id) => document.getElementById(id);
+    let timerAlerta = null;
+    let idParaExcluir = null;
+    let modoModal = 'nova';   // 'nova' ou 'editar'
+    let idEditando = null;
+
+    // Migra as matérias do formato antigo (NEWS_MATERIAS) para uma edição
+    const migracao = NewsDados.migrarLegado();
+
+    // ── Utilidades de tela ──────────────────────────────────
+    function mostrarAlerta(tipo, texto) {
+      const el = $('alerta');
+      el.className = 'alert alert-' + tipo;
+      el.textContent = texto;
+      clearTimeout(timerAlerta);
+      if (tipo === 'success') {
+        timerAlerta = setTimeout(() => el.classList.add('d-none'), 5000);
+      }
+    }
+
+    function esc(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto == null ? '' : String(texto);
+      return div.innerHTML;
+    }
+
+    function normalizar(texto) {
+      return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    }
+
+    // ── Tabela ──────────────────────────────────────────────
+    function filtrarEdicoes() {
+      const termo = normalizar($('campoBusca').value.trim());
+      const status = $('filtroStatus').value;
+
+      return NewsDados.lerEdicoes()
+        .filter(e => !status || e.status === status)
+        .filter(e => {
+          if (!termo) return true;
+          const texto = [
+            e.nome,
+            NewsDados.dataBR(e.data),
+            e.status,
+            e.materias.map(m => m.titulo).join(' ')
+          ].join(' ');
+          return normalizar(texto).includes(termo);
+        })
+        .sort((a, b) => String(b.data).localeCompare(String(a.data)));
+    }
+
+    function linhaEdicao(e) {
+      const ativa = String(e.id) === String(NewsDados.edicaoAtivaId());
+      const c = NewsDados.contarPorColuna(e);
+      const publicada = e.status === 'Publicada';
+
+      return '<tr>' +
+        '<td class="text-nowrap fw-semibold">' + esc(NewsDados.dataBR(e.data)) + '</td>' +
+        '<td>' + (e.nome ? esc(e.nome) : '<span class="text-body-secondary">—</span>') +
+          (ativa ? ' <span class="badge text-bg-primary ms-1">Aberta</span>' : '') + '</td>' +
+        '<td class="text-center"><div class="fw-semibold">' + e.materias.length + '</div>' +
+          '<div class="small text-body-secondary text-nowrap">C1 ' + c[0] + ' · C2 ' + c[1] + ' · C3 ' + c[2] + '</div></td>' +
+        '<td class="text-center"><span class="badge ' + (publicada ? 'text-bg-success' : 'text-bg-warning') + '">' + esc(e.status || 'Rascunho') + '</span></td>' +
+        '<td class="text-nowrap small text-body-secondary">' + esc(NewsDados.dataHoraBR(e.atualizadoEm)) + '</td>' +
+        '<td class="text-end text-nowrap">' +
+          '<button type="button" class="btn btn-sm btn-success me-1" data-acao="abrir" data-id="' + esc(e.id) + '" title="Abrir as matérias desta edição">📂 Abrir</button>' +
+          '<button type="button" class="btn btn-sm btn-outline-secondary me-1" data-acao="duplicar" data-id="' + esc(e.id) + '" title="Criar uma nova edição a partir desta">📑 Duplicar</button>' +
+          '<button type="button" class="btn btn-sm btn-outline-secondary me-1" data-acao="dados" data-id="' + esc(e.id) + '" title="Alterar data, nome e status">✏️ Dados</button>' +
+          '<button type="button" class="btn btn-sm btn-outline-secondary me-1" data-acao="json" data-id="' + esc(e.id) + '" title="Baixar o JSON desta edição">⬇ JSON</button>' +
+          '<button type="button" class="btn btn-sm btn-outline-danger" data-acao="excluir" data-id="' + esc(e.id) + '" title="Excluir">🗑️ Excluir</button>' +
+        '</td>' +
+      '</tr>';
+    }
+
+    function renderTabela() {
+      const total = NewsDados.lerEdicoes().length;
+      const lista = filtrarEdicoes();
+      const corpo = $('corpoTabela');
+
+      if (!total) {
+        corpo.innerHTML = '<tr><td colspan="6" class="text-center text-body-secondary py-4">' +
+          'Nenhuma edição criada ainda. Clique em <strong>🆕 Nova edição</strong> para começar ou em <strong>📂 Importar</strong> para carregar um JSON.</td></tr>';
+      } else if (!lista.length) {
+        corpo.innerHTML = '<tr><td colspan="6" class="text-center text-body-secondary py-4">Nenhuma edição encontrada com esses filtros.</td></tr>';
+      } else {
+        corpo.innerHTML = lista.map(linhaEdicao).join('');
+      }
+
+      $('contador').textContent = total
+        ? (lista.length === total ? total + ' edição(ões)' : lista.length + ' de ' + total + ' edição(ões)')
+        : '';
+    }
+
+    // ── Modal: nova edição / dados da edição ────────────────
+    function mostrarErroModal(texto) {
+      const el = $('erroModal');
+      el.textContent = texto || '';
+      el.classList.toggle('d-none', !texto);
+    }
+
+    function preencherOpcoesCopiar(selecionadaId) {
+      const edicoes = NewsDados.lerEdicoes().sort((a, b) => String(b.data).localeCompare(String(a.data)));
+      $('edCopiar').innerHTML = '<option value="">Edição em branco</option>' + edicoes.map(e =>
+        '<option value="' + esc(e.id) + '"' + (String(e.id) === String(selecionadaId) ? ' selected' : '') + '>' +
+        'Copiar de ' + esc(NewsDados.dataBR(e.data)) + (e.nome ? ' — ' + esc(e.nome) : '') + ' (' + e.materias.length + ' matéria(s))' +
+        '</option>'
+      ).join('');
+      $('blocoCopiar').classList.toggle('d-none', !edicoes.length);
+    }
+
+    function abrirModalNova(copiarDeId) {
+      modoModal = 'nova';
+      idEditando = null;
+      $('tituloModalEdicao').textContent = copiarDeId ? 'Duplicar edição' : 'Nova edição';
+      $('edData').value = NewsDados.hojeISO();
+      $('edNome').value = '';
+      $('edStatus').value = 'Rascunho';
+      preencherOpcoesCopiar(copiarDeId);
+      mostrarErroModal('');
+      bootstrap.Modal.getOrCreateInstance($('modalEdicao')).show();
+    }
+
+    function abrirModalDados(id) {
+      const edicao = NewsDados.obterEdicao(id);
+      if (!edicao) return;
+      modoModal = 'editar';
+      idEditando = edicao.id;
+      $('tituloModalEdicao').textContent = 'Dados da edição';
+      $('edData').value = edicao.data || '';
+      $('edNome').value = edicao.nome || '';
+      $('edStatus').value = edicao.status === 'Publicada' ? 'Publicada' : 'Rascunho';
+      $('blocoCopiar').classList.add('d-none');
+      mostrarErroModal('');
+      bootstrap.Modal.getOrCreateInstance($('modalEdicao')).show();
+    }
+
+    function salvarModal() {
+      const dados = {
+        data: $('edData').value,
+        nome: $('edNome').value,
+        status: $('edStatus').value,
+        copiarDeId: $('edCopiar').value
+      };
+
+      if (modoModal === 'nova') {
+        const r = NewsDados.criarEdicao(dados);
+        if (r.erro) { mostrarErroModal(r.erro); return; }
+        // Abre a edição criada para já começar a cadastrar as matérias
+        NewsDados.definirAtiva(r.edicao.id);
+        window.location.href = 'tabMaterias.html';
+        return;
+      }
+
+      const r = NewsDados.atualizarDadosEdicao(idEditando, dados);
+      if (r.erro) { mostrarErroModal(r.erro); return; }
+      bootstrap.Modal.getOrCreateInstance($('modalEdicao')).hide();
+      renderTabela();
+      mostrarAlerta('success', 'Dados da edição de ' + NewsDados.dataBR(r.edicao.data) + ' atualizados.');
+    }
+
+    // ── Ações da tabela ─────────────────────────────────────
+    function abrirEdicao(id) {
+      NewsDados.definirAtiva(id);
+      window.location.href = 'tabMaterias.html';
+    }
+
+    function exportarUma(id) {
+      const edicao = NewsDados.obterEdicao(id);
+      if (!edicao) return;
+      if (!edicao.materias.length) {
+        mostrarAlerta('warning', 'Esta edição ainda não tem matérias para exportar.');
+        return;
+      }
+      NewsDados.exportarEdicao(edicao);
+    }
+
+    function pedirExclusao(id) {
+      const edicao = NewsDados.obterEdicao(id);
+      if (!edicao) return;
+      idParaExcluir = edicao.id;
+      $('nomeExcluir').textContent = NewsDados.dataBR(edicao.data) + (edicao.nome ? ' — ' + edicao.nome : '') +
+        ' (' + edicao.materias.length + ' matéria(s))';
+      bootstrap.Modal.getOrCreateInstance($('modalExcluir')).show();
+    }
+
+    function confirmarExclusao() {
+      if (idParaExcluir == null) return;
+      const edicao = NewsDados.obterEdicao(idParaExcluir);
+      idParaExcluir = null;
+      bootstrap.Modal.getOrCreateInstance($('modalExcluir')).hide();
+      if (!edicao) return;
+
+      if (!NewsDados.excluirEdicao(edicao.id)) {
+        mostrarAlerta('danger', 'Não foi possível excluir a edição.');
+        return;
+      }
+      renderTabela();
+      mostrarAlerta('success', 'Edição de ' + NewsDados.dataBR(edicao.data) + ' excluída.');
+    }
+
+    function aoClicarTabela(event) {
+      const botao = event.target.closest('[data-acao]');
+      if (!botao) return;
+      const id = botao.dataset.id;
+      switch (botao.dataset.acao) {
+        case 'abrir': abrirEdicao(id); break;
+        case 'duplicar': abrirModalNova(id); break;
+        case 'dados': abrirModalDados(id); break;
+        case 'json': exportarUma(id); break;
+        case 'excluir': pedirExclusao(id); break;
+      }
+    }
+
+    // ── Backup e importação ─────────────────────────────────
+    function fazerBackup() {
+      if (!NewsDados.lerEdicoes().length) {
+        mostrarAlerta('warning', 'Não há edições para exportar.');
+        return;
+      }
+      NewsDados.exportarTodas();
+    }
+
+    function importarJSON(event) {
+      const arquivo = event.target.files[0];
+      if (!arquivo) return;
+
+      const leitor = new FileReader();
+      leitor.onerror = () => mostrarAlerta('danger', 'Não foi possível ler o arquivo.');
+      leitor.onload = () => {
+        let dados;
+        try {
+          dados = JSON.parse(leitor.result);
+        } catch (e) {
+          console.error(e);
+          mostrarAlerta('danger', 'O arquivo não é um JSON válido.');
+          return;
+        }
+
+        const r = NewsDados.importarEdicoes(dados);
+        if (!r.ok) {
+          mostrarAlerta('danger', 'Não foi possível gravar os dados. O armazenamento do navegador pode estar cheio; exporte e exclua edições antigas.');
+          return;
+        }
+        renderTabela();
+
+        const partes = [];
+        if (r.novas) partes.push(r.novas + ' nova(s)');
+        if (r.atualizadas) partes.push(r.atualizadas + ' atualizada(s) (o conteúdo do arquivo substituiu o da edição)');
+        let texto = partes.length ? 'Importação concluída: ' + partes.join(', ') + '.' : 'Nenhuma edição foi importada.';
+        if (r.conflitos.length) texto += ' Já existe outra edição em ' + r.conflitos.join(', ') + '; altere a data no arquivo ou exclua a edição existente.';
+        if (r.soMaterias) texto += ' ' + r.soMaterias + ' item(ns) são matérias soltas: abra uma edição e use Importar na tabela de matérias.';
+        if (r.ignoradas) texto += ' ' + r.ignoradas + ' item(ns) ignorado(s) por formato inválido.';
+
+        mostrarAlerta((r.novas || r.atualizadas) ? 'success' : 'warning', texto);
+      };
+      leitor.readAsText(arquivo);
+      event.target.value = ''; // permite importar o mesmo arquivo de novo
+    }
+
+    // ── Eventos ─────────────────────────────────────────────
+    $('btnNova').addEventListener('click', () => abrirModalNova());
+    $('btnSalvarEdicao').addEventListener('click', salvarModal);
+    ['edData', 'edNome'].forEach(id => $(id).addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); salvarModal(); }
+    }));
+
+    $('corpoTabela').addEventListener('click', aoClicarTabela);
+    $('btnConfirmarExcluir').addEventListener('click', confirmarExclusao);
+
+    $('btnBackup').addEventListener('click', fazerBackup);
+    $('btnImportar').addEventListener('click', () => $('inputImportar').click());
+    $('inputImportar').addEventListener('change', importarJSON);
+
+    $('btnBuscar').addEventListener('click', renderTabela);
+    $('campoBusca').addEventListener('input', renderTabela);
+    $('campoBusca').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); renderTabela(); } });
+    $('filtroStatus').addEventListener('change', renderTabela);
+
+    // Voltando pelo histórico (bfcache) o JS não roda de novo: redesenha a tabela
+    window.addEventListener('pageshow', (e) => { if (e.persisted) renderTabela(); });
+
+    // ── Início ──────────────────────────────────────────────
+    renderTabela();
+    if (migracao) {
+      mostrarAlerta('info', migracao.quantidade + ' matéria(s) do formato antigo foram movidas para a edição de ' +
+        NewsDados.dataBR(migracao.edicao.data) + ' ("' + migracao.edicao.nome + '"). Use ✏️ Dados para ajustar a data e o nome.');
+    }
+  })();
+  </script>
+
+  <!-- //////////////////////////////////;;;;;;;;///////// -->
+  <!-- FOOTER -->
+  <!-- /////////////////////////////////////////////////// -->
+
+    <footer class="border-top mt-4 py-3 text-center small text-body-secondary">
+      <div class="fw-bold fs-5">Constantino <span class="text-success">News</span></div>
+      <p class="mb-0">© 2026 Felipe Rodrigues - FullTime Technology. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- /////////////////////////////////////////// -->
+    <!-- DEPENDÊNCIAS DE SCRIPTS DO ECOSSISTEMA CORE -->
+    <!-- /////////////////////////////////////////// -->
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Fallback: se o Bootstrap JS local não carregou, usa o CDN oficial da jsDelivr
+        if (typeof bootstrap === 'undefined') {
+            alert('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            console.warn('bootstrap.bundle.min.js local não carregou. Usando CDN como reserva.');
+            document.write('<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"><\/script>');
+        }
+    </script>
+
+<!-- //////////////////////////////////////////////////////// -->
+<!-- iNCLUDE PARA USAR HTML EXTERNO -->
+<!-- //////////////////////////////////////////////////////// -->
+
+    <script src="./js/include.js"></script>
+
+<!-- //////////////////////////////////////////////////////// -->
+
+</body>
+</html>

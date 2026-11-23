@@ -1,4 +1,7 @@
 {
-    "workbench.externalBrowser": "chrome",
-    "editor.wordWrap": "on"
+  "workbench.externalBrowser": "chrome",
+  "editor.wordWrap": "on",
+  "liveServer.settings.CustomBrowser": "chrome",
+  "git.autofetch": true,
+  "git.confirmSync": false
 }
